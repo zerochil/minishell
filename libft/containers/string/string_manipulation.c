@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/21 20:00:35 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/29 12:15:26 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/29 16:20:17 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,18 @@ void	string_shift_by(t_string *string, size_t offset)
 	ft_memmove(string->data, string->data + offset, string->size - offset);
 	string->size -= offset;
 	string->data[string->size] = '\0';
+}
+
+
+void	string_shift_while(t_string *string, char *charset)
+{
+	if (string == NULL || charset == NULL || string->size == 0)
+	{
+		report_error("string_shift_while: error");
+		return ;
+	}
+	while(string->size > 0 && ft_strchr(charset, string->data[0]))
+		string_shift(string);
 }
 
 void	string_append(t_string *string, const char *text)
