@@ -1,0 +1,12 @@
+remove escape character; and join newlines
+
+tokenization
+
+expansion:
+	tild expansion
+	parameter expansion 
+	field spliting // more tokens
+	pathname expansion
+	quote-removal
+here document?
+AST

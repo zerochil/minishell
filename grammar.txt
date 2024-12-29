@@ -1,0 +1,36 @@
+complete_command ; list
+                 ;
+list             :      and_or
+                 | list and_or
+                 ;
+and_or           :             pipeline
+                 | and_or '&&' pipeline
+                 | and_or '||' pipeline
+                 ;
+pipeline         :              command
+                 | pipeline '|' command
+                 ;
+command          : simple_command
+                 | subshell
+                 | subshell redirect_list
+                 ;
+subshell         : '(' list ')'
+                 ;
+simple_command   : redirect_list WORD cmd_suffix
+                 | redirect_list WORD
+                 | redirect_list
+				 | WORD cmd_suffix
+				 | WORD
+                 ;
+cmd_suffix       :            io_redirect
+                 | cmd_suffix io_redirect
+                 |            WORD
+                 | cmd_suffix WORD
+                 ;
+redirect_list    :               io_redirect
+                 | redirect_list io_redirect
+                 ;
+io_redirect      : '<'     WORD(filename)    /* rule 2: equals exactly one field, otherwise it's ambiguous*/
+                 | '>'     WORD(filename)
+                 | '>>'    WORD(filename)
+                 | '<<'    WORD 			 /* rule 3: apply quote removal  */
