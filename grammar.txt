@@ -1,3 +1,5 @@
+// TODO: this fucked; you should look newline sperator
+
 complete_command ; list
                  ;
 list             :      and_or

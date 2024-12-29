@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/21 20:00:35 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/22 18:44:59 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/29 12:15:26 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,24 @@ char	string_shift(t_string *string)
 	char	c;
 
 	if (string == NULL || string->size == 0)
-		return (-1); // TODO: AGAIN; am not sure about the return value here;
+		return (0);
 	c = string->data[0];
 	ft_memmove(string->data, string->data + 1, string->size - 1);
 	string->size--;
 	string->data[string->size] = '\0';
 	return c;
+}
+
+
+void	string_shift_by(t_string *string, size_t offset)
+{
+	if (string == NULL || string->size == 0)
+		return ;
+	if (offset > string->size)
+		offset = string->size;
+	ft_memmove(string->data, string->data + offset, string->size - offset);
+	string->size -= offset;
+	string->data[string->size] = '\0';
 }
 
 void	string_append(t_string *string, const char *text)

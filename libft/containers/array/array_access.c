@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 10:57:55 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/19 10:57:59 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/29 12:38:57 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void	*array_last_item(t_array *array)
 	return (array->data[array->size - 1]);
 }
 
-void	*array_find(t_array *array, void *element, int (*cmp)(void *, void *))
+void	*array_find(t_array *array, void *target, int (*cmp)(void *, void *))
 {
 	size_t	i;
 
@@ -35,7 +35,7 @@ void	*array_find(t_array *array, void *element, int (*cmp)(void *, void *))
 	i = 0;
 	while (i < array->size)
 	{
-		if (cmp(array->data[i], element))
+		if (cmp(array->data[i], target))
 			return (array->data[i]);
 		i++;
 	}

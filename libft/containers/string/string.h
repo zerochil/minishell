@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/21 20:00:28 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/22 18:49:21 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/29 12:36:12 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,10 @@ char	string_peek_reset(t_string *string);
 
 void		string_append(t_string *str, const char *text);
 char	string_shift(t_string *str);
+void	string_shift_by(t_string *string, size_t offset);
 void string_insert(t_string *string, const char *text, size_t index);
+
+int  string_match(t_string *string, char *to_find, size_t start);
 
 void string_segment_remove(t_string *string, size_t start, size_t length);
 void string_segment_replace(t_string *string, size_t start, size_t length, const char *new_text);

@@ -1,4 +1,7 @@
 #include "minishell.h"
+#include "libft/containers/array/array.h"
+#include "libft/containers/string/string.h"
+#include "libft/memory_management/memory_management.h"
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <stddef.h>
@@ -36,19 +39,13 @@ typedef struct s_subshell
 	t_array *redirection_list;
 }	t_subshell;
 
-typedef struct s_redirection
-{
-	char *filename;
-	int  (*open_file)(t_token*, void*);
-}	t_redirection;
-
 struct s_token
 {
 	int	type;
 	union
 	{
 		char *word;
-		t_redirection *redirection;
+		char *filename;
 	};
 };
 
@@ -93,29 +90,33 @@ typedef struct s_lexem
 	int type;
 	char *symbol;
 	char *identifier;
+	size_t symbol_length;
+	size_t identifier_length;
 } t_lexem;
 
 
-void lexems_init(t_array*);
-t_array *token_get_instance();
+static void lexems_init(t_array*);
+t_array *lexems_get_instance();
 
-void lexem_add(char* symbol, char *identifier)
+static void lexem_add(char* symbol, char *identifier)
 {
 	static int id = 1;
 	t_array *lexems;
 	t_lexem *lexem;
 
-	lexems = token_get_instance();
+	lexems = lexems_get_instance();
 	lexem = track_malloc(sizeof(t_lexem));
 	lexem->type = id;
 	lexem->symbol = symbol;
 	lexem->identifier = identifier;
+	lexem->symbol_length = ft_strlen(symbol);
+	lexem->identifier_length = ft_strlen(identifier);
 	array_push(lexems, lexem);
 	id++;
 }
 
 // && || >> << > < ( ) |
-void lexems_init(t_array *lexems)
+static void lexems_init(t_array *lexems)
 {
 	array_init(lexems);
 	lexem_add("&&", "LOGIC_AND");
@@ -126,11 +127,12 @@ void lexems_init(t_array *lexems)
 	lexem_add("<", "REDIRECTION_IN");
 	lexem_add("(", "OPEN_PARENTHESIS");
 	lexem_add(")", "CLOSE_PARENTHESIS");
+	lexem_add("\n", "NEWLINE");
 	lexem_add("|", "PIPE");
 	lexem_add("", "EOF");
 }
 
-void lexems_destroyer(void *ptr)
+static void lexems_destroyer(void *ptr)
 {
 	t_array *array;
 	
@@ -138,7 +140,6 @@ void lexems_destroyer(void *ptr)
 	array_destroy(array);
 	free(array);
 }
-
 
 t_array *lexems_get_instance()
 {
@@ -152,50 +153,191 @@ t_array *lexems_get_instance()
 	return lexems;
 }
 
-// next_token
-// token.type == lexem_get_type("")
-
-int lexem_match(void *_lexem, void *_identifier)
+static int lexem_match_identifier(void *lexem_ptr, void *identifier)
 {
 	t_lexem *lexem;
-	char *identifier;
-	size_t lexem_id_len;
 
-	lexem = _lexem;
-	identifier = _identifier;
-	lexem_id_len = ft_strlen(lexem->identifier);
-	return (ft_strncmp(lexem->identifier, identifier, lexem_id_len) == 0);
+	lexem = lexem_ptr;
+	return (ft_strncmp(lexem->identifier, identifier, lexem->identifier_length) == 0);
 }
 
 int lexem_get_type(char *identifier)
 {
-	t_array *lexems = lexems_get_instance();
+	t_array *lexems;
 	t_lexem *lexem;
 
-	lexem = array_find(lexems, identifier, lexem_match);
+	lexems = lexems_get_instance();
+	lexem = array_find(lexems, identifier, lexem_match_identifier);
 	if (lexem == NULL)
 		return (0);
 	return (lexem->type);
-	// find identifier's type using array_find;
-	// report_error if identifier isn't found
 }
 
-t_token *token_next()
+
+// TOKENIZATION
+
+int is_space(char c)
 {
-	token = token_match
-	if (token == NULL)
-		token = tokenize_word()
-	if (token == NULL)
-		token = get_token("EOF");
+	return (c == ' ' || c == '\t' || c == '\v');
+}
+
+void skip_whitespace(t_string *input)
+{
+	while (is_space(string_peek(input)))
+		string_shift(input);
+}
+
+static int lexem_is_redirection(int type)
+{
+	return (
+		type == lexem_get_type("REDIRECTION_IN") ||
+		type == lexem_get_type("REDIRECTION_APPEND") ||
+		type == lexem_get_type("REDIRECTION_TRUNC") ||
+		type == lexem_get_type("HERE_DOCUMENT")
+	);
+}
+
+t_token *token_init(int type, char *value)
+{
+	t_token *token;
+
+	token = track_malloc(sizeof(t_token));
+	/*track_transfer_ownership(token, "global");*/
+	token->type = type;
+	if (lexem_is_redirection(type))
+		token->filename = value;
+	else if (type == 0)
+		token->word = value;
 	return token;
 }
 
+int	lexem_match_symbol(void *lexem_ptr, void *input_ptr)
+{
+	t_lexem *lexem;
+	t_string *input;
 
-// 
+	lexem = lexem_ptr;
+	input = input_ptr;
+	return string_match(input, lexem->symbol, 0);
+}
 
+#define META_CHARACTERS "|&;()<>\n \t"
 
+t_token *tokenize_word(t_string *input)
+{
+	char	c;
+	char	in_quote;
+	char	*word;
 
+	in_quote = '\0';
+	string_peek_reset(input);
+	skip_whitespace(input);
+	while(1)
+	{
+		c = string_peek(input);
+		if (in_quote == '\0' && ft_strchr(META_CHARACTERS, c))
+			break;
+		else if (in_quote == c)
+			in_quote = '\0';
+		else if (c == '\'' || c == '"')
+			in_quote = c;
+		string_peek_advance(input);
+	}
+	word = string_segment_slice(input, 0, input->peek);
+	return (token_init(0, word));
+}
 
+t_token *tokenize_non_word(t_string *input)
+{
+	t_array	*lexems;
+	t_lexem	*lexem;
+	t_token	*token;
+	t_token	*next_token;
+
+	lexems = lexems_get_instance();
+	token = NULL;
+	skip_whitespace(input);
+	lexem = array_find(lexems, input, lexem_match_symbol);
+	if (lexem == NULL)
+		return (NULL);
+	string_shift_by(input, lexem->symbol_length);
+	if (lexem_is_redirection(lexem->type))
+	{
+		next_token = tokenize_word(input);
+		token = token_init(lexem->type, next_token->word);
+	}
+	else if (lexem->type != lexem_get_type("EOF"))
+		token = token_init(lexem->type, NULL);
+	return token;
+}
+
+t_token *token_next(t_string *input)
+{
+	t_token	*token;
+
+	string_peek_reset(input);
+	if (string_peek(input) == '\0')
+		return (token_init(lexem_get_type("EOF"), NULL));
+	token = tokenize_non_word(input);
+	if (token == NULL)
+		token = tokenize_word(input);
+	return token;
+}
+
+t_array tokenize(t_string *input)
+{
+	add_scope();
+	t_array tokens;
+	t_token	*token;
+
+	array_init(&tokens);
+	while(1)
+	{
+		token = token_next(input);
+		array_push(&tokens, token);
+		if (token->type == lexem_get_type("EOF"))
+			break;
+	}
+	return tokens;
+	end_scope();
+}
+
+static void print(void *token_ptr)
+{
+	t_array *lexems;
+	t_token *token;
+	char *id;
+
+	lexems = lexems_get_instance();
+	token = token_ptr;
+	if (token->type)
+		id = ((t_lexem *)(lexems->data[token->type - 1]))->identifier;
+	else
+	 	id = "WORD";
+	printf("[%s, %s]\n", id, token->filename);
+	fflush(NULL);
+}
+
+int is_quoted(t_string *input);
+int main(void)
+{
+	char *line;
+	t_string input;
+	t_array tokens;
+
+	string_init(&input);
+	/*string_append(&input, "ls -a&&echo 'jj'$arg\"here\"x | cat < hello << LL > -n >> out | (exit && true) > out_exit || (env && export)");*/
+	while(1)
+	{
+		line = readline("minishell> ");
+		add_history(line);
+		string_set(&input, line);
+		if (!is_quoted(&input))
+			report_error("minishell: unbalanced quotes!");
+		tokens = tokenize(&input);
+		array_do(&tokens, print);
+	}
+}
 
 int is_quoted(t_string *input)
 {
@@ -225,30 +367,4 @@ int is_quoted(t_string *input)
   }
   string_peek_reset(input);
   return (balance == 0);
-}
-
-// ls && (echo && echo) || ls | ls
-
-//parse -> grouping
-//grouping -> - '(' simple_list ')' | simple_list | pipeline
-//simple_list -> - grouping '&&' grouping
-//               - grouping '||' grouping
-//pipeline -> command '|' pipeline
-//         -> command
-//
-
-int main(void)
-{
-  char *line;
-  t_string input;
-
-  string_init(&input);
-  while(1)
-  {
-    line = readline("minishell> ");
-    add_history(line);
-    string_set(&input, line);
-    if (!is_quoted(&input))
-       report_error("minishell: unbalanced quotes!");
-  }
 }
