@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/21 20:00:35 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/29 16:20:17 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/29 16:46:19 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,10 @@ char	string_shift(t_string *string)
 	char	c;
 
 	if (string == NULL || string->size == 0)
+	{
+		report_error("string_shift: error");
 		return (0);
+	}
 	c = string->data[0];
 	ft_memmove(string->data, string->data + 1, string->size - 1);
 	string->size--;
@@ -29,7 +32,10 @@ char	string_shift(t_string *string)
 void	string_shift_by(t_string *string, size_t offset)
 {
 	if (string == NULL || string->size == 0)
-		return ;
+	{
+		report_error("string_shift_by: error");
+		return;
+	}
 	if (offset > string->size)
 		offset = string->size;
 	ft_memmove(string->data, string->data + offset, string->size - offset);
@@ -54,7 +60,10 @@ void	string_append(t_string *string, const char *text)
 	size_t	text_len;
 
 	if (string == NULL || text == NULL)
+	{
+		report_error("string_append: error");
 		return ;
+	}
 	text_len = ft_strlen(text);
 	string_ensure_capacity(string, string->size + text_len);
 	ft_memcpy(string->data + string->size, text, text_len);
@@ -66,7 +75,10 @@ void	string_insert(t_string *string, const char *text, size_t index)
 	size_t	text_len;
 
 	if (string == NULL || text == NULL || index > string->size)
+	{
+		report_error("string_insert: error");
 		return ;
+	}
 	text_len = ft_strlen(text);
 	string_ensure_capacity(string, string->size + text_len);
 	ft_memmove(

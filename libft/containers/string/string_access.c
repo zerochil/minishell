@@ -12,22 +12,22 @@
 
 #include "string.h"
 
-char  string_at(t_string *string, size_t index)
+char	string_at(t_string *string, size_t index)
 {
-  if (string == NULL || index > string->size)
-  {
-    report_error("string_at: error");
-    return (-1);
-  }
-  return (string->data[index]);
+	if (string == NULL || index > string->size)
+	{
+		report_error("string_at: error");
+		return (-1);
+	}
+	return (string->data[index]);
 }
 
-int  string_match(t_string *string, char *to_find, size_t start)
+int	string_match(t_string *string, char *to_find, size_t start)
 {
 	if (string == NULL || start > string->size || to_find == NULL)
 	{
 		report_error("string_match: error");
 		return (-1);
 	}
-	return (ft_strncmp(string->data+start, to_find, ft_strlen(to_find)) == 0);
+	return (ft_strncmp(string->data + start, to_find, ft_strlen(to_find)) == 0);
 }

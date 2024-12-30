@@ -6,10 +6,11 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:07 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/29 16:33:32 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/29 20:08:46 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "lexer.h"
 #include "tokenizer.h"
 
 static t_token	*token_init(int type, char *value)
@@ -38,7 +39,8 @@ static t_token	*tokenize_word(t_string *input)
 	while (1)
 	{
 		c = string_peek(input);
-		if (in_quote == '\0' && ft_strchr(META_CHARACTERS, c))
+		if (in_quote == '\0' && ft_strchr(WHITE_SPACE, c)
+			&& array_find(lexems_get_instance(), input, lexem_match_word_break))
 			break ;
 		else if (in_quote == c)
 			in_quote = '\0';
@@ -87,20 +89,24 @@ static t_token	*token_next(t_string *input)
 	return (token);
 }
 
-t_array	tokenize(t_string *input)
+t_array	*tokenize(t_string *input)
 {
-	t_array	tokens;
+	t_array	*tokens;
 	t_token	*token;
 
-	add_scope();
-	array_init(&tokens);
+	if (!is_quoted(input))
+	{
+		report_error("tokenizer: unbalanced quotes!");
+		return (NULL);
+	}
+	tokens = track_malloc(sizeof(t_array));
+	array_init(tokens);
 	while (1)
 	{
 		token = token_next(input);
-		array_push(&tokens, token);
+		array_push(tokens, token);
 		if (token->type == lexem_get_type("EOF"))
 			break ;
 	}
 	return (tokens);
-	end_scope();
 }

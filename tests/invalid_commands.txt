@@ -1,0 +1,20 @@
+1. echo "Missing quote | ls
+2. cat < > file.txt
+3. mkdir && echo "No directory name"
+4. find -type z | grep 'invalid'
+5. ls || || echo "Double pipes"
+6. echo "Nested $(echo "not closed) command"
+7. grep -i keyword file.txt <
+8. awk '{print $1' < file.txt  # Missing closing brace
+9. touch | > file.txt
+10. mkdir "folder && rm -r folder
+11. echo && ls -l > 
+12. find . -name '*.txt' && 
+13. cat | sort | > output.txt
+14. grep "test" && echo "Found
+15. rm || echo "Invalid syntax" &&
+16. chmod +x script.sh | &&
+17. cp file1 file2 > 
+18. echo | tr 'a-z' > uppercase.log
+19. mkdir && (echo "Missing directory name")
+20. tar -cf archive.tar > file

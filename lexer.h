@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:11:53 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/29 16:13:28 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/29 20:08:03 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ t_array		*lexems_get_instance(void);
 
 int			lexem_match_symbol(void *lexem_ptr, void *input_ptr);
 int			lexem_match_identifier(void *lexem_ptr, void *identifier);
+int			lexem_match_word_break(void *lexem_ptr, void *input_ptr);
 
-int lexem_is_redirection(int type);
+int			lexem_is_redirection(int type);
 
 #endif

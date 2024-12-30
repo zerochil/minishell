@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:33 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/29 16:29:33 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/29 19:54:41 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 # include "lexer.h"
 # include "libft/libft.h"
 
-# define META_CHARACTERS "|&;()<>\n \t"
+# define META_CHARACTERS "|&()<>\n \t"
 # define WHITE_SPACE " \t"
 
 typedef struct s_token
@@ -29,6 +29,7 @@ typedef struct s_token
 	};
 }				t_token;
 
-t_array			tokenize(t_string *input);
+t_array			*tokenize(t_string *input);
+int	is_quoted(t_string *input);
 
 #endif

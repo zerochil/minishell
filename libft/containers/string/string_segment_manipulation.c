@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/22 02:47:30 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/22 18:45:13 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/29 16:59:17 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,10 @@
 void	string_segment_remove(t_string *string, size_t start, size_t length)
 {
 	if (string == NULL || string->size == 0 || start >= string->size)
+	{
+		report_error("string_segment_remove: error");
 		return ;
+	}
 	// TODO: if length is 0;
 	if (start + length > string->size)
 		length = string->size - start;
@@ -33,7 +36,10 @@ char	*string_segment_extract(t_string *string, size_t start, size_t length)
 	char	*result;
 
 	if (string == NULL || start >= string->size)
+	{
+		report_error("string_segment_extract: error");
 		return (NULL);
+	}
 	// TODO: if length is 0;
 	if (start + length > string->size)
 		length = string->size - start;
@@ -48,6 +54,7 @@ void	string_segment_replace(t_string *string, size_t start, size_t length,
 {
 	string_segment_remove(string, start, length);
 	string_insert(string, new_text, start);
+	// TODO: CHECK THESE FUNCTIONS OUTPUT
 }
 
 char	*string_segment_slice(t_string *string, size_t start, size_t length)
@@ -56,5 +63,6 @@ char	*string_segment_slice(t_string *string, size_t start, size_t length)
 
 	result = string_segment_extract(string, start, length);
 	string_segment_remove(string, start, length);
+	// TODO: CHECK THESE FUNCTIONS OUTPUT
 	return (result);
 }

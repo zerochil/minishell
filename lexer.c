@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:12:15 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/29 16:12:16 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/29 20:05:18 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,23 +45,14 @@ static void	lexems_init(t_array *lexems)
 	lexem_add("", "EOF");
 }
 
-static void	lexems_destroyer(void *ptr)
-{
-	t_array	*array;
-
-	array = ptr;
-	array_destroy(array);
-	free(array);
-}
-
 t_array	*lexems_get_instance(void)
 {
 	static t_array	*lexems;
 
 	if (lexems == NULL)
 	{
-		lexems = safe_malloc(sizeof(t_array));
-		track_resource(lexems, lexems_destroyer);
+		lexems = track_malloc(sizeof(t_array));
+		/*track_resource(lexems, lexems_destroyer);*/
 		lexems_init(lexems);
 	}
 	return (lexems);
