@@ -1,10 +1,10 @@
 NAME = minishell
 CFLAGS = -Werror -Wextra -Wall
 CC = cc
-SRCS = minishell.c tokenizer.c tokenizer_input_validator.c lexer.c lexer_functions.c
+SRCS = minishell.c tokenizer.c tokenizer_input_validator.c lexer.c lexer_functions.c ast.c
 OBJS_DIR = .objects/
 OBJS = $(SRCS:%.c=$(OBJS_DIR)%.o)
-HEADERS = minishell.h tokenizer.h lexer.h
+HEADERS = minishell.h tokenizer.h lexer.h ast.h
 LIBFT = libft/libft.a
 
 

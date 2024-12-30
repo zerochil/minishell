@@ -42,7 +42,7 @@ static void	lexems_init(t_array *lexems)
 	lexem_add(")", "CLOSE_PARENTHESIS");
 	lexem_add("\n", "NEWLINE");
 	lexem_add("|", "PIPE");
-	lexem_add("", "EOF");
+	/*lexem_add("", "EOF");*/
 }
 
 t_array	*lexems_get_instance(void)

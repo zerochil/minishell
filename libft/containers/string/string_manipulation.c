@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/21 20:00:35 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/29 16:46:19 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/30 15:04:26 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ void	string_shift_by(t_string *string, size_t offset)
 
 void	string_shift_while(t_string *string, char *charset)
 {
-	if (string == NULL || charset == NULL || string->size == 0)
+	if (string == NULL || charset == NULL)
 	{
 		report_error("string_shift_while: error");
 		return ;

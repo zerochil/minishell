@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 10:57:55 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/19 10:57:59 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/30 15:00:02 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,6 @@ void	*array_dup(t_array *array)
 
 void	free_array(t_array *arr)
 {
-	array_do(arr, free_resource);
+	array_do(arr, resource_free);
 	array_destroy(arr);
 }

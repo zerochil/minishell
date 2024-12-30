@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 10:57:55 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/19 10:57:59 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/30 18:08:06 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,14 @@ void	*array_pop(t_array *array)
 	return (item);
 }
 
-void	array_remove(t_array *array, size_t index)
+void	*array_remove(t_array *array, size_t index)
 {
+	void	*item;
+
 	if (!array || index >= array->size)
-		return ;
+		return (NULL);
+	// TODO: replace with memove
+	item = array->data[index];
 	while (index < array->size - 1)
 	{
 		array->data[index] = array->data[index + 1];
@@ -53,6 +57,12 @@ void	array_remove(t_array *array, size_t index)
 	}
 	array->data[array->size - 1] = NULL;
 	array->size--;
+	return (item);
+}
+
+void	*array_shift(t_array *array)
+{
+	return (array_remove(array, 0));
 }
 
 void	array_insert(t_array *array, size_t index, void *element)

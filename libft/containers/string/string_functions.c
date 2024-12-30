@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 10:57:55 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/29 17:03:24 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/30 14:59:21 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void	string_set(t_string *string, char *new_text)
 
 void	string_destroy(t_string *string)
 {
-	free_resource(string->data);
+	resource_free(string->data);
 	string->data = NULL;
 	string->size = 0;
 	string->capacity = 0;

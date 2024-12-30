@@ -1,32 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   array_functions.c                                  :+:      :+:    :+:   */
+/*   error_operations.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/19 10:57:55 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/30 14:59:58 by rrochd           ###   ########.fr       */
+/*   Created: 2024/12/30 14:19:48 by rrochd            #+#    #+#             */
+/*   Updated: 2024/12/30 14:40:15 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "array.h"
+#include "memory_management.h"
 
-void	array_init(t_array *array)
+void	report_error(char *message)
 {
-	if (!array)
-		return ;
-	array->data = track_malloc(INITIAL_CAPACITY * sizeof(void *));
-	array->size = 0;
-	array->capacity = INITIAL_CAPACITY;
+	if (message && *message != '\0')
+		ft_putendl_fd(message, 2);
 }
 
-void	array_destroy(t_array *array)
+void	error(char *message)
 {
-	if (!array)
-		return ;
-	resource_free(array->data);
-	array->data = NULL;
-	array->size = 0;
-	array->capacity = 0;
+	if (message && *message != '\0')
+		ft_putendl_fd(message, 2);
+	manager_free_everything();
+	exit(1);
 }

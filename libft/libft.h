@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 08:59:51 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/10 18:35:12 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/30 17:55:37 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
+# include <stdbool.h>
 
 # include "base/base.h"
 # include "get_next_line/get_next_line.h"

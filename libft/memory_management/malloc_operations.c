@@ -1,32 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   array_functions.c                                  :+:      :+:    :+:   */
+/*   malloc_operations.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/19 10:57:55 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/30 14:59:58 by rrochd           ###   ########.fr       */
+/*   Created: 2024/12/30 14:20:04 by rrochd            #+#    #+#             */
+/*   Updated: 2024/12/30 14:50:24 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "array.h"
+#include "memory_management.h"
 
-void	array_init(t_array *array)
+void	*safe_malloc(size_t size)
 {
-	if (!array)
-		return ;
-	array->data = track_malloc(INITIAL_CAPACITY * sizeof(void *));
-	array->size = 0;
-	array->capacity = INITIAL_CAPACITY;
+	void	*allocated_space;
+
+	allocated_space = ft_calloc(size, 1);
+	if (allocated_space == NULL)
+		error("Safe Callocation failed; BUY MORE RAM!!!");
+	return (allocated_space);
 }
 
-void	array_destroy(t_array *array)
+void	*track_malloc(size_t size)
 {
-	if (!array)
-		return ;
-	resource_free(array->data);
-	array->data = NULL;
-	array->size = 0;
-	array->capacity = 0;
+	void	*ptr;
+
+	ptr = safe_malloc(size);
+	resource_track(ptr, free);
+	return (ptr);
 }

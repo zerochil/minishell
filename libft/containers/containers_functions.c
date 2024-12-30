@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 10:57:55 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/21 19:02:59 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/30 15:00:32 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void	*container_grow(void *old_data, size_t old_cap, size_t new_cap,
 	if (old_data)
 	{
 		ft_memcpy(new_data, old_data, old_cap * elem_size);
-		free_resource(old_data);
+		resource_free(old_data);
 	}
 	return (new_data);
 }

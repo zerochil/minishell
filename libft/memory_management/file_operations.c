@@ -1,32 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   array_functions.c                                  :+:      :+:    :+:   */
+/*   file_operations.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/19 10:57:55 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/30 14:59:58 by rrochd           ###   ########.fr       */
+/*   Created: 2024/12/30 14:49:03 by rrochd            #+#    #+#             */
+/*   Updated: 2024/12/30 14:49:04 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "array.h"
+#include "memory_management.h"
 
-void	array_init(t_array *array)
+void	close_fd(void *fd_ptr)
 {
-	if (!array)
-		return ;
-	array->data = track_malloc(INITIAL_CAPACITY * sizeof(void *));
-	array->size = 0;
-	array->capacity = INITIAL_CAPACITY;
+	int	fd;
+
+	fd = (int)(intptr_t)fd_ptr;
+	if (fd >= 0)
+		close(fd);
 }
 
-void	array_destroy(t_array *array)
+int	track_open(char *pathname, int flags, mode_t mode, char *error_message)
 {
-	if (!array)
-		return ;
-	resource_free(array->data);
-	array->data = NULL;
-	array->size = 0;
-	array->capacity = 0;
+	int	fd;
+
+	fd = open(pathname, flags, mode);
+	if (fd < 0)
+		error(error_message);
+	resource_track((void *)(intptr_t)fd, close_fd);
+	return (fd);
 }

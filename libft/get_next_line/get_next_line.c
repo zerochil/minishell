@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 18:21:36 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/22 03:08:44 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/30 15:03:20 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ static char	*extract_line(t_string *stored, char *newline)
 		line = ft_strdup(stored->data);
 		string_destroy(stored);
 	}
-	track_resource(line, free);
+	resource_track(line, free);
 	return (line);
 }
 
@@ -48,7 +48,7 @@ static int	read_buffer(int fd, t_string *stored)
 		buffer[bytes_read] = '\0';
 		string_append(stored, buffer);
 	}
-	free_resource(buffer);
+	resource_free(buffer);
 	return (bytes_read);
 }
 
