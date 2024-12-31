@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:07 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/30 15:24:19 by rrochd           ###   ########.fr       */
+/*   Updated: 2024/12/31 12:43:26 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@ static t_token	*token_init(int type, char *value)
 	t_token	*token;
 
 	token = track_malloc(sizeof(t_token));
-	/*track_transfer_ownership(token, "global");*/
 	token->type = type;
 	if (lexem_is_redirection(type))
 		token->filename = value;
@@ -79,7 +78,7 @@ static t_token	*tokenize_non_word(t_string *input)
 	return (token);
 }
 
-static t_token	*token_next(t_string *input)
+static t_token	*tokenize_next(t_string *input)
 {
 	t_token	*token;
 
@@ -108,7 +107,7 @@ t_array	*tokenize(t_string *input)
 	array_init(tokens);
 	while (1)
 	{
-		token = token_next(input);
+		token = tokenize_next(input);
 		array_push(tokens, token);
 		if (token->type == -1)
 			break ;

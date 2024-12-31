@@ -13,7 +13,7 @@ pipeline         : command '|' linebreak pipeline
 command          : subshell
 				 | simple_command
                  ;
-subshell         : '(' complete_command ')' redirect_list*
+subshell         : '(' command_list ')' redirect_list*
                  ;
 simple_command   : io_redirect simple_command
 				 | io_redirect
