@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/31 18:11:19 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/01 08:47:59 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 
-static void	print_token(void *token_ptr)
+void	print_token(void *token_ptr)
 {
 	t_array	*lexems;
 	t_token	*token;
@@ -40,7 +40,6 @@ static void print_children(t_array *children, char *symb)
 {
 	printf("%s ", symb);
 	array_do(children, print);
-	printf("\n");
 	/*printf(" %c", symb[1]);*/
 }
 
@@ -51,31 +50,36 @@ static void	print(void *node_ptr)
 	node = node_ptr;
 	if(node == NULL)
 		return;
-	if (node->type == AST_COMMAND_LIST)
+	if (node->type == AST_COMPLETE_COMMAND)
+	{
+		print_children(node->children, "Complete: ");
+		printf("%s\n", node->error_message);
+	}
+	else if (node->type == AST_COMMAND_LIST)
 		print_children(node->children, "List: ");
 	else if (node->type == AST_COMPOUND_COMMAND)
 		print_children(node->children, "Compound: ");
 	else if (node->type == AST_BINARY_AND)
-		printf("AND: ");
+		printf("\n\tAND: ");
 	else if (node->type == AST_BINARY_OR)
-		printf("OR: ");
+		printf("\n\tOR: ");
 	else if (node->type == AST_PIPELINE)
-		print_children(node->children, "Pipeline: ");
+		print_children(node->children, "\n\t\tPipeline: ");
 	else if (node->type == AST_COMMAND)
 		print_children(node->children, "Command: ");
 	else if (node->type == AST_SUBSHELL)
 	{
-		print_children(node->children, "subshell: ");
+		print_children(node->children, "\n\t\t\tsubshell: ");
 		if (node->redirect_list)
 		{
 
-			printf("subshell_redirection: ");
+			printf("\n\t\t\t\tsubshell_redirection: ");
 			array_do(node->redirect_list, print_token);
 		}
 	}
 	else if (node->type == AST_SIMPLE_COMMAND)
 	{
-		printf("\n\tSimple_command: ");
+		printf("\n\t\t\tSimple_command: ");
 		array_do(node->children, print_token);
 	}
 }
@@ -85,11 +89,12 @@ int	main(void)
 	char		*line;
 	t_string	input;
 	t_array		*tokens;
-	t_ast_node	*list;
+	t_array		*list;
 
 	string_init(&input);
-	/*line = "ls -a 'xs' >>> xsx && ls | sl | wi && (ls jds) > dwi";*/
-	line = "ls\nlx";
+	line = "ls -a 'xs'>> xsx\nls && sl | wi\n ls && ls \n ls | ls \nwc | cat > helo >> world";
+	/*line = "ls\n()\ncat | wc";*/
+	/*line = "ls | lx";*/
 	/*printf("%s\n", line);*/
 	/*string_set(&input, line);*/
 	/*tokens = tokenize(&input);*/
@@ -101,9 +106,15 @@ int	main(void)
 	/**/
 		string_set(&input, line);
 		tokens = tokenize(&input);
-		list = complete_command(tokens);
-		if (list != NULL)
-			print(list);
+		printf("minishell: %s\n", line);
+		//array_do(tokens, print_token);
+		printf("\n");
+		list = generate_ast(tokens);
+		if (list->size > 0 )
+			array_do(list, print);
+		else {
+			printf("error\n");
+		}
 	/*while (1)*/
 	/*{*/
 	/*	line = readline("minishell> ");*/

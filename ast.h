@@ -16,7 +16,13 @@
 #include "libft/containers/array/array.h"
 # include "libft/libft.h"
 # include "tokenizer.h"
-#include "lexer.h"
+# include "lexer.h"
+
+# define ERR_WORD_OR_REDIR "syntax error near unexpected token: expected word or redirection"
+# define ERR_MISSING_FILENAME "syntax error near unexpected token: missing filename"
+# define ERR_EMPTY_COMMAND "syntax error near unexpected token: empty command"
+# define ERR_UNFINISHED_PIPE "syntax error near unexpected token: unfinished pipe"
+# define ERR_CLOSE_PARENTHESIS "syntax error near unexpected token: missing close parenthesis"
 
 typedef enum e_ast_type
 {
@@ -39,6 +45,7 @@ typedef struct 				s_ast_node
 	char 					*error_message;
 }							t_ast_node;
 
+t_array *generate_ast(t_array *tokens);
 t_ast_node *complete_command(t_array *tokens);
 t_ast_node *command_list(t_array *tokens);
 t_ast_node *compound_command(t_array *tokens);

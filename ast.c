@@ -3,12 +3,24 @@
 #include "libft/memory_management/memory_management.h"
 #include "tokenizer.h"
 
+#include "minishell.h"
+
 char *syntax_error(char *message)
 {
 	static char *error_message;
 	if (*message != '\0')
 		error_message = message;
 	return (error_message);
+}
+
+bool	check_syntax_error(bool condition, char *message)
+{
+	if (condition)
+	{
+		syntax_error(message);
+		return true;
+	}
+	return false;
 }
 
 t_ast_node *create_ast_node(t_array *array, t_ast_type type)
@@ -19,30 +31,9 @@ t_ast_node *create_ast_node(t_array *array, t_ast_type type)
 	node->type = type;
 	node->children = array;
 	node->redirect_list = NULL;
-	node->error_message = NULL;
+	node->error_message = "";
 	return node;
 }
-
-static void	print_token(void *token_ptr)
-{
-	t_array	*lexems;
-	t_token	*token;
-	char	*id;
-	lexems = lexems_get_instance();
-	token = token_ptr;
-	if (token->type == 0)
-		id = "WORD";
-	else if(token->type == -1)
-		id = "EOF";
-	else
-		id = ((t_lexem *)(lexems->data[token->type - 1]))->identifier;
-	printf("[%s, %s]", id, token->filename);
-	fflush(NULL);
-}
-
-
-
-
 
 t_array *generate_ast(t_array *tokens)
 {
@@ -52,24 +43,26 @@ t_array *generate_ast(t_array *tokens)
 	int		newline_type;	
 
 	newline_type = lexem_get_type("NEWLINE");
+	ast_list = track_malloc(sizeof(t_array));
 	array_init(ast_list);
 	while(true)
 	{
 		node = complete_command(tokens);
+
 		token = array_peek(tokens);
 		if (token->type != -1 && token->type != newline_type)
 		{
-			node->error_message = syntax_error("Unexpected token");
+			node->error_message = syntax_error("");
 			while (token->type != -1 && token->type != newline_type)
 			{
 				array_shift(tokens);
 				token = array_peek(tokens);
 			}
 		}
+		array_push(ast_list, node);
 		if (token->type == -1)
 			break;
 	}
-	array_push(ast_list, node);
 	return ast_list;
 }
 
@@ -78,15 +71,16 @@ t_ast_node *complete_command(t_array *tokens)
 {
 	t_ast_node	*command_list_node;
 	t_ast_node	*node;
-	t_array		*ast_list;
+	/*t_array		*ast_list;*/
 
-	node = create_ast_node(NULL, AST_COMPLETE_COMMAND);
 	command_list_node = command_list(tokens);
 	if (command_list_node == NULL)
 	{
-		node->error_message = syntax_error("WHY YOU??");
+		node = create_ast_node(NULL, AST_COMPLETE_COMMAND);
+		node->error_message = syntax_error("");
 		return node;
 	}
+	command_list_node->type = AST_COMPLETE_COMMAND;
 	return command_list_node;
 }
 
@@ -98,16 +92,21 @@ t_ast_node *command_list(t_array *tokens)
 	commands = track_malloc(sizeof(t_array));
 	array_init(commands);
 	linebreak(tokens);
-	while(true)
-	{
-		command = compound_command(tokens);
-		if (command == NULL)
-			return NULL;
-		array_push(commands, command);
-		/*if (linebreak(tokens) == false)*/
-		/*	break;*/
-	}
+	command = compound_command(tokens);
+	if (command == NULL)
+		return NULL;
+	array_push(commands, command);
 	return (create_ast_node(commands, AST_COMMAND_LIST));
+}
+
+
+int is_logical_and_or(t_token *token)
+{
+	if (token->type == lexem_get_type("LOGIC_AND"))
+		return AST_BINARY_AND;
+	if (token->type == lexem_get_type("LOGIC_OR"))
+		return AST_BINARY_OR;
+	return -1;
 }
 
 t_ast_node *compound_command(t_array *tokens)
@@ -115,6 +114,7 @@ t_ast_node *compound_command(t_array *tokens)
 	t_token *token;
 	t_ast_node	*pipes;
 	t_array *compounds;	
+	int type;
 
 	compounds = track_malloc(sizeof(t_array));
 	array_init(compounds);
@@ -124,25 +124,16 @@ t_ast_node *compound_command(t_array *tokens)
 		if (pipes == NULL)
 			return (NULL);
 		array_push(compounds, pipes);
-		linebreak(tokens);
 		token = array_peek(tokens);
-		if (token->type == lexem_get_type("LOGIC_AND"))
+		type = is_logical_and_or(token);
+		if (type != -1)
 		{
-			array_push(compounds, create_ast_node(NULL, AST_BINARY_AND));
+			array_push(compounds, create_ast_node(NULL, type));
 			array_shift(tokens);
-		}
-		else if (token->type == lexem_get_type("LOGIC_OR"))
-		{
-			array_push(compounds, create_ast_node(NULL, AST_BINARY_OR));
-			array_shift(tokens);
+			linebreak(tokens);
 		}
 		else
 			break;
-	}
-	if (compounds->size <= 0)
-	{
-		report_error("");
-		return NULL;
 	}
 	return (create_ast_node(compounds, AST_COMPOUND_COMMAND));
 }
@@ -152,36 +143,21 @@ t_ast_node *pipeline(t_array *tokens)
 	t_token 		*token;
 	t_array			*pipes;
 	t_ast_node	*command_node;
-	int state;
 
-	state = 1;
 	pipes = track_malloc(sizeof(t_array));
 	array_init(pipes);
 	while (true)
 	{
 		command_node = command(tokens);
-		array_do(tokens, print_token);
-		printf("\n");
-		if (command_node == NULL && state == 1)
-		{
-			// not found
+		if (command_node == NULL)
 			return NULL;
-		}
-		if (command_node == NULL && state == 2)
-		{
-			// unfinished pipeline
-			return NULL;
-		}
 		array_push(pipes, command_node);
 		token = array_peek(tokens);
 		if (token->type != lexem_get_type("PIPE"))
 			break;
 		linebreak(tokens);
-		state = 2;
 		array_shift(tokens);
 	}
-	if (pipes->size == 0)
-		return NULL;
 	return (create_ast_node(pipes, AST_PIPELINE));
 }
 
@@ -204,22 +180,37 @@ t_ast_node *subshell(t_array *tokens)
 	t_token *token;
 
 	node = command_list(tokens);
-	linebreak(tokens);
 	if (node == NULL)
 		return NULL;
+	linebreak(tokens);
 	token = array_peek(tokens);
-	if (token->type == lexem_get_type("CLOSE_PARENTHESIS"))
-	{
-		array_shift(tokens);
-		node->type = AST_SUBSHELL;
-		node->redirect_list = redirect_list(tokens);
-	}
-	else
-	{
-		report_error("");
+	if (check_syntax_error(token->type != lexem_get_type("CLOSE_PARENTHESIS"), ERR_CLOSE_PARENTHESIS))
 		return NULL;
-	}
+	array_shift(tokens);
+	node->type = AST_SUBSHELL;
+	node->redirect_list = redirect_list(tokens);
 	return node;
+}
+
+char *get_token_symbol(int type)
+{
+	if (type == lexem_get_type("WORD"))
+		return "WORD";
+	if (type == lexem_get_type("REDIRECTION"))
+		return "REDIRECTION";
+	if (type == lexem_get_type("PIPE"))
+		return "PIPE";
+	if (type == lexem_get_type("LOGIC_AND"))
+		return "LOGIC_AND";
+	if (type == lexem_get_type("LOGIC_OR"))
+		return "LOGIC_OR";
+	if (type == lexem_get_type("OPEN_PARENTHESIS"))
+		return "OPEN_PARENTHESIS";
+	if (type == lexem_get_type("CLOSE_PARENTHESIS"))
+		return "CLOSE_PARENTHESIS";
+	if (type == lexem_get_type("NEWLINE"))
+		return "NEWLINE";
+	return "UNKNOWN";
 }
 
 t_ast_node *simple_command(t_array *tokens)
@@ -232,30 +223,18 @@ t_ast_node *simple_command(t_array *tokens)
 	while (true)
 	{
 		token = array_peek(tokens);
-		if (lexem_is_redirection(token->type))
+		if (lexem_is_redirection(token->type) || token->type == lexem_get_type("WORD"))
 		{
-			if (token->filename == NULL)
-			{
-				syntax_error("Unexpected token");
+			if (check_syntax_error(token->filename == NULL, ERR_MISSING_FILENAME))
 				return NULL;
-			}
-			array_push(argument_list, token);
-			array_shift(tokens);
-			continue;
-		}
-		if (token && token->type == lexem_get_type("WORD"))
-		{
 			array_push(argument_list, token);
 			array_shift(tokens);
 			continue;
 		}
 		break;
 	}
-	if (argument_list->size <= 0)
-	{
-		syntax_error("Unexpected token");
+	if (check_syntax_error(argument_list->size == 0, ft_strjoin(ERR_WORD_OR_REDIR": ", get_token_symbol(token->type))))
 		return NULL;
-	}
 	return create_ast_node(argument_list, AST_SIMPLE_COMMAND);
 }
 
@@ -280,7 +259,7 @@ t_array *redirect_list(t_array *tokens)
 	while (true)
 	{
 		token = array_peek(tokens);
-		if (token->type != lexem_get_type("REDIRECTION"))
+		if (lexem_is_redirection(token->type) == false)
 			break;
 		if (token->filename == NULL)
 		{
@@ -288,6 +267,7 @@ t_array *redirect_list(t_array *tokens)
 			return NULL;
 		}
 		array_push(redirections, token);
+		array_shift(tokens);
 	}
 	return (redirections);
 }
