@@ -24,6 +24,40 @@ char	*get_param_value(char *arg_name)
 	return ("");
 }
 
+void	token_peek(t_token *token, char *c, char *m)
+{
+	*c = string_peek(token->value);
+	*m = string_peek(token->mask);
+}
+
+void	token_peek_advance(t_token *token)
+{
+	string_peek_advance(token->value);
+	string_peek_advance(token->mask);
+}
+
+void	token_peek_reset(t_token *token)
+{
+	string_peek_reset(token->value);
+	string_peek_reset(token->mask);
+}
+
+void	token_segment_remove(t_token *token, size_t start, size_t length)
+{
+	string_segment_remove(token->value, start, length);
+	string_segment_remove(token->mask, start, length);		
+}
+
+static bool	is_whitespace(char c)
+{
+	return (c == ' ' || c == '\t' || c == '\n');
+}
+
+static bool	is_valid_param_char(char c)
+{
+	return (ft_isalnum(c) || c == '_');
+}
+
 void	token_update_mask(t_token *token, size_t start, size_t length, size_t value_length)
 {
 	char 	*value_mask;
@@ -32,12 +66,6 @@ void	token_update_mask(t_token *token, size_t start, size_t length, size_t value
 	ft_memset(value_mask, '1', value_length);
 	string_segment_replace(token->mask, start, length, value_mask);
 }
-
-bool	is_valid_param_char(char c)
-{
-	return (ft_isalnum(c) || c == '_');
-}
-
 
 void	token_replace_param(t_token *token)
 {
@@ -83,13 +111,7 @@ void	parameter_expansion(void *token_ptr)
 		else
 			string_peek_advance(token->value);
 	}
-	string_peek_reset(token->value);
-}
-
-
-static bool	is_whitespace(char c)
-{
-	return (c == ' ' || c == '\t' || c == '\n');
+	token_peek_reset(token);
 }
 
 t_token	*token_slice(t_token *token)
@@ -114,12 +136,6 @@ t_token	*token_slice(t_token *token)
 	string_peek_reset(token->mask);
 	return (field_token);
 }
-
-typedef struct s_field
-{
-	int		type;
-	t_array *tokens;
-}	t_field;
 
 t_field *field_init(int type)
 {
@@ -146,12 +162,6 @@ void	field_push_token(t_field *field, t_token *token)
 	}
 }
 
-void	token_peek_advance(t_token *token)
-{
-	string_peek_advance(token->value);
-	string_peek_advance(token->mask);
-}
-
 t_field *field_splitting(t_token *token)
 {
 	t_field *field;
@@ -162,8 +172,7 @@ t_field *field_splitting(t_token *token)
 	field = field_init(token->type);
 	while (true)
 	{
-		c = string_peek(token->value);
-		m = string_peek(token->mask);
+		token_peek(token, &c, &m);
 		if (c == '\0')
 			break;
 		if (in_quote == '\0' && m == '0' && (c == '"' || c == '\''))
@@ -180,6 +189,35 @@ t_field *field_splitting(t_token *token)
 	return (field);
 }
 
+void quote_removal(void *token_ptr)
+{
+	t_token *token;
+	char 	in_quote;
+	char 	c;
+	char	m;
+
+	token = token_ptr;
+	token_peek_reset(token);
+	while (true)
+	{
+		token_peek(token, &c, &m);
+		if (c == '\0')
+			break;
+		if (in_quote == '\0' && m == '0' && (c == '"' || c == '\''))
+		{
+			in_quote = c;
+			token_segment_remove(token, token->value->peek, 1);
+			continue;
+		}
+		else if (in_quote == c && m == '0')
+		{
+			in_quote = '\0';
+			token_segment_remove(token, token->value->peek, 1);
+		}
+		token_peek_advance(token);
+	}
+}
+
 void	split_fields(void *token_ptr)
 {
 	t_token *token;
@@ -187,6 +225,7 @@ void	split_fields(void *token_ptr)
 
 	token = token_ptr;
 	field = field_splitting(token);
+	array_do(field->tokens, quote_removal);
 	if (lexem_is_redirection(field->type) && field->tokens->size > 1)
 		printf("Ambiguos redirection\n");
 	else
