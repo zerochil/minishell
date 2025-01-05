@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/05 10:20:47 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/05 15:51:39 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void	print_token(void *token_ptr)
 		id = "EOF";
 	else
 		id = ((t_lexem *)(lexems->data[token->type - 1]))->identifier;
-	printf("[%s, %s, mask: %s]", id, token->filename, token->mask);
+	printf("[%s, %s, mask: %s]", id, token->value->data, token->mask->data);
 	fflush(NULL);
 }
 
@@ -101,6 +101,8 @@ int	main(int ac, char **av, char **env)
 	while (1)
 	{
 		line = readline("minishell> ");
+		if (ft_strncmp(line, "exit", ft_strlen(line)) == 0)
+			break ;
 		add_history(line);
 		string_set(&input, line);
 		tokens = tokenize(&input);

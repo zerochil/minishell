@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:07 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/05 14:53:27 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/05 15:02:49 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,27 +16,20 @@
 static t_token	*token_init(int type, char *value)
 {
 	t_token		*token;
-	t_string	*string;
-	size_t		mask_len;
 
 	token = track_malloc(sizeof(t_token));
 	token->type = type;
-	string = NULL;
-	if (value)
-	{
-		string = track_malloc(sizeof(t_string));
-		string_init(string);
-		string_set(string, value);
-	}
-	if (lexem_is_redirection(type))
-		token->filename = string;
-	else if (type == 0)
-		token->word = string;
+	token->value = NULL;
 	token->mask = NULL;
 	if (value)
 	{
+		token->value = track_malloc(sizeof(t_string));
+		string_init(token->value);
+		string_set(token->value, value);
 		token->mask = track_malloc(sizeof(t_string));
-		ft_memset(token->mask, '0', mask_len);
+		string_init(token->mask);
+		string_set(token->mask, value);
+		ft_memset(token->mask->data, '0', ft_strlen(value));
 	}
 	return (token);
 }
@@ -86,7 +79,7 @@ static t_token	*tokenize_non_word(t_string *input)
 		if (next_token == NULL)
 			token = token_init(lexem->type, NULL);
 		else
-			token = token_init(lexem->type, next_token->word);
+			token = token_init(lexem->type, next_token->value->data);
 	}
 	else
 		token = token_init(lexem->type, NULL);

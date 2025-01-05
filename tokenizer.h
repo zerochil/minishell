@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:33 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/05 14:49:13 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/05 15:01:00 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,7 @@
 typedef struct s_token
 {
 	int			type;
-	union
-	{
-		t_string	*word;
-		t_string	*filename;
-	};
+	t_string	*value;
 	t_string	*mask;
 }				t_token;
 

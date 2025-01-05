@@ -225,7 +225,7 @@ t_ast_node *simple_command(t_array *tokens)
 		token = array_peek(tokens);
 		if (lexem_is_redirection(token->type) || token->type == lexem_get_type("WORD"))
 		{
-			if (check_syntax_error(token->filename == NULL, ERR_MISSING_FILENAME))
+			if (check_syntax_error(token->value == NULL, ERR_MISSING_FILENAME))
 				return NULL;
 			array_push(argument_list, token);
 			array_shift(tokens);
@@ -261,7 +261,7 @@ t_array *redirect_list(t_array *tokens)
 		token = array_peek(tokens);
 		if (lexem_is_redirection(token->type) == false)
 			break;
-		if (token->filename == NULL)
+		if (token->value == NULL)
 		{
 			syntax_error("Missing filename");
 			return NULL;
@@ -279,7 +279,7 @@ t_token *io_redirect(t_array *tokens)
 	token = array_peek(tokens);
 	if (lexem_is_redirection(token->type))
 	{
-		if (token->filename == NULL)
+		if (token->value == NULL)
 		{
 			syntax_error("Missing filename");
 			return NULL;
