@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/01 08:47:59 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/05 10:20:47 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "minishell.h"
 #include "tokenizer.h"
 #include "ast.h"
+#include "expansion.h"
 #include <readline/history.h>
 #include <readline/readline.h>
 
@@ -30,7 +31,7 @@ void	print_token(void *token_ptr)
 		id = "EOF";
 	else
 		id = ((t_lexem *)(lexems->data[token->type - 1]))->identifier;
-	printf("[%s, %s]", id, token->filename);
+	printf("[%s, %s, mask: %s]", id, token->filename, token->mask);
 	fflush(NULL);
 }
 
@@ -80,52 +81,33 @@ static void	print(void *node_ptr)
 	else if (node->type == AST_SIMPLE_COMMAND)
 	{
 		printf("\n\t\t\tSimple_command: ");
-		array_do(node->children, print_token);
+		array_do(node->children, parameter_expansion);
+		//array_do(node->children, print_token);
+		array_do(node->children, split_fields);
 	}
 }
 
-int	main(void)
+int	main(int ac, char **av, char **env)
 {
 	char		*line;
 	t_string	input;
 	t_array		*tokens;
 	t_array		*list;
 
+	(void)av;
+	(void)ac;
+	*get_env_instance() = env;
 	string_init(&input);
-	line = "ls -a 'xs'>> xsx\nls && sl | wi\n ls && ls \n ls | ls \nwc | cat > helo >> world";
-	/*line = "ls\n()\ncat | wc";*/
-	/*line = "ls | lx";*/
-	/*printf("%s\n", line);*/
-	/*string_set(&input, line);*/
-	/*tokens = tokenize(&input);*/
-	/*t_ast_node *list = complete_command(tokens);*/
-	/*if (list)*/
-	/*	print(list);*/
-	/*else*/
-	/*	printf("error\n");*/
-	/**/
+	while (1)
+	{
+		line = readline("minishell> ");
+		add_history(line);
 		string_set(&input, line);
 		tokens = tokenize(&input);
-		printf("minishell: %s\n", line);
-		//array_do(tokens, print_token);
-		printf("\n");
 		list = generate_ast(tokens);
-		if (list->size > 0 )
+		if (list != NULL)
 			array_do(list, print);
-		else {
-			printf("error\n");
-		}
-	/*while (1)*/
-	/*{*/
-	/*	line = readline("minishell> ");*/
-	/*	add_history(line);*/
-	/*	string_set(&input, line);*/
-	/*	tokens = tokenize(&input);*/
-	/*	array_do(tokens, print_token);*/
-	/*	list = complete_command(tokens);*/
-	/*	if (list != NULL)*/
-	/*		print(list);*/
-	/*}*/
+	}
 	rl_clear_history();
 	manager_free_everything();
 }

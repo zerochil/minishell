@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:07 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/31 12:43:26 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/05 14:53:27 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,29 @@
 
 static t_token	*token_init(int type, char *value)
 {
-	t_token	*token;
+	t_token		*token;
+	t_string	*string;
+	size_t		mask_len;
 
 	token = track_malloc(sizeof(t_token));
 	token->type = type;
+	string = NULL;
+	if (value)
+	{
+		string = track_malloc(sizeof(t_string));
+		string_init(string);
+		string_set(string, value);
+	}
 	if (lexem_is_redirection(type))
-		token->filename = value;
+		token->filename = string;
 	else if (type == 0)
-		token->word = value;
+		token->word = string;
+	token->mask = NULL;
+	if (value)
+	{
+		token->mask = track_malloc(sizeof(t_string));
+		ft_memset(token->mask, '0', mask_len);
+	}
 	return (token);
 }
 
