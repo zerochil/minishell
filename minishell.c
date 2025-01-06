@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/05 15:51:39 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/06 16:38:03 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,18 @@ void	print_token(void *token_ptr)
 		id = "EOF";
 	else
 		id = ((t_lexem *)(lexems->data[token->type - 1]))->identifier;
-	printf("[%s, %s, mask: %s]", id, token->value->data, token->mask->data);
+	printf("[%s, %s]", id, token->value->data);
 	fflush(NULL);
+}
+
+void	print_redirection(void *field_ptr)
+{
+	t_field *field;
+
+	field = field_ptr;
+	printf("{");
+	array_do(field->tokens, print_token);
+	printf("}");
 }
 
 static void	print(void *node_ptr);
@@ -41,7 +51,6 @@ static void print_children(t_array *children, char *symb)
 {
 	printf("%s ", symb);
 	array_do(children, print);
-	/*printf(" %c", symb[1]);*/
 }
 
 static void	print(void *node_ptr)
@@ -73,30 +82,27 @@ static void	print(void *node_ptr)
 		print_children(node->children, "\n\t\t\tsubshell: ");
 		if (node->redirect_list)
 		{
-
 			printf("\n\t\t\t\tsubshell_redirection: ");
 			array_do(node->redirect_list, print_token);
 		}
 	}
 	else if (node->type == AST_SIMPLE_COMMAND)
 	{
+		expansion(node);
+		quote_removal(node);
 		printf("\n\t\t\tSimple_command: ");
-		array_do(node->children, parameter_expansion);
-		//array_do(node->children, print_token);
-		array_do(node->children, split_fields);
+		array_do(node->children, print_token);
+		array_do(node->redirect_list, print_redirection);
 	}
 }
 
-int	main(int ac, char **av, char **env)
+int	main()
 {
 	char		*line;
 	t_string	input;
 	t_array		*tokens;
 	t_array		*list;
 
-	(void)av;
-	(void)ac;
-	*get_env_instance() = env;
 	string_init(&input);
 	while (1)
 	{
@@ -106,6 +112,8 @@ int	main(int ac, char **av, char **env)
 		add_history(line);
 		string_set(&input, line);
 		tokens = tokenize(&input);
+		if (tokens == NULL)
+			continue ;
 		list = generate_ast(tokens);
 		if (list != NULL)
 			array_do(list, print);

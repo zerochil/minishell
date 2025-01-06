@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/04 17:13:33 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/05 17:42:05 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/06 16:53:32 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,7 @@ typedef struct s_field
 	t_array *tokens;
 }	t_field;
 
-char ***get_env_instance(void);
-void	parameter_expansion(void *token_ptr);
-void	split_fields(void *token_ptr);
+void	expansion(t_ast_node *node);
+void	quote_removal(t_ast_node *node);
 
 #endif

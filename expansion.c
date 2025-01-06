@@ -1,27 +1,12 @@
 #include "expansion.h"
 
-char ***get_env_instance(void)
-{
-	static char **env;
-	return &env;
-}
-
 char	*get_param_value(char *arg_name)
 {
-	size_t	i;
-	size_t	arg_name_len;
-	char **env;
-
-	env = *get_env_instance();
-	arg_name_len = ft_strlen(arg_name);
-	i = 0;
-	while (env[i])
-	{
-		if (ft_strncmp(env[i], arg_name, arg_name_len) == 0 && env[i][arg_name_len] == '=')
-			return env[i] + arg_name_len + 1;
-		i++;
-	}
-	return ("");
+	char *arg_value;
+	arg_value = getenv(arg_name);
+	if (arg_value == NULL)
+		return ("");
+	return (arg_value);
 }
 
 void	token_peek(t_token *token, char *c, char *m)
@@ -97,6 +82,7 @@ void	parameter_expansion(void *token_ptr)
 
 	in_quote = '\0';
 	token = token_ptr;
+	token_peek_reset(token);
 	while (true)
 	{
 		c = string_peek(token->value);
@@ -111,7 +97,6 @@ void	parameter_expansion(void *token_ptr)
 		else
 			string_peek_advance(token->value);
 	}
-	token_peek_reset(token);
 }
 
 t_token	*token_slice(t_token *token)
@@ -132,8 +117,7 @@ t_token	*token_slice(t_token *token)
 	string_set(field_token->value, value);
 	string_init(field_token->mask);
 	string_set(field_token->mask, mask);
-	string_peek_reset(token->value);
-	string_peek_reset(token->mask);
+	token_peek_reset(token);
 	return (field_token);
 }
 
@@ -170,6 +154,7 @@ t_field *field_splitting(t_token *token)
 	char m;
 
 	field = field_init(token->type);
+	token_peek_reset(token);
 	while (true)
 	{
 		token_peek(token, &c, &m);
@@ -189,7 +174,46 @@ t_field *field_splitting(t_token *token)
 	return (field);
 }
 
-void quote_removal(void *token_ptr)
+void	array_merge(t_array *dest, t_array *src)
+{
+	size_t	i;
+
+	i = 0;
+	while (i < src->size)
+	{
+		array_push(dest, src->data[i]);
+		i++;
+	}
+}
+
+void	expansion(t_ast_node *node)
+{
+	t_field		*field;
+	t_array		*argument_list;
+	t_array		*redirect_list;
+	size_t		i;
+
+	argument_list = track_malloc(sizeof(t_array));
+	redirect_list = track_malloc(sizeof(t_array));
+	array_init(argument_list);
+	array_init(redirect_list);
+	array_do(node->children, parameter_expansion);// always results in a single field.
+	i = 0;
+	while (i < node->children->size)
+	{
+		//TODO: field might be empty.
+		field = field_splitting(node->children->data[i]);
+		if (lexem_is_redirection(field->type))
+			array_push(redirect_list, field);
+		else
+			array_merge(argument_list, field->tokens);
+		i++;
+	}
+	node->children = argument_list;
+	node->redirect_list = redirect_list;
+}
+
+void token_remove_quotes(void *token_ptr)
 {
 	t_token *token;
 	char 	in_quote;
@@ -207,28 +231,28 @@ void quote_removal(void *token_ptr)
 		{
 			in_quote = c;
 			token_segment_remove(token, token->value->peek, 1);
-			continue;
 		}
 		else if (in_quote == c && m == '0')
 		{
 			in_quote = '\0';
 			token_segment_remove(token, token->value->peek, 1);
 		}
-		token_peek_advance(token);
+		else
+			token_peek_advance(token);
 	}
 }
 
-void	split_fields(void *token_ptr)
+void	quote_removal(t_ast_node *node)
 {
-	t_token *token;
-	t_field *field;
+	t_field	*field;
+	size_t	i;
 
-	token = token_ptr;
-	field = field_splitting(token);
-	array_do(field->tokens, quote_removal);
-	if (lexem_is_redirection(field->type) && field->tokens->size > 1)
-		printf("Ambiguos redirection\n");
-	else
-		array_do(field->tokens, print_token);
+	array_do(node->children, token_remove_quotes);
+	i = 0;
+	while (i < node->redirect_list->size)
+	{
+		field = node->redirect_list->data[i];
+		array_do(field->tokens, token_remove_quotes);
+		i++;
+	}
 }
-

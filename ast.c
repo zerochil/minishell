@@ -8,7 +8,10 @@
 char *syntax_error(char *message)
 {
 	static char *error_message;
-	if (*message != '\0')
+
+	if (message == NULL)
+		error_message = NULL;
+	else if (*message != '\0')
 		error_message = message;
 	return (error_message);
 }
@@ -47,12 +50,15 @@ t_array *generate_ast(t_array *tokens)
 	array_init(ast_list);
 	while(true)
 	{
+		syntax_error(NULL);
 		node = complete_command(tokens);
-
 		token = array_peek(tokens);
 		if (token->type != -1 && token->type != newline_type)
 		{
 			node->error_message = syntax_error("");
+			node->children = NULL;
+			if (node->error_message == NULL)
+				node->error_message = syntax_error("syntax error near unexpected token");
 			while (token->type != -1 && token->type != newline_type)
 			{
 				array_shift(tokens);
@@ -210,7 +216,9 @@ char *get_token_symbol(int type)
 		return "CLOSE_PARENTHESIS";
 	if (type == lexem_get_type("NEWLINE"))
 		return "NEWLINE";
-	return "UNKNOWN";
+	if (type == -1)
+		return "EOF";
+	return "WORD";
 }
 
 t_ast_node *simple_command(t_array *tokens)
