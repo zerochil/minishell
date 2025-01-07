@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/06 16:38:03 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/07 09:00:06 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,13 +35,13 @@ void	print_token(void *token_ptr)
 	fflush(NULL);
 }
 
-void	print_redirection(void *field_ptr)
+void	print_redirection(void *tokens_ptr)
 {
-	t_field *field;
+	t_array *tokens;
 
-	field = field_ptr;
+	tokens = tokens_ptr;
 	printf("{");
-	array_do(field->tokens, print_token);
+	array_do(tokens, print_token);
 	printf("}");
 }
 

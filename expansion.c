@@ -204,7 +204,7 @@ void	expansion(t_ast_node *node)
 		//TODO: field might be empty.
 		field = field_splitting(node->children->data[i]);
 		if (lexem_is_redirection(field->type))
-			array_push(redirect_list, field);
+			array_push(redirect_list, field->tokens);
 		else
 			array_merge(argument_list, field->tokens);
 		i++;
@@ -244,15 +244,15 @@ void token_remove_quotes(void *token_ptr)
 
 void	quote_removal(t_ast_node *node)
 {
-	t_field	*field;
+	t_array	*tokens;
 	size_t	i;
 
 	array_do(node->children, token_remove_quotes);
 	i = 0;
 	while (i < node->redirect_list->size)
 	{
-		field = node->redirect_list->data[i];
-		array_do(field->tokens, token_remove_quotes);
+		tokens = node->redirect_list->data[i];
+		array_do(tokens, token_remove_quotes);
 		i++;
 	}
 }
