@@ -6,14 +6,14 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:07 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/05 15:02:49 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/07 18:16:39 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "lexer.h"
 #include "tokenizer.h"
 
-static t_token	*token_init(int type, char *value)
+t_token	*token_init(int type, char *value)
 {
 	t_token		*token;
 

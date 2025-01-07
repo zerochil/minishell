@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 10:57:55 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/30 14:59:58 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/07 21:17:22 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,4 +29,18 @@ void	array_destroy(t_array *array)
 	array->data = NULL;
 	array->size = 0;
 	array->capacity = 0;
+}
+
+void	array_ensure_capacity(t_array *array, size_t needed_capacity)
+{
+	size_t	new_cap;
+
+	needed_capacity = needed_capacity + 1;
+	if (needed_capacity >= array->capacity)
+	{
+		new_cap = array->capacity * 2;
+		array->data = container_grow(array->data, array->capacity, new_cap,
+				sizeof(void *));
+		array->capacity = new_cap;
+	}
 }

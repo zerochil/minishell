@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 10:57:55 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/30 18:08:06 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/07 21:03:35 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,9 +71,7 @@ void	array_insert(t_array *array, size_t index, void *element)
 
 	if (!array || index > array->size)
 		return ;
-	if (array->size >= array->capacity)
-		array->data = container_grow(array->data, array->capacity, array->capacity * 2,
-				sizeof(void *));
+	array_ensure_capacity(array, array->size + 1);
 	i = array->size;
 	while (i > index)
 	{

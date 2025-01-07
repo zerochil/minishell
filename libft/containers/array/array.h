@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/21 20:00:43 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/30 18:23:04 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/07 20:50:55 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ typedef struct s_array
 
 void		array_init(t_array *arr);
 void		array_destroy(t_array *arr);
+void		array_ensure_capacity(t_array *array, size_t needed_capacity);
 
 void		array_push(t_array *arr, void *item);
 void		array_insert(t_array *array, size_t index, void *element);

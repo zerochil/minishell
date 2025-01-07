@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/07 09:00:06 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/07 21:22:54 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,11 @@ void	print_token(void *token_ptr)
 	char	*id;
 	lexems = lexems_get_instance();
 	token = token_ptr;
+	if (token == NULL)
+	{
+		printf("(null)");
+		return ;
+	}
 	if (token->type == 0)
 		id = "WORD";
 	else if(token->type == -1)
@@ -80,15 +85,18 @@ static void	print(void *node_ptr)
 	else if (node->type == AST_SUBSHELL)
 	{
 		print_children(node->children, "\n\t\t\tsubshell: ");
+		expansion(node);
+		quote_removal(node);
 		if (node->redirect_list)
 		{
 			printf("\n\t\t\t\tsubshell_redirection: ");
-			array_do(node->redirect_list, print_token);
+			array_do(node->redirect_list, print_redirection);
 		}
 	}
 	else if (node->type == AST_SIMPLE_COMMAND)
 	{
 		expansion(node);
+		pathname_expansion(node);
 		quote_removal(node);
 		printf("\n\t\t\tSimple_command: ");
 		array_do(node->children, print_token);

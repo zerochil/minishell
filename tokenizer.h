@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:33 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/05 15:01:00 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/07 18:17:25 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,8 @@ typedef struct s_token
 	t_string	*mask;
 }				t_token;
 
-t_array			*tokenize(t_string *input);
+t_array	*tokenize(t_string *input);
+t_token	*token_init(int type, char *value);
 int	is_quoted(t_string *input);
 
 #endif
