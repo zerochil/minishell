@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/09 15:16:17 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/09 18:37:28 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,10 +40,14 @@ void	token_peek_reset(t_token *token)
 	string_peek_reset(token->mask);
 }
 
-void	token_segment_remove(t_token *token, size_t start, size_t length)
+char	token_slice_char_at_peek(t_token *token)
 {
-	string_segment_remove(token->value, start, length);
-	string_segment_remove(token->mask, start, length);
+	char	c;
+
+	c = string_peek(token->value);
+	string_segment_remove(token->value, token->value->peek, 1);
+	string_segment_remove(token->mask, token->mask->peek, 1);
+	return (c);
 }
 
 static bool	is_whitespace(char c)
@@ -514,15 +518,14 @@ void	pathname_expansion(t_ast_node *node)
 	}
 }
 
-void token_remove_quotes(void *token_ptr)
+bool	remove_quotes(t_token *token)
 {
-	t_token *token;
-	char 	in_quote;
-	char 	c;
+	size_t	old_size;
+	char	in_quote;
+	char	c;
 	char	m;
 
-	token = token_ptr;
-	token_peek_reset(token);
+	old_size = token->value->size;
 	in_quote = '\0';
 	while (true)
 	{
@@ -530,18 +533,23 @@ void token_remove_quotes(void *token_ptr)
 		if (c == '\0')
 			break;
 		if (in_quote == '\0' && m == '0' && (c == '"' || c == '\''))
-		{
-			in_quote = c;
-			token_segment_remove(token, token->value->peek, 1);
-		}
+			in_quote = token_slice_char_at_peek(token);
 		else if (in_quote == c && m == '0')
-		{
-			in_quote = '\0';
-			token_segment_remove(token, token->value->peek, 1);
-		}
+			in_quote = token_slice_char_at_peek(token) != in_quote;
 		else
 			token_peek_advance(token);
 	}
+	return (token->value->size != old_size);
+}
+
+void token_remove_quotes(void *token_ptr)
+{
+	t_token	*token;
+	
+	token = token_ptr;
+	token_peek_reset(token);
+	if (remove_quotes(token))
+		token->mask->data[0] = '2';
 }
 
 void	quote_removal(t_ast_node *node)

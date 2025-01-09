@@ -1,30 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   expansion.h                                        :+:      :+:    :+:   */
+/*   here_document.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/04 17:13:33 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/09 18:38:14 by inajah           ###   ########.fr       */
+/*   Created: 2025/01/09 18:06:13 by inajah            #+#    #+#             */
+/*   Updated: 2025/01/09 20:19:59 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef EXPANSION_H
-# define EXPANSION_H
+#ifndef HERE_DOCUMENT_H
+# define HERE_DOCUMENT_H
 
-# include "minishell.h"
-# include "ast.h"
-# include <dirent.h>
 
-typedef struct s_field
-{
-	int		type;
-	t_array *tokens;
-}	t_field;
+# include "libft/libft.h"
+# include "tokenizer.h"
+# include <readline/history.h>
+# include <readline/readline.h>
 
-void	expansion(t_ast_node *node);
-void	pathname_expansion(t_ast_node *node);
-void	quote_removal(t_ast_node *node);
+void	handle_heredoc(void *token_ptr);
 
 #endif

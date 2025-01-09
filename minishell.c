@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/08 12:38:28 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/09 19:08:46 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "tokenizer.h"
 #include "ast.h"
 #include "expansion.h"
+#include "here_document.h"
 #include <readline/history.h>
 #include <readline/readline.h>
 
@@ -36,7 +37,7 @@ void	print_token(void *token_ptr)
 		id = "EOF";
 	else
 		id = ((t_lexem *)(lexems->data[token->type - 1]))->identifier;
-	printf("[%s, %s]", id, token->value->data);
+	printf("[%s, %s, %s]", id, token->value->data, token->mask->data);
 	fflush(NULL);
 }
 
@@ -46,6 +47,7 @@ void	print_redirection(void *tokens_ptr)
 
 	tokens = tokens_ptr;
 	printf("{");
+	array_do(tokens, handle_heredoc);
 	array_do(tokens, print_token);
 	printf("}");
 }
@@ -98,6 +100,7 @@ static void	print(void *node_ptr)
 		expansion(node);
 		pathname_expansion(node);
 		quote_removal(node);
+		array_do(node->children, handle_heredoc);
 		printf("\n\t\t\tSimple_command: ");
 		array_do(node->children, print_token);
 		array_do(node->redirect_list, print_redirection);
