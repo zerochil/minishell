@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 08:59:51 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/16 10:22:36 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/09 10:06:37 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,5 +83,7 @@ void				ft_lstiter(t_list *lst, void (*f)(void *));
 int					ft_lstsize(t_list *lst);
 
 int					ends_with(const char *str, const char *suffix);
+int					starts_with(const char *str, const char *prefix);
+
 
 #endif
