@@ -12,21 +12,25 @@
 
 #include "memory_management.h"
 
-t_rm_node	*rm_node_new_manager(char *name)
-{
-	t_rm_node	*node;
-
-	node = safe_malloc(sizeof(t_rm_node));
-	node->manager.name = name;
-	return (node);
-}
-
 void	rm_node_add_front(t_rm_node **lst, t_rm_node *new_node)
 {
 	if (lst == NULL || new_node == NULL)
 		return ;
 	new_node->next = *lst;
 	*lst = new_node;
+}
+
+t_rm_node	*rm_node_add_back(t_rm_node **lst, t_rm_node *new_node)
+{
+	t_rm_node	*current;
+
+	if (!*lst)
+		return (*lst = new_node);
+	current = *lst;
+	while (current->next)
+		current = current->next;
+	current->next = new_node;
+	return (new_node);
 }
 
 void	rm_node_clear_list(t_rm_node **lst, void (*del)(void *))

@@ -44,6 +44,7 @@ int					ft_isdigit(int c);
 int					ft_isalnum(int c);
 int					ft_isascii(int c);
 int					ft_isprint(int c);
+int					ft_isnumber(char *str);
 
 int					ft_atoi(const char *str);
 char				*ft_itoa(int n);

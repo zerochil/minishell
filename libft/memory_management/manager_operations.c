@@ -46,8 +46,21 @@ void	manager_free(void)
 void	manager_free_everything(void)
 {
 	t_rm_node	**manager;
+	t_scope		*scope;
 
 	manager = managers_get_instance();
+	scope = get_scope();
+	while (scope->stack)
+		manager_scope_end();
 	while (*manager)
 		manager_free();
+}
+
+t_rm_node	*rm_node_new_manager(char *name)
+{
+	t_rm_node	*node;
+
+	node = safe_malloc(sizeof(t_rm_node));
+	node->manager.name = name;
+	return (node);
 }

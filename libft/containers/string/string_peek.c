@@ -12,9 +12,11 @@
 
 #include "string.h"
 
+// this shit is dangerous this is no synchronisation between function manipulation and the peek position
+
 char	string_peek(t_string *string)
 {
-  // TODO: WHAT BOOMB is going to go off if we have string->size == 0 ??
+	// TODO: WHAT BOOMB is going to go off if we have string->size == 0 ??
 	if (string == NULL)
 	{
 		report_error("string_peek: error");
@@ -36,7 +38,7 @@ char	string_peek_reset(t_string *string)
 
 char	string_peek_advance(t_string *string)
 {
-	char last_character;
+	char	last_character;
 
 	if (string == NULL)
 	{
@@ -45,6 +47,6 @@ char	string_peek_advance(t_string *string)
 	}
 	last_character = string->data[string->peek];
 	if (string->peek + 1 <= string->size)
-    string->peek++;
-	return last_character;
+		string->peek++;
+	return (last_character);
 }

@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:33 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/29 19:54:41 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/07 18:17:25 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,14 +22,12 @@
 typedef struct s_token
 {
 	int			type;
-	union
-	{
-		char	*word;
-		char	*filename;
-	};
+	t_string	*value;
+	t_string	*mask;
 }				t_token;
 
-t_array			*tokenize(t_string *input);
+t_array	*tokenize(t_string *input);
+t_token	*token_init(int type, char *value);
 int	is_quoted(t_string *input);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/01 08:47:59 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/07 21:22:54 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include "minishell.h"
 #include "tokenizer.h"
 #include "ast.h"
+#include "expansion.h"
 #include <readline/history.h>
 #include <readline/readline.h>
 
@@ -24,14 +25,29 @@ void	print_token(void *token_ptr)
 	char	*id;
 	lexems = lexems_get_instance();
 	token = token_ptr;
+	if (token == NULL)
+	{
+		printf("(null)");
+		return ;
+	}
 	if (token->type == 0)
 		id = "WORD";
 	else if(token->type == -1)
 		id = "EOF";
 	else
 		id = ((t_lexem *)(lexems->data[token->type - 1]))->identifier;
-	printf("[%s, %s]", id, token->filename);
+	printf("[%s, %s]", id, token->value->data);
 	fflush(NULL);
+}
+
+void	print_redirection(void *tokens_ptr)
+{
+	t_array *tokens;
+
+	tokens = tokens_ptr;
+	printf("{");
+	array_do(tokens, print_token);
+	printf("}");
 }
 
 static void	print(void *node_ptr);
@@ -40,7 +56,6 @@ static void print_children(t_array *children, char *symb)
 {
 	printf("%s ", symb);
 	array_do(children, print);
-	/*printf(" %c", symb[1]);*/
 }
 
 static void	print(void *node_ptr)
@@ -70,21 +85,26 @@ static void	print(void *node_ptr)
 	else if (node->type == AST_SUBSHELL)
 	{
 		print_children(node->children, "\n\t\t\tsubshell: ");
+		expansion(node);
+		quote_removal(node);
 		if (node->redirect_list)
 		{
-
 			printf("\n\t\t\t\tsubshell_redirection: ");
-			array_do(node->redirect_list, print_token);
+			array_do(node->redirect_list, print_redirection);
 		}
 	}
 	else if (node->type == AST_SIMPLE_COMMAND)
 	{
+		expansion(node);
+		pathname_expansion(node);
+		quote_removal(node);
 		printf("\n\t\t\tSimple_command: ");
 		array_do(node->children, print_token);
+		array_do(node->redirect_list, print_redirection);
 	}
 }
 
-int	main(void)
+int	main()
 {
 	char		*line;
 	t_string	input;
@@ -92,40 +112,20 @@ int	main(void)
 	t_array		*list;
 
 	string_init(&input);
-	line = "ls -a 'xs'>> xsx\nls && sl | wi\n ls && ls \n ls | ls \nwc | cat > helo >> world";
-	/*line = "ls\n()\ncat | wc";*/
-	/*line = "ls | lx";*/
-	/*printf("%s\n", line);*/
-	/*string_set(&input, line);*/
-	/*tokens = tokenize(&input);*/
-	/*t_ast_node *list = complete_command(tokens);*/
-	/*if (list)*/
-	/*	print(list);*/
-	/*else*/
-	/*	printf("error\n");*/
-	/**/
+	while (1)
+	{
+		line = readline("minishell> ");
+		if (ft_strncmp(line, "exit", ft_strlen(line)) == 0)
+			break ;
+		add_history(line);
 		string_set(&input, line);
 		tokens = tokenize(&input);
-		printf("minishell: %s\n", line);
-		//array_do(tokens, print_token);
-		printf("\n");
+		if (tokens == NULL)
+			continue ;
 		list = generate_ast(tokens);
-		if (list->size > 0 )
+		if (list != NULL)
 			array_do(list, print);
-		else {
-			printf("error\n");
-		}
-	/*while (1)*/
-	/*{*/
-	/*	line = readline("minishell> ");*/
-	/*	add_history(line);*/
-	/*	string_set(&input, line);*/
-	/*	tokens = tokenize(&input);*/
-	/*	array_do(tokens, print_token);*/
-	/*	list = complete_command(tokens);*/
-	/*	if (list != NULL)*/
-	/*		print(list);*/
-	/*}*/
+	}
 	rl_clear_history();
 	manager_free_everything();
 }

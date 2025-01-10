@@ -13,7 +13,6 @@
 #ifndef AST_H
 # define AST_H
 
-#include "libft/containers/array/array.h"
 # include "libft/libft.h"
 # include "tokenizer.h"
 # include "lexer.h"
