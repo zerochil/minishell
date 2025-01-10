@@ -103,6 +103,9 @@ int	builtin_export(char **args, int out_fd)
 
 int	builtin_exit(char **args, int out_fd)
 {
+	(void)out_fd;
+	// bash: exit: eruwehriw21: numeric argument required 
+	manager_free_everything();
 	if (args[1])
 		exit(ft_atoi(args[1]));
 	exit(0);
@@ -149,6 +152,7 @@ int	builtin_cd(char **args, int out_fd)
 	char *env_pwd;
 
 	// should I handle: cd -??
+	(void)out_fd;
 	if (count_args(args) > 2)
 		return (ft_putendl_fd("cd: too many arguments", 2), 1);
 	if (args[1])
@@ -171,6 +175,7 @@ int	builtin_unset(char **args, int out_fd)
 {
 	int i;
 
+	(void)out_fd;
 	i = 1;
 	while (args[i])
 	{
@@ -185,6 +190,7 @@ int	builtin_pwd(char **args, int out_fd)
 {
 	char *cwd;
 
+	(void)args;
 	cwd = getcwd(NULL, 0);
 	if (!cwd)
 		return (perror("pwd"), 1); // when will this ever happen?
@@ -199,6 +205,7 @@ int	builtin_env(char **args, int out_fd)
 
 	// fuck is _=/usr/bin/env ?? is there an env that's not builtin?
 	// IN EXECUTION: args, same as envp, are all NULL terminated array of strings
+	(void)args;
 	env_array = env_get_array();
 	while (*env_array)
 	{

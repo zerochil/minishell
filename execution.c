@@ -2,13 +2,13 @@
 #include "builtins.h"
 #include "env.h"
 
-void execution(t_context *context)
+void execution(t_array *ast_root_list)
 {
 	t_ast_node *ast_root;
 
 	while (true)
 	{
-		ast_root = array_shift(context->ast_root_list);
+		ast_root = array_shift(ast_root_list);
 		if (ast_root == NULL)
 			break;
 		if (ast_root->children == NULL)
@@ -23,23 +23,23 @@ void execution(t_context *context)
 
 int execute_complete_command(t_ast_node *node)
 {
-	t_ast_node *command_list_node;
-
-	command_list_node = array_shift(node->children);
-	if (command_list_node == NULL)
-		return (-1);
-	return (execute_command_list(command_list_node));
-}
-
-int execute_command_list(t_ast_node *node)
-{
 	t_ast_node *compound_command_node;
 
 	compound_command_node = array_shift(node->children);
 	if (compound_command_node == NULL)
 		return (-1);
-	return(execute_compound_command(compound_command_node));
+	return (execute_compound_command(compound_command_node));
 }
+
+/*int execute_command_list(t_ast_node *node)*/
+/*{*/
+/*	t_ast_node *compound_command_node;*/
+/**/
+/*	compound_command_node = array_shift(node->children);*/
+/*	if (compound_command_node == NULL)*/
+/*		return (-1);*/
+/*	return(execute_compound_command(compound_command_node));*/
+/*}*/
 
 int execute_compound_command(t_ast_node *node)
 {
@@ -88,22 +88,27 @@ void fork_and_execute(t_array *commands, int index, t_pipeline_context *pipeline
 		if (pipeline_context->read_end != STDIN_FILENO)
 		{
 			dup2(pipeline_context->read_end, STDIN_FILENO);
-			close(pipeline_context->read_end);
+			close(pipeline_context->pipe.read);
 		}
 		if (pipeline_context->write_end != STDOUT_FILENO)
 		{
 			dup2(pipeline_context->write_end, STDOUT_FILENO);
-			close(pipeline_context->write_end);
+			close(pipeline_context->pipe.write);
 		}
+		close(pipeline_context->pipe.read);
+		close(pipeline_context->pipe.write);
 		exit(execute_command(array_get(commands, index)));
 	}
+	// 
+	// cat | ls
+	//
 }
 
 int execute_pipeline(t_ast_node *node)
 {
 	t_pipeline_context pipeline_context;
 	t_array *commands;
-	int index;
+	size_t index;
 	int last_command_status;
 
 	commands = node->children;
@@ -122,17 +127,20 @@ int execute_pipeline(t_ast_node *node)
 				perror("minishell");
 				error(NULL);
 			}
-		pipeline_context.write_end = pipeline_context.pipe.write_end;
+		pipeline_context.write_end = pipeline_context.pipe.write;
 		if (index == 0)
 			pipeline_context.read_end = STDIN_FILENO;
 		if (index == commands->size - 1)
 			pipeline_context.write_end = STDOUT_FILENO;
+		// pipe_in
+		// pipe_out
+		//    child1 -> write1
 		fork_and_execute(commands, index, &pipeline_context);
 		if (pipeline_context.read_end != STDIN_FILENO)
 			close(pipeline_context.read_end);
 		if (pipeline_context.write_end != STDOUT_FILENO)
 			close(pipeline_context.write_end);
-		pipeline_context.read_end = pipeline_context.pipe.read_end;
+		pipeline_context.read_end = pipeline_context.pipe.read;
 		index++;
 	}
 	waitpid(pipeline_context.last_command_pid, &last_command_status, 0);
@@ -149,6 +157,7 @@ int execute_command(t_ast_node *node)
 		return (execute_simple_command(node));
 	else
 		error("execute_command_list: error");
+	return (-1);
 }
 
 int execute_subshell(t_ast_node *node)
@@ -157,7 +166,25 @@ int execute_subshell(t_ast_node *node)
 	// hanndle redirection
 	// and dup redirection
 	// then call execute_command_list
-	return (execute_command_list(node));
+	return (execute_compound_command(node));
+}
+
+char **get_arg_list(t_array *tokens)
+{
+	t_token *token;
+	char **args;
+	size_t i;
+
+	args = track_malloc(sizeof(char *) * (tokens->size + 1));
+	i = 0;
+	while (i < tokens->size)
+	{
+		token = array_get(tokens, i);
+		args[i] = token->value->data;
+		i++;
+	}
+	args[i] = NULL;
+	return (args);
 }
 
 int execute_simple_command(t_ast_node *node)
@@ -174,7 +201,7 @@ int execute_simple_command(t_ast_node *node)
 		fd_out = STDOUT_FILENO;
 	if (fd_in == -1)
 		fd_in = STDIN_FILENO;
-	command_context.args = array_dup(node->children); // TODO: this isn't an array of strings;
+	command_context.args = get_arg_list(node->children);
 	command_context.envp = env_get_array();
 	command_context.fd_in = fd_in;
 	command_context.fd_out = fd_out;

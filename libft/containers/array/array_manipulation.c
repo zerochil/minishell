@@ -42,6 +42,8 @@ void	*array_remove(t_array *array, size_t index)
 {
 	void	*item;
 
+	if (array->size == 0)
+		return (NULL);
 	if (!array || index >= array->size)
 	{
 		ft_putendl_fd("Error: array_remove", 2);

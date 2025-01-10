@@ -18,6 +18,7 @@
 #include "here_document.h"
 #include <readline/history.h>
 #include <readline/readline.h>
+#include "execution.h"
 
 void	print_token(void *token_ptr)
 {
@@ -105,6 +106,8 @@ static void	handle_expansions(void *node_ptr)
 	t_ast_node *node;
 
 	node = node_ptr;
+	if (node->children == NULL)
+		return ;
 	if (node->type != AST_SIMPLE_COMMAND && node->type != AST_SUBSHELL)
 	{
 		 array_do(node->children, handle_expansions);
@@ -130,19 +133,14 @@ int	main()
 	while (1)
 	{
 		line = readline("minishell> ");
-		if (ft_strncmp(line, "exit", ft_strlen(line)) == 0)
-			break ;
 		add_history(line);
 		string_set(&input, line);
 		tokens = tokenize(&input);
 		if (tokens == NULL)
 			continue ;
 		list = generate_ast(tokens);
-		if (list != NULL)
-		{
-			array_do(list, handle_expansions);
-			array_do(list, print);
-		}
+		array_do(list, handle_expansions);
+		execution(list);
 	}
 	rl_clear_history();
 	manager_free_everything();

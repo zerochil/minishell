@@ -12,12 +12,13 @@
 /* ************************************************************************** */
 
 #include "expansion.h"
+#include "env.h"
 
 char	*get_param_value(char *param_name)
 {
 	char	*param_value;
 
-	param_value = getenv(param_name);
+	param_value = env_get(param_name);
 	if (param_value == NULL)
 		return ("");
 	return (param_value);

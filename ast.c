@@ -92,6 +92,7 @@ t_ast_node *command_list(t_array *tokens)
 	t_array	*commands;
 	t_ast_node	*command;
 
+	// TODO: rewrite the top 3 functions in recursive top down;
 	commands = track_malloc(sizeof(t_array));
 	array_init(commands);
 	linebreak(tokens);
