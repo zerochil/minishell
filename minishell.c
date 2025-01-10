@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/09 19:08:46 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/10 09:52:36 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void	print_token(void *token_ptr)
 		id = "EOF";
 	else
 		id = ((t_lexem *)(lexems->data[token->type - 1]))->identifier;
-	printf("[%s, %s, %s]", id, token->value->data, token->mask->data);
+	printf("[%s, %s]", id, token->value->data);
 	fflush(NULL);
 }
 
@@ -47,7 +47,6 @@ void	print_redirection(void *tokens_ptr)
 
 	tokens = tokens_ptr;
 	printf("{");
-	array_do(tokens, handle_heredoc);
 	array_do(tokens, print_token);
 	printf("}");
 }
@@ -87,8 +86,6 @@ static void	print(void *node_ptr)
 	else if (node->type == AST_SUBSHELL)
 	{
 		print_children(node->children, "\n\t\t\tsubshell: ");
-		expansion(node);
-		quote_removal(node);
 		if (node->redirect_list)
 		{
 			printf("\n\t\t\t\tsubshell_redirection: ");
@@ -97,14 +94,29 @@ static void	print(void *node_ptr)
 	}
 	else if (node->type == AST_SIMPLE_COMMAND)
 	{
-		expansion(node);
-		pathname_expansion(node);
-		quote_removal(node);
-		array_do(node->children, handle_heredoc);
 		printf("\n\t\t\tSimple_command: ");
 		array_do(node->children, print_token);
 		array_do(node->redirect_list, print_redirection);
 	}
+}
+
+static void	handle_expansions(void *node_ptr)
+{
+	t_ast_node *node;
+
+	node = node_ptr;
+	if (node->type != AST_SIMPLE_COMMAND && node->type != AST_SUBSHELL)
+	{
+		 array_do(node->children, handle_expansions);
+		 return ;
+	}
+	if (node->type == AST_SUBSHELL)
+		array_do(node->children, handle_expansions);
+	
+	expansion_and_field_splitting(node);
+	pathname_expansion(node);
+	quote_removal(node);
+	array_do(node->redirect_list, handle_heredoc);
 }
 
 int	main()
@@ -127,7 +139,10 @@ int	main()
 			continue ;
 		list = generate_ast(tokens);
 		if (list != NULL)
+		{
+			array_do(list, handle_expansions);
 			array_do(list, print);
+		}
 	}
 	rl_clear_history();
 	manager_free_everything();

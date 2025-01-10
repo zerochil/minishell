@@ -6,38 +6,41 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/09 18:37:28 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "expansion.h"
 
-char	*get_param_value(char *arg_name)
+char	*get_param_value(char *param_name)
 {
-	char	*arg_value;
+	char	*param_value;
 
-	arg_value = getenv(arg_name);
-	if (arg_value == NULL)
+	param_value = getenv(param_name);
+	if (param_value == NULL)
 		return ("");
-	return (arg_value);
+	return (param_value);
 }
 
 void	token_peek(t_token *token, char *c, char *m)
 {
 	*c = string_peek(token->value);
-	*m = string_peek(token->mask);
+	if (token->mask)
+		*m = string_peek(token->mask);
 }
 
 void	token_peek_advance(t_token *token)
 {
 	string_peek_advance(token->value);
-	string_peek_advance(token->mask);
+	if (token->mask)
+		string_peek_advance(token->mask);
 }
 
 void	token_peek_reset(t_token *token)
 {
 	string_peek_reset(token->value);
-	string_peek_reset(token->mask);
+	if (token->mask)
+		string_peek_reset(token->mask);
 }
 
 char	token_slice_char_at_peek(t_token *token)
@@ -46,7 +49,8 @@ char	token_slice_char_at_peek(t_token *token)
 
 	c = string_peek(token->value);
 	string_segment_remove(token->value, token->value->peek, 1);
-	string_segment_remove(token->mask, token->mask->peek, 1);
+	if (token->mask)
+		string_segment_remove(token->mask, token->mask->peek, 1);
 	return (c);
 }
 
@@ -64,7 +68,8 @@ void	token_update_mask(t_token *token, size_t start, size_t length,
 		size_t value_length)
 {
 	char	*value_mask;
-
+	if (token->mask == NULL)
+		return ;
 	value_mask = track_malloc((value_length + 1) * sizeof(char));
 	ft_memset(value_mask, '1', value_length);
 	string_segment_replace(token->mask, start, length, value_mask);
@@ -130,15 +135,9 @@ t_token	*token_slice(t_token *token)
 
 	if (token->value->peek == 0)
 		return (NULL);
-	field_token = track_malloc(sizeof(t_token));
-	field_token->type = token->type;
 	value = string_segment_slice(token->value, 0, token->value->peek);
 	mask = string_segment_slice(token->mask, 0, token->mask->peek);
-	field_token->value = track_malloc(sizeof(t_string));
-	field_token->mask = track_malloc(sizeof(t_string));
-	string_init(field_token->value);
-	string_set(field_token->value, value);
-	string_init(field_token->mask);
+	field_token = token_init(token->type, value);
 	string_set(field_token->mask, mask);
 	token_peek_reset(token);
 	return (field_token);
@@ -227,7 +226,7 @@ void	expand_redirect_list(t_ast_node *node, t_array *redirect_list)
 	node->redirect_list = redirect_list;
 }
 
-void	expansion(t_ast_node *node)
+void	expansion_and_field_splitting(t_ast_node *node)
 {
 	t_field		*field;
 	t_array		*argument_list;
