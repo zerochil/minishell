@@ -6,44 +6,54 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/07 21:31:43 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/10 16:54:50 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
+>>>>>>> expansion
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "expansion.h"
 
-char	*get_param_value(char *arg_name)
+char	*get_param_value(char *param_name)
 {
-	char	*arg_value;
+	char	*param_value;
 
-	arg_value = getenv(arg_name);
-	if (arg_value == NULL)
+	param_value = getenv(param_name);
+	if (param_value == NULL)
 		return ("");
-	return (arg_value);
+	return (param_value);
 }
 
 void	token_peek(t_token *token, char *c, char *m)
 {
 	*c = string_peek(token->value);
-	*m = string_peek(token->mask);
+	if (token->mask)
+		*m = string_peek(token->mask);
 }
 
 void	token_peek_advance(t_token *token)
 {
 	string_peek_advance(token->value);
-	string_peek_advance(token->mask);
+	if (token->mask)
+		string_peek_advance(token->mask);
 }
 
 void	token_peek_reset(t_token *token)
 {
 	string_peek_reset(token->value);
-	string_peek_reset(token->mask);
+	if (token->mask)
+		string_peek_reset(token->mask);
 }
 
-void	token_segment_remove(t_token *token, size_t start, size_t length)
+char	token_slice_char_at_peek(t_token *token)
 {
-	string_segment_remove(token->value, start, length);
-	string_segment_remove(token->mask, start, length);
+	char	c;
+
+	c = string_peek(token->value);
+	string_segment_remove(token->value, token->value->peek, 1);
+	if (token->mask)
+		string_segment_remove(token->mask, token->mask->peek, 1);
+	return (c);
 }
 
 static bool	is_whitespace(char c)
@@ -60,7 +70,9 @@ void	token_update_mask(t_token *token, size_t start, size_t length,
 		size_t value_length)
 {
 	char	*value_mask;
-
+	
+	if (token->mask == NULL)
+		return ;
 	value_mask = track_malloc((value_length + 1) * sizeof(char));
 	ft_memset(value_mask, '1', value_length);
 	string_segment_replace(token->mask, start, length, value_mask);
@@ -126,15 +138,10 @@ t_token	*token_slice(t_token *token)
 
 	if (token->value->peek == 0)
 		return (NULL);
-	field_token = track_malloc(sizeof(t_token));
-	field_token->type = token->type;
+
 	value = string_segment_slice(token->value, 0, token->value->peek);
 	mask = string_segment_slice(token->mask, 0, token->mask->peek);
-	field_token->value = track_malloc(sizeof(t_string));
-	field_token->mask = track_malloc(sizeof(t_string));
-	string_init(field_token->value);
-	string_set(field_token->value, value);
-	string_init(field_token->mask);
+	field_token = token_init(token->type, value);
 	string_set(field_token->mask, mask);
 	token_peek_reset(token);
 	return (field_token);
@@ -223,7 +230,7 @@ void	expand_redirect_list(t_ast_node *node, t_array *redirect_list)
 	node->redirect_list = redirect_list;
 }
 
-void	expansion(t_ast_node *node)
+void	expansion_and_field_splitting(t_ast_node *node)
 {
 	t_field		*field;
 	t_array		*argument_list;
@@ -251,92 +258,213 @@ void	expansion(t_ast_node *node)
 	node->redirect_list = redirect_list;
 }
 
+void token_remove_quotes(void *token_ptr);
+
+void	pattern_update_mask(t_token *pattern)
+{
+	char	in_quote;
+	char	c;
+
+	in_quote = '\0';
+	string_peek_reset(pattern->value);
+	while (true)
+	{
+		c = string_peek(pattern->value);
+		if (c == '\0')
+			break;
+		if (in_quote == '\0' && (c == '"' || c == '\''))
+			in_quote = c;
+		else if (in_quote == c)
+			in_quote = '\0';
+		else if (c == '*' && in_quote != '\0')
+			pattern->mask->data[pattern->value->peek] = '2';
+		string_peek_advance(pattern->value);
+	}
+}
+
+t_token	*token_copy(t_token *token)
+{
+	t_token *copy;
+
+	if (!token)
+	{
+		report_error("token_copy: error");
+		return (NULL);
+	}
+	copy = token_init(token->type, token->value->data);
+	string_set(copy->mask, token->mask->data);
+	return (copy);
+}
+
+char	*pattern_extract_dir_path(t_token *pattern)
+{
+	char *dir_path;
+	size_t	len;
+
+	dir_path = ".";
+    if (ft_strchr(pattern->value->data, '/'))
+    {
+		len = ft_strrchr(pattern->value->data, '/') - pattern->value->data + 1;
+        dir_path = string_segment_slice(pattern->value, 0, len);
+		string_segment_remove(pattern->mask, 0, len);
+    }
+	return (dir_path);
+}
+
+enum {
+	DENTRY_VISIBLE,
+	DENTRY_HIDDEN,
+	DENTRY_DIRECTORY,
+};
+
+bool	target_entry_type(struct dirent *entry, char entry_type)
+{
+	if (entry_type == DENTRY_HIDDEN)
+		return (starts_with(entry->d_name, "."));
+	if (entry_type == DENTRY_DIRECTORY)
+		return (!starts_with(entry->d_name, ".") && entry->d_type == DT_DIR);
+	if (entry_type == DENTRY_HIDDEN + DENTRY_DIRECTORY)
+		return (starts_with(entry->d_name, ".") && entry->d_type == DT_DIR);
+	return (!starts_with(entry->d_name, "."));
+}
+
+void	recover_full_path(t_array *list, char *dir_path)
+{
+	size_t	i;
+	t_token	*entry;
+
+	if (!ft_strchr(dir_path, '/'))
+		return ;
+	i = 0;
+	while (i < list->size)
+	{
+		entry = list->data[i];
+		string_insert(entry->value, dir_path, 0);
+		string_insert(entry->mask, dir_path, 0);
+		i++;
+	}
+}
+
+void	append_trailing_slash(void	*token_ptr)
+{
+	t_token	*token;
+
+	token = token_ptr;
+	string_append(token->value, "/");
+	string_append(token->mask, "1");
+}
+
+bool	trim_trailing_slash(t_token *pattern)
+{
+	t_string	*string;
+	ssize_t		i;
+
+	string = pattern->value;
+	i = string->size - 1;
+	while (i >= 0 && string->data[i] == '/')
+		i--;
+	if (i == (ssize_t)string->size - 1)
+		return (false);
+	i++;
+	string_segment_remove(pattern->value, i, string->size - i);
+	string_segment_remove(pattern->mask, i, string->size - i);
+	return (true);
+}
+
 void double_assign(char **a, char **b, char *c, char *d)
 {
     *a = c;
     *b = d;
 }
 
-int matches_pattern(char *pattern, char *str)
+int matches_pattern(char *pattern_start, char *mask, char *str)
 {
     char *star;
     char *ss;
+	char *pattern;
 
+	pattern = pattern_start;
     double_assign(&star, &ss, NULL, NULL);
     while (*str)
-    {
-        if (*pattern == *str)
-            double_assign(&pattern, &str, pattern + 1, str + 1);
-        else if (*pattern == '*')
-        {
-            while (*(pattern + 1) == '*')
+    {	
+		if (*pattern == '*' && mask[pattern - pattern_start] != '2')
+		{
+            while (*(pattern + 1) == '*' && mask[(pattern + 1) - pattern_start] != '2')
                 pattern++;
             double_assign(&star, &ss, pattern++, str);
         }
+		else if (*pattern == *str)
+            double_assign(&pattern, &str, pattern + 1, str + 1);
         else if (star)
             double_assign(&pattern, &str, star + 1, ++ss);
         else
             return 0;
     }
-    while (*pattern == '*')
+    while (*pattern == '*' && mask[pattern - pattern_start] != '2')
         pattern++;
     return !*pattern;
 }
 
-t_array *list_files(char *pattern) {
-    t_array *found_files;
-    char *dir_path;
-    struct dirent *entry;
+void	*list_dentries(t_token *pattern, char *dir_path, int target_type)
+{
+	t_array	*list;
+	struct dirent *entry;
     DIR *dir;
 
-    dir_path = ".";
-    if (ft_strchr(pattern, '/'))
-    {
-        dir_path = pattern;
-        *ft_strrchr(dir_path, '/') = '\0';
-        pattern = dir_path + ft_strlen(dir_path) + 1;
-    }
+	list = track_malloc(sizeof(t_array));
+	array_init(list);
     dir = opendir(dir_path);
-    // TODO: if dir == NULL??
 	if (dir == NULL)
-		return NULL;
-	found_files = track_malloc(sizeof(t_array));
-    array_init(found_files);
-    while (true)
+		return (list);
+	while (true)
     {
         entry = readdir(dir);
         if (entry == NULL)
             break;
-		//TODO: track strdup
-        if (matches_pattern(pattern, entry->d_name))
-            array_push(found_files, ft_strdup(entry->d_name));
+		if (!target_entry_type(entry, target_type))
+			continue ;
+		if (matches_pattern(pattern->value->data,
+					pattern->mask->data, entry->d_name))
+			array_push(list, token_init(0, entry->d_name));
     }
-    closedir(dir);
-	if (found_files->size == 0)
+	closedir(dir);
+	return (list);
+}
+
+t_array *list_files(t_token *pattern)
+{
+    t_array	*found_dentries;
+    char	*dir_path;
+	int		target_type;
+
+	pattern_update_mask(pattern);
+	token_remove_quotes(pattern);
+	target_type = DENTRY_VISIBLE;
+	target_type |= DENTRY_DIRECTORY * trim_trailing_slash(pattern);
+    dir_path = pattern_extract_dir_path(pattern);
+	target_type |= DENTRY_HIDDEN * (pattern->value->data[0] == '.');
+	found_dentries = list_dentries(pattern, dir_path, target_type);
+	recover_full_path(found_dentries, dir_path);
+	resource_free(pattern);
+	if (found_dentries->size == 0)
+	{
+		resource_free(found_dentries);
 		return (NULL);
-    return found_files;
+	}
+	if (target_type & DENTRY_DIRECTORY)
+		array_do(found_dentries, append_trailing_slash);
+    return (found_dentries);
 }
 
 t_array	*token_expand_pathname(t_token *token)
 {
 	t_array	*filenames;
-	t_token	*new_token;
-	size_t	i;
 
 	if (ft_strchr(token->value->data, '*') == NULL)
 		return (NULL);
-	//TODO: track strdup
-	filenames = list_files(ft_strdup(token->value->data));
+	filenames = list_files(token_copy(token));
 	if (filenames == NULL)
 		return (NULL);
-	i = 0;
-	while (i < filenames->size)
-	{
-		new_token = token_init(token->type, (char *)filenames->data[i]);
-		ft_memset(new_token->mask->data, '1', new_token->mask->size);
-		filenames->data[i] = new_token;
-		i++;
-	}
 	return (filenames);
 }
 
@@ -358,67 +486,73 @@ void	array_expand_at(t_array *array, size_t index, t_array *subarray)
 	}
 }
 
-//TODO: do not expand if * is quoted;
-
-void	pathname_expansion(t_ast_node *node)
+void	expand_pattern_list(t_array *pattern_list)
 {
+	t_array	*expansion_list;
 	size_t	i;
-	t_array *expansion_list;
-	t_array	*redirects;
 
 	i = 0;
-	while (i < node->children->size)
+	while (i < pattern_list->size)
 	{
-		expansion_list = token_expand_pathname(node->children->data[i]);
+		expansion_list = token_expand_pathname(pattern_list->data[i]);
 		if (expansion_list)
 		{
-			array_expand_at(node->children, i, expansion_list);
+			array_expand_at(pattern_list, i, expansion_list);
 			i += expansion_list->size;
 		}
 		else
 			i++;
 	}
+}
+
+void	pathname_expansion(t_ast_node *node)
+{
+	size_t	i;
+	t_array	*redirects;
+
+	expand_pattern_list(node->children);
 	i = 0;
 	while (i < node->redirect_list->size)
 	{
 		redirects = node->redirect_list->data[i];
 		if (redirects->size == 1)
-		{
-			expansion_list = token_expand_pathname(redirects->data[0]);
-			if (expansion_list)
-				array_expand_at(redirects, 0, expansion_list);
-		}
+			expand_pattern_list(redirects);
 		i++;
 	}
 }
 
-void token_remove_quotes(void *token_ptr)
+bool	remove_quotes(t_token *token)
 {
-	t_token *token;
-	char 	in_quote;
-	char 	c;
+	size_t	old_size;
+	char	in_quote;
+	char	c;
 	char	m;
 
-	token = token_ptr;
-	token_peek_reset(token);
+	old_size = token->value->size;
+	in_quote = '\0';
 	while (true)
 	{
 		token_peek(token, &c, &m);
 		if (c == '\0')
 			break;
 		if (in_quote == '\0' && m == '0' && (c == '"' || c == '\''))
-		{
-			in_quote = c;
-			token_segment_remove(token, token->value->peek, 1);
-		}
+			in_quote = token_slice_char_at_peek(token);
 		else if (in_quote == c && m == '0')
-		{
-			in_quote = '\0';
-			token_segment_remove(token, token->value->peek, 1);
-		}
+			in_quote = token_slice_char_at_peek(token) != in_quote;
 		else
 			token_peek_advance(token);
 	}
+	return (token->value->size != old_size);
+}
+
+void token_remove_quotes(void *token_ptr)
+{
+	t_token	*token;
+	
+	token = token_ptr;
+	token_peek_reset(token);
+	if (remove_quotes(token))
+		token->mask->data[0] = '2';
 }
 
 void	quote_removal(t_ast_node *node)

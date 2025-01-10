@@ -1,7 +1,6 @@
 # temp files
 .*.swp
 .*.swo
-.objects
 
 # executable
 minishell
@@ -11,6 +10,7 @@ minishell
 *.d
 
 # Object files
+.objects
 *.o
 *.ko
 *.obj
