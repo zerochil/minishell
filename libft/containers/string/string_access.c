@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/21 22:32:58 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/29 12:36:07 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/10 17:09:05 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ char	string_at(t_string *string, size_t index)
 	return (string->data[index]);
 }
 
-int	string_match(t_string *string, char *target, int cmp(char *, char *), size_t start)
+int	string_match(t_string *string, char *target, int (*cmp)(const char *, const char *), size_t start)
 {
 	if (string == NULL || start > string->size)
 	{

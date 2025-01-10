@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 15:17:55 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/10 10:00:42 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/10 17:14:41 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,9 +46,7 @@ bool	is_delimiter(t_string *line, t_string *delimiter)
 {
 	if (line->size == 1 && string_peek(line) == '\n')
 		return (false);
-	if (line->size > delimiter->size)
-		return (string_match(delimiter, line->data, 0));
-	return (string_match(line, delimiter->data, 0));
+	return (string_match(line, delimiter->data, ft_strcmp, 0));
 }
 
 void	expand_parameters(t_string *string)
