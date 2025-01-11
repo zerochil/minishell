@@ -217,11 +217,44 @@ int execute_command(t_ast_node *node)
 
 int execute_subshell(t_ast_node *node)
 {
-	// (cat; io) < file;
-	// hanndle redirection
-	// and dup redirection
-	// then call execute_command_list
-	return (execute_compound_command(node));
+	pid_t pid;
+	int status;
+	int fd_out;
+	int fd_in;
+
+	fd_out = -1;
+	fd_in = -1;
+	pid = fork();
+	if (pid == -1)
+	{
+		perror("minishell");
+		error(NULL);
+	}
+	else if (pid == 0)
+	{
+		if (handle_redirection(node->redirect_list, &fd_out, &fd_in) == -1)
+		{
+			destroy_context();
+			exit(1);
+		}
+		if (fd_out != -1)
+		{
+			dup2(fd_out, STDOUT_FILENO);
+			close(fd_out);
+		}
+		if (fd_in != -1)
+		{
+			dup2(fd_in, STDIN_FILENO);
+			close(fd_in);
+		}
+		status = execute_compound_command(array_get(node->children, 0));
+		destroy_context();
+		exit(status);
+	}
+	waitpid(pid, &status, 0);
+	if (WIFEXITED(status))
+		return (WEXITSTATUS(status));
+	return (WTERMSIG(status) + 128);
 }
 
 char **get_arg_list(t_array *tokens)

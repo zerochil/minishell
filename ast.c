@@ -23,13 +23,13 @@ bool	check_syntax_error(bool condition, char *message)
 	return false;
 }
 
-t_ast_node *create_ast_node(t_array *array, t_ast_type type)
+t_ast_node *create_ast_node(t_array *children, t_ast_type type)
 {
 	t_ast_node *node;
 
 	node = track_malloc(sizeof(t_ast_node));
 	node->type = type;
-	node->children = array;
+	node->children = children;
 	node->redirect_list = NULL;
 	node->error_message = "";
 	return node;
@@ -180,6 +180,7 @@ t_ast_node	*command(t_array *tokens)
   
 t_ast_node *subshell(t_array *tokens)
 {
+	t_ast_node *children_node;
 	t_ast_node *node;
 	t_token *token;
 
@@ -192,6 +193,8 @@ t_ast_node *subshell(t_array *tokens)
 		return NULL;
 	array_shift(tokens);
 	node->type = AST_SUBSHELL;
+	children_node = array_get(node->children, 0);
+	children_node->type = AST_COMPOUND_COMMAND;
 	node->redirect_list = redirect_list(tokens);
 	return node;
 }

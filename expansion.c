@@ -395,9 +395,9 @@ int matches_pattern(char *pattern_start, char *mask, char *str)
         }
 		else if (*pattern == *str)
             double_assign(&pattern, &str, pattern + 1, str + 1);
-        else if (star)
+		else if (star)
             double_assign(&pattern, &str, star + 1, ++ss);
-        else
+		else
             return 0;
     }
     while (*pattern == '*' && mask[pattern - pattern_start] != '2')
