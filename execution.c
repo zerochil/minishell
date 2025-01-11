@@ -1,6 +1,4 @@
 #include "execution.h"
-#include "builtins.h"
-#include "env.h"
 
 void execution(t_array *ast_root_list)
 {
@@ -70,10 +68,73 @@ int execute_compound_command(t_ast_node *node)
 	return (last_exit_status);
 }
 
+char *get_command_name(t_ast_node *command_node)
+{
+	char *command_name;
+	t_token *token;
 
-void fork_and_execute(t_array *commands, int index, t_pipeline_context *pipeline_context)
+	if (command_node->type == AST_SIMPLE_COMMAND)
+	{
+		token = array_get(command_node->children, 0);
+		if (token == NULL)
+			return (NULL);
+		command_name = token->value->data;
+	}
+	else
+		error("get_command_name: error");
+	return (command_name);
+}
+
+
+
+int execute_single_command(t_ast_node *command_node)
+{
+
+	char *command_name;
+	pid_t pid;
+	int status;
+
+	if (command_node->type == AST_SUBSHELL)
+		return (execute_subshell(command_node));
+	else if (command_node->type == AST_SIMPLE_COMMAND)
+	{
+		command_name = get_command_name(command_node);
+		if (command_name == NULL || is_builtin(command_name))
+			return (execute_simple_command(command_node));
+		else
+		{
+			pid = fork();
+			if (pid == -1)
+			{
+				perror("minishell");
+				error(NULL);
+			}
+			else if (pid > 0)
+			{
+				waitpid(pid, &status, 0);
+				if (WIFEXITED(status))
+					return (WEXITSTATUS(status));
+				else if (WIFSIGNALED(status))
+					return (WTERMSIG(status) + 128);
+			}
+			else if (pid == 0)
+			{
+				if (command_node->type == AST_SIMPLE_COMMAND)
+				{
+					return (execute_simple_command(command_node));
+				}
+			}
+		}
+	}
+	else
+		error("execute_single_command: error");
+	return (-1);
+}
+
+void fork_and_execute(t_array *commands, size_t index, t_pipeline_context *pipeline_context)
 {
 	pid_t pid;
+	int status;
 
 	pid = fork();
 	if (pid == -1)
@@ -88,20 +149,19 @@ void fork_and_execute(t_array *commands, int index, t_pipeline_context *pipeline
 		if (pipeline_context->read_end != STDIN_FILENO)
 		{
 			dup2(pipeline_context->read_end, STDIN_FILENO);
-			close(pipeline_context->pipe.read);
+			close(pipeline_context->read_end);
 		}
 		if (pipeline_context->write_end != STDOUT_FILENO)
 		{
 			dup2(pipeline_context->write_end, STDOUT_FILENO);
-			close(pipeline_context->pipe.write);
+			close(pipeline_context->write_end);;
 		}
-		close(pipeline_context->pipe.read);
-		close(pipeline_context->pipe.write);
-		exit(execute_command(array_get(commands, index)));
+		if (index == 0)
+			close(pipeline_context->pipe.read);
+		status = execute_command(array_get(commands, index));
+		destroy_context();
+		exit(status);
 	}
-	// 
-	// cat | ls
-	//
 }
 
 int execute_pipeline(t_ast_node *node)
@@ -113,28 +173,23 @@ int execute_pipeline(t_ast_node *node)
 
 	commands = node->children;
 	if (commands->size == 1)
-	{
-		// TODO: if is not built-in, you should fork;
-		return (execute_command(array_get(commands, 0)));
-	}
+		return (execute_single_command(array_get(commands, 0)));
 	index = 0;
 	while (index < commands->size)
 	{
-		//TODO: check if command is found first, otherwise error, index++;
 		if (index < commands->size - 1)
+		{
 			if (pipe((int *)&pipeline_context.pipe) == -1)
 			{
 				perror("minishell");
 				error(NULL);
 			}
+		}
 		pipeline_context.write_end = pipeline_context.pipe.write;
 		if (index == 0)
 			pipeline_context.read_end = STDIN_FILENO;
 		if (index == commands->size - 1)
 			pipeline_context.write_end = STDOUT_FILENO;
-		// pipe_in
-		// pipe_out
-		//    child1 -> write1
 		fork_and_execute(commands, index, &pipeline_context);
 		if (pipeline_context.read_end != STDIN_FILENO)
 			close(pipeline_context.read_end);
@@ -187,11 +242,80 @@ char **get_arg_list(t_array *tokens)
 	return (args);
 }
 
+char *get_command_path(char *command_name)
+{
+	char *path;
+	char *path_env;
+	char **path_list;
+	size_t i;
+	char command_path[PATH_MAX];
+
+	if (ft_strchr(command_name, '/') != NULL)
+		return (command_name);
+	path_env = env_get("PATH");
+	if (path_env == NULL)
+		return (command_name);
+	path_list = ft_split(path_env, ':');
+	resource_track(path_list, free_strings);
+	i = 0;
+	while (path_list[i])
+	{
+		command_path[0] = '\0';
+		ft_strlcat(command_path, path_list[i], sizeof(command_path));
+		ft_strlcat(command_path, "/", sizeof(command_path));
+		ft_strlcat(command_path, command_name, sizeof(command_path));
+		if (access(command_path, F_OK) == 0)
+		{
+			path = ft_strdup(command_path);
+			resource_track(path, free);
+			return (path);
+		}
+		i++;
+	}
+	return (NULL);
+}
+
+int execute_external(t_command_context *command_context)
+{
+	char *command_path;
+
+	// TODO: if dup2 fails??
+	dup2(command_context->fd_in, STDIN_FILENO);
+	dup2(command_context->fd_out, STDOUT_FILENO);
+	command_path = get_command_path(command_context->args[0]);
+	if (command_path == NULL)
+	{
+		report_error("minishell: command not found");
+		return (127);
+	}
+	command_context->args[0] = command_path;
+	execve(command_context->args[0], command_context->args, command_context->envp);
+	perror("minishell: external");
+	return (127);
+}
+
+int execute_builtin(char **args, int out_fd)
+{
+	builtin_t *builtins;
+	int i;
+
+	builtins = get_builtins_instance();
+	i = 0;
+	while (builtins[i].name)
+	{
+		if (ft_strcmp(builtins[i].name, args[0]) == 0)
+			return (builtins[i].function(args, out_fd));
+		i++;
+	}
+	return (-1);
+}
+
 int execute_simple_command(t_ast_node *node)
 {
 	t_command_context command_context;
 	int fd_out;
 	int fd_in;
+	int status;
 
 	fd_out = -1;
 	fd_in = -1;
@@ -205,14 +329,21 @@ int execute_simple_command(t_ast_node *node)
 	command_context.envp = env_get_array();
 	command_context.fd_in = fd_in;
 	command_context.fd_out = fd_out;
-	// TODO: close fds for builtin or if execve fails
-	if (is_builtin(command_context.args[0]))
-		return (execute_builtin(command_context.args, command_context.fd_out));
-	execve(command_context.args[0], command_context.args, command_context.envp);
-	perror("minishell");
-	return (127);
-}
 
+	if (command_context.args[0] != NULL)
+	{
+		if (is_builtin(command_context.args[0]))
+			status = execute_builtin(command_context.args, command_context.fd_out);
+		else
+			execute_external(&command_context);
+	}
+
+	if (fd_out != STDOUT_FILENO)
+		close(fd_out);
+	if (fd_in != STDIN_FILENO)
+		close(fd_in);
+	return (status);
+}
 
 int handle_redirection(t_array *redirection_list, int *fd_out, int *fd_in)
 {

@@ -1,11 +1,25 @@
 #ifndef EXECUTION_H
 # define EXECUTION_H
 
+#include <sys/wait.h>
+#include <limits.h>
+
+#include <stdio.h>
+#include <readline/history.h>
+#include <readline/readline.h>
+
+
 #include "ast.h"
 #include "lexer.h"
 #include "tokenizer.h"
 #include "builtins.h"
-#include <sys/wait.h>
+#include "env.h"
+#include "utils.h"
+
+
+#ifndef PATH_MAX
+# define PATH_MAX 4096
+#endif
 
 typedef struct s_pipe
 {

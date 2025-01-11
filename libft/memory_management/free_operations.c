@@ -12,19 +12,19 @@
 
 #include "memory_management.h"
 
-/*void	free_strings(void *ptr)*/
-/*{*/
-/*	char	**temp;*/
-/*	char	**strings;*/
-/**/
-/*	if (ptr == NULL)*/
-/*		return ;*/
-/*	strings = ptr;*/
-/*	temp = strings;*/
-/*	while (*temp)*/
-/*	{*/
-/*		free(*temp);*/
-/*		temp++;*/
-/*	}*/
-/*	free(strings);*/
-/*}*/
+void	free_strings(void *ptr)
+{
+	char	**temp;
+	char	**strings;
+
+	if (ptr == NULL)
+		return ;
+	strings = ptr;
+	temp = strings;
+	while (*temp)
+	{
+		free(*temp);
+		temp++;
+	}
+	free(strings);
+}

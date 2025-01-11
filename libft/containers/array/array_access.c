@@ -28,6 +28,8 @@ void	*array_peek_last(t_array *array)
 
 void *array_get(t_array *array, size_t index)
 {
+	if (array->size == 0)
+		return (NULL);
 	if (!array || index >= array->size)
 	{
 		ft_putendl_fd("Error: array_get", 2);

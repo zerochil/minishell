@@ -239,7 +239,7 @@ t_ast_node *simple_command(t_array *tokens)
 		}
 		break;
 	}
-	if (check_syntax_error(argument_list->size == 0, ft_strjoin(ERR_WORD_OR_REDIR": ", get_token_symbol(token->type))))
+	if (check_syntax_error(argument_list->size == 0, ERR_WORD_OR_REDIR))
 		return NULL;
 	return create_ast_node(argument_list, AST_SIMPLE_COMMAND);
 }

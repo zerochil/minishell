@@ -95,4 +95,7 @@ void						resource_transfer(void *resource_pointer,
 
 int							manager_is_in_scope(t_rm_node *manager);
 
+
+void						free_strings(void *ptr);
+
 #endif

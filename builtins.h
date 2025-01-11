@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include "libft/libft.h"
 #include "env.h"
+#include "utils.h"
 
 typedef struct s_builtin
 {
@@ -23,9 +24,6 @@ int	builtin_env(char **args, int out_fd);
 int builtin_exit(char **args, int out_fd);
 int builtin_echo(char **args, int out_fd);
 
-void env_set(char *var);
-void env_unset(char *var);
-char *env_get(char *key);
-char **env_get_array();
+builtin_t *get_builtins_instance();
 
 #endif

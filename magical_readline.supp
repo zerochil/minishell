@@ -1,0 +1,29 @@
+{
+	<generalized_readline_leak>
+	Memcheck:Leak
+	...
+	fun:tokenize
+	...
+}
+
+
+
+{
+	<generalized_readline_leak>
+	Memcheck:Leak
+	...
+	fun:rl_redisplay
+}
+{
+	<generalized_readline_leak>
+	Memcheck:Leak
+	...
+	fun:readline_internal_setup
+}
+{
+	<generalized_readline_leak>
+	Memcheck:Leak
+	...
+	fun:readline
+	...
+}

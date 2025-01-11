@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "env.h"
 
-
 builtin_t *get_builtins_instance()
 {
 	static builtin_t builtins[] = {
@@ -35,22 +34,6 @@ int is_builtin(char *name)
 		i++;
 	}
 	return (0);
-}
-
-int execute_builtin(char **args, int out_fd)
-{
-	builtin_t *builtins;
-	int i;
-
-	builtins = get_builtins_instance();
-	i = 0;
-	while (builtins[i].name)
-	{
-		if (ft_strcmp(builtins[i].name, args[0]) == 0)
-			return (builtins[i].function(args, out_fd));
-		i++;
-	}
-	return (-1);
 }
 
 int	builtin_export_add(char **args)
@@ -105,10 +88,21 @@ int	builtin_exit(char **args, int out_fd)
 {
 	(void)out_fd;
 	// bash: exit: eruwehriw21: numeric argument required 
-	manager_free_everything();
+	int exit_status;
+
+	exit_status = 0;
 	if (args[1])
-		exit(ft_atoi(args[1]));
-	exit(0);
+	{
+		if (ft_isnumber(args[1]) == 0)
+		{
+			ft_putendl_fd("exit: numeric argument required", 2);
+			exit_status = 2;
+		}
+		else
+			exit_status = ft_atoi(args[1]);
+	}
+	destroy_context();
+	exit(exit_status);
 }
 
 
