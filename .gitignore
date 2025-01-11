@@ -1,6 +1,7 @@
 # temp files
 .*.swp
 .*.swo
+vgcore.*
 
 # executable
 minishell

@@ -130,6 +130,19 @@ int	main()
 	t_array		*list;
 
 	string_init(&input);
+	if (isatty(0) == 0)
+	{
+		line = get_next_line(0);
+		if (ft_strchr(line, '\n'))
+			*ft_strchr(line, '\n') = '\0';
+		string_set(&input, line);
+		tokens = tokenize(&input);
+		list = generate_ast(tokens);
+		array_do(list, handle_expansions);
+		int status = execution(list);
+		manager_free_everything();
+		exit(status);
+	}
 	while (1)
 	{
 		line = readline("minishell> ");
@@ -141,6 +154,7 @@ int	main()
 		list = generate_ast(tokens);
 		array_do(list, handle_expansions);
 		execution(list);
+		free(line);
 	}
 	rl_clear_history();
 	manager_free_everything();

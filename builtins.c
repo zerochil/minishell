@@ -113,7 +113,7 @@ int	builtin_echo(char **args, int out_fd)
 
 	newline_flag = 0;
 	i = 1;
-	if (args[1] && ft_strcmp(args[1], "-n") == 0)
+	while (args[i] && ft_strncmp(args[i], "-n", strlen("-n")) == 0)
 	{
 		newline_flag = 1;
 		i++;

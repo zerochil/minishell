@@ -1,8 +1,9 @@
 #include "execution.h"
 
-void execution(t_array *ast_root_list)
+int execution(t_array *ast_root_list)
 {
 	t_ast_node *ast_root;
+	int status;
 
 	while (true)
 	{
@@ -12,11 +13,13 @@ void execution(t_array *ast_root_list)
 		if (ast_root->children == NULL)
 		{
 			report_error(ast_root->error_message);
+			status = 2;
 			continue;
 		}
-		execute_complete_command(ast_root);
+		status = execute_complete_command(ast_root);
 		// TODO: set $?
 	}
+	return (status);
 }
 
 int execute_complete_command(t_ast_node *node)
@@ -156,7 +159,7 @@ void fork_and_execute(t_array *commands, size_t index, t_pipeline_context *pipel
 			dup2(pipeline_context->write_end, STDOUT_FILENO);
 			close(pipeline_context->write_end);;
 		}
-		if (index == 0)
+		if (index < commands->size - 1)
 			close(pipeline_context->pipe.read);
 		status = execute_command(array_get(commands, index));
 		destroy_context();

@@ -49,7 +49,7 @@ typedef struct s_context
 
 } t_context;
 
-void execution(t_array *ast_root_list);
+int execution(t_array *ast_root_list);
 int execute_ast_node(t_ast_node *node);
 int execute_complete_command(t_ast_node *node);
 int execute_compound_command(t_ast_node *node);
