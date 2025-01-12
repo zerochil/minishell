@@ -9,15 +9,12 @@ int match_key(void *element_ptr, void *target_ptr)
 {
 	char *element;
 	char *target;
-	int equal_sign_index;
 
-	// TODO: mn be3d man tgheda
 	element = (char *)element_ptr;
 	target = (char *)target_ptr;
-	equal_sign_index = ft_strchr(element, '=') - element;
-	if (equal_sign_index < 0)
-		return (ft_strcmp(element, target) == 0);
-	return (ft_strncmp(element, target, equal_sign_index) == 0);
+	if (ft_strchr(element, '='))
+		return (ft_strncmp(element, target, ft_strcspn(element, "=")) == 0);
+	return (ft_strcmp(element, target) == 0);
 }
 
 void set_default_env_vars(t_array *environment)
@@ -79,19 +76,14 @@ t_array *get_environment_instance()
 void env_set(char *var)
 {
 	t_array *environment;
-	int i;
-	char *tmp;
 	char *env_var;
+	char *key;
 
 	manager_scope_begin("environment");
 	environment = get_environment_instance();
-	i = array_index_of(environment, var, match_key);
-	if (i != -1)
-	{
-		tmp = array_get(environment, i);
-		array_remove(environment, i);
-		resource_free(tmp);
-	}
+	key = ft_strndup(var, ft_strcspn(var, "="));
+	env_unset(key);
+	free(key);
 	env_var = ft_strdup(var);
 	resource_track(env_var, free);
 	array_push(environment, env_var);
@@ -99,7 +91,7 @@ void env_set(char *var)
 	manager_scope_end();
 }
 
-void env_unset(char *var)
+void env_unset(char *key)
 {
 	t_array *environment;
 	char *tmp;
@@ -107,7 +99,7 @@ void env_unset(char *var)
 
 	manager_scope_begin("environment");
 	environment = get_environment_instance();
-	i = array_index_of(environment, var, match_key);
+	i = array_index_of(environment, key, match_key);
 	if (i != -1)
 	{
 		tmp = array_get(environment, i);

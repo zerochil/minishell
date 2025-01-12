@@ -46,7 +46,6 @@ int	builtin_export_add(char **args)
 	int identifier_len;
 	while (args[i])
 	{
-		// TODO: check if valid identifier
 		if (ft_strchr(args[i], '='))
 		{
 			equal_pos = ft_strchr(args[i], '=');

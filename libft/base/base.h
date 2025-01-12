@@ -60,6 +60,7 @@ int					ft_tolower(int c);
 char				*ft_strchr(const char *s, int c);
 char				*ft_strrchr(const char *s, int c);
 char				*ft_strdup(const char *s1);
+char				*ft_strndup(const char *s1, size_t n);
 char				*ft_substr(char const *s, unsigned int start, size_t len);
 char				*ft_strjoin(char const *s1, char const *s2);
 char				*ft_strjoinx(char **str);
@@ -69,6 +70,7 @@ char				*ft_strnstr(const char *haystack, const char *needle,
 						size_t len);
 char				**ft_split(char const *s, char c);
 size_t				ft_strlen(const char *s);
+size_t				ft_strnlen(const char *s, size_t maxlen);
 size_t				ft_strlcpy(char *dst, const char *src, size_t dstsize);
 size_t				ft_strlcat(char *dst, const char *src, size_t dstsize);
 char				*ft_strcat(char *dst, const char *src);

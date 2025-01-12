@@ -24,3 +24,17 @@ char	*ft_strdup(const char *s1)
 	ft_memcpy(string, s1, len);
 	return (string);
 }
+
+char	*ft_strndup(const char *s1, size_t n)
+{
+	size_t	len;
+	char	*string;
+
+	len = ft_strnlen(s1, n);
+	string = malloc(len + 1);
+	if (!string)
+		return (NULL);
+	ft_memcpy(string, s1, len);
+	string[len] = '\0';
+	return (string);
+}
