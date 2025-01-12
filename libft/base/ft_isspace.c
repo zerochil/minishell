@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ends_with.c                                        :+:      :+:    :+:   */
+/*   ft_isspace.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,27 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../libft.h"
+#include "base.h"
 
-int	ends_with(const char *str, const char *suffix)
+int	ft_isspace(int c)
 {
-	size_t	str_len;
-	size_t	suffix_len;
-
-	if (str == NULL || suffix == NULL)
-		return (0);
-	str_len = ft_strlen(str);
-	suffix_len = ft_strlen(suffix);
-	return (suffix_len <= str_len && ft_strcmp(str + str_len - suffix_len,
-			suffix) == 0);
-}
-
-int	starts_with(const char *str, const char *prefix)
-{
-	size_t	prefix_len;
-
-	if (str == NULL || prefix == NULL)
-		return (0);
-	prefix_len = ft_strlen(prefix);
-	return (ft_strncmp(str, prefix, prefix_len) == 0);
+	return (c == ' ' || (c >= '\t' && c <= '\r'));
 }

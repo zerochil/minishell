@@ -45,6 +45,8 @@ int					ft_isalnum(int c);
 int					ft_isascii(int c);
 int					ft_isprint(int c);
 int					ft_isnumber(char *str);
+int					ft_isspace(int c);
+int					ft_numberlen(char *str);
 
 int					ft_atoi(const char *str);
 char				*ft_itoa(int n);
@@ -85,6 +87,9 @@ int					ft_lstsize(t_list *lst);
 
 int					ends_with(const char *str, const char *suffix);
 int					starts_with(const char *str, const char *prefix);
+
+size_t				ft_strspn(const char *s, const char *accept);
+size_t				ft_strcspn(const char *s, const char *reject);
 
 
 #endif

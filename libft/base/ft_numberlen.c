@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_isdigit.c                                       :+:      :+:    :+:   */
+/*   ft_numberlen.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rrochd <rrochd@student.1337.ma             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -12,23 +12,22 @@
 
 #include "base.h"
 
-int	ft_isnumber(char *str)
+int	ft_numberlen(char *str)
 {
-	int is_number;
+	int	len;
 
-	is_number = 0;
+	len = 0;
 	while (ft_isspace(*str))
 		str++;
-	if (*str == '-' || *str == '+')
+	if (*str == '+' || *str == '-')
 		str++;
-	while (*str && ft_isdigit(*str))
-	{
-		is_number = 1;
+	while (*str == '0')
 		str++;
-	}
-	while (ft_isspace(*str))
+	while (str[len] && ft_isdigit(str[len]))
+		len++;
+	while (ft_isspace(str[len]))
 		str++;
-	if (*str)
-		return (0);
-	return (is_number);
+	if (str[len] != '\0')
+		return (-1);
+	return len;
 }

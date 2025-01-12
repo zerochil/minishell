@@ -11,6 +11,7 @@ int match_key(void *element_ptr, void *target_ptr)
 	char *target;
 	int equal_sign_index;
 
+	// TODO: mn be3d man tgheda
 	element = (char *)element_ptr;
 	target = (char *)target_ptr;
 	equal_sign_index = ft_strchr(element, '=') - element;

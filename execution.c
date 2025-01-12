@@ -322,7 +322,7 @@ int execute_external(t_command_context *command_context)
 	if (command_path == NULL)
 	{
 		report_error("minishell: command not found");
-		return (127);
+		exit(127);
 	}
 	command_context->args[0] = command_path;
 	execve(command_context->args[0], command_context->args, command_context->envp);

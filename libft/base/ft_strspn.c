@@ -1,34 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_isdigit.c                                       :+:      :+:    :+:   */
+/*   ft_strspn.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rrochd <rrochd@student.1337.ma             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/08 21:37:18 by rrochd            #+#    #+#             */
-/*   Updated: 2024/09/10 09:59:40 by rrochd           ###   ########.fr       */
+/*   Created: 2024/09/09 06:31:56 by rrochd            #+#    #+#             */
+/*   Updated: 2024/09/10 09:59:44 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "base.h"
 
-int	ft_isnumber(char *str)
+size_t	ft_strspn(const char *s, const char *accept)
 {
-	int is_number;
+	size_t	i;
 
-	is_number = 0;
-	while (ft_isspace(*str))
-		str++;
-	if (*str == '-' || *str == '+')
-		str++;
-	while (*str && ft_isdigit(*str))
-	{
-		is_number = 1;
-		str++;
-	}
-	while (ft_isspace(*str))
-		str++;
-	if (*str)
-		return (0);
-	return (is_number);
+	i = 0;
+	while (s[i] && ft_strchr(accept, s[i]))
+		i++;
+	return (i);
+}
+
+size_t	ft_strcspn(const char *s, const char *reject)
+{
+	size_t	i;
+
+	i = 0;
+	while (s[i] && !ft_strchr(reject, s[i]))
+		i++;
+	return (i);
 }

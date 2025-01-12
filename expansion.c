@@ -460,6 +460,8 @@ t_array	*token_expand_pathname(t_token *token)
 {
 	t_array	*filenames;
 
+	if (token->type == lexem_get_type("HERE_DOCUMENT"))
+		return (NULL);
 	if (ft_strchr(token->value->data, '*') == NULL)
 		return (NULL);
 	filenames = list_files(token_copy(token));

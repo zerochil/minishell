@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include "builtins.h"
 #include <stdio.h>
+#include "utils.h"
 #include "env.h"
 
 builtin_t *get_builtins_instance()
@@ -41,9 +42,22 @@ int	builtin_export_add(char **args)
 	int i;
 
 	i = 1;
+	char *equal_pos;
+	int identifier_len;
 	while (args[i])
 	{
-		env_set(args[i]);
+		// TODO: check if valid identifier
+		if (ft_strchr(args[i], '='))
+		{
+			equal_pos = ft_strchr(args[i], '=');
+		    identifier_len = equal_pos - args[i];
+			if (is_valid_string(is_valid_identifier, args[i], identifier_len) == 0)
+				ft_putendl_fd("export: not a valid identifier", 2);
+			else
+				env_set(args[i]);
+		}
+		else
+			env_set(args[i]);
 		i++;
 	}
 	return (0);
@@ -87,13 +101,17 @@ int	builtin_export(char **args, int out_fd)
 int	builtin_exit(char **args, int out_fd)
 {
 	(void)out_fd;
-	// bash: exit: eruwehriw21: numeric argument required 
 	int exit_status;
 
+	if (args[1] && args[2])
+	{
+		ft_putendl_fd("exit: too many arguments", 2);
+		return (1);
+	}
 	exit_status = 0;
 	if (args[1])
 	{
-		if (ft_isnumber(args[1]) == 0)
+		if (ft_isnumber(args[1]) == 0 || ft_numberlen(args[1]) > 20)
 		{
 			ft_putendl_fd("exit: numeric argument required", 2);
 			exit_status = 2;
@@ -105,15 +123,14 @@ int	builtin_exit(char **args, int out_fd)
 	exit(exit_status);
 }
 
-
 int	builtin_echo(char **args, int out_fd)
 {
 	int i;
 	int newline_flag;
 
-	newline_flag = 0;
 	i = 1;
-	while (args[i] && ft_strncmp(args[i], "-n", strlen("-n")) == 0)
+	newline_flag = 0;
+	while (starts_with(args[i], "-n") && ft_strspn(args[i]+1, "n") == ft_strlen(args[i]+1))
 	{
 		newline_flag = 1;
 		i++;
