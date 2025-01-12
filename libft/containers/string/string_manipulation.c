@@ -59,7 +59,9 @@ void	string_append(t_string *string, const char *text)
 {
 	size_t	text_len;
 
-	if (string == NULL || text == NULL)
+	if (text == NULL)
+		return ;
+	if (string == NULL)
 	{
 		report_error("string_append: error");
 		return ;

@@ -39,27 +39,20 @@ int is_builtin(char *name)
 
 int	builtin_export_add(char **args)
 {
-	int i;
+	int exit_status;
 
-	i = 1;
-	char *equal_pos;
-	int identifier_len;
-	while (args[i])
+	exit_status = 0;
+	args++;
+	while (*args)
 	{
-		if (ft_strchr(args[i], '='))
+		if (env_set(*args) == false)
 		{
-			equal_pos = ft_strchr(args[i], '=');
-		    identifier_len = equal_pos - args[i];
-			if (is_valid_string(is_valid_identifier, args[i], identifier_len) == 0)
-				ft_putendl_fd("export: not a valid identifier", 2);
-			else
-				env_set(args[i]);
+			exit_status = 1;
+			ft_putendl_fd("export: not a valid identifier", 2);
 		}
-		else
-			env_set(args[i]);
-		i++;
+		args++;
 	}
-	return (0);
+	return (exit_status);
 }
 
 int builtin_export_print(int out_fd)
@@ -118,6 +111,7 @@ int	builtin_exit(char **args, int out_fd)
 		else
 			exit_status = ft_atoi(args[1]);
 	}
+	//TODO: Print exit message (pipe)
 	destroy_context();
 	exit(exit_status);
 }
@@ -172,6 +166,8 @@ int	builtin_cd(char **args, int out_fd)
 		dir_path = env_get("HOME");
 		if (!dir_path)
 			return (ft_putendl_fd("cd: HOME not set", 2), 1);
+		if (*dir_path == '\0')
+			return (0);
 	}
 	if (chdir(dir_path) != 0)
 		return (perror("cd"), 1);

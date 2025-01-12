@@ -24,7 +24,11 @@ int	ft_numberlen(char *str)
 	while (*str == '0')
 		str++;
 	while (str[len] && ft_isdigit(str[len]))
+	{
+		if (INT_MAX - 1 == len)
+			return (-1);
 		len++;
+	}
 	while (ft_isspace(str[len]))
 		str++;
 	if (str[len] != '\0')

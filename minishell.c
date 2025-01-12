@@ -129,7 +129,9 @@ int	main()
 	t_array		*tokens;
 	t_array		*list;
 
+	get_environment_instance();
 	string_init(&input);
+
 	if (isatty(0) == 0)
 	{
 		line = get_next_line(0);
