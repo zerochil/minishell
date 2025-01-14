@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:33 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/07 18:17:25 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/13 20:15:09 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,8 @@
 typedef struct s_token
 {
 	int			type;
-	t_string	*value;
-	t_string	*mask;
+	char		*value;
+	t_array		*fields; //TODO: make this work! 
 }				t_token;
 
 t_array	*tokenize(t_string *input);

@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/10 17:10:22 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/14 09:40:15 by inajah           ###   ########.fr       */
 /*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
@@ -24,36 +24,104 @@ char	*get_param_value(char *param_name)
 	return (param_value);
 }
 
-void	token_peek(t_token *token, char *c, char *m)
+
+//////////////////////////////// field helper functions //////////////////////////////////////
+void	field_peek(t_field *field, char *c, char *m)
 {
-	*c = string_peek(token->value);
-	if (token->mask)
-		*m = string_peek(token->mask);
+	*c = string_peek(field->value);
+	if (field->mask)
+		*m = string_peek(field->mask);
 }
 
-void	token_peek_advance(t_token *token)
+void	field_peek_set(t_field *field, size_t peek)
 {
-	string_peek_advance(token->value);
-	if (token->mask)
-		string_peek_advance(token->mask);
+	field->value->peek = peek;
+	if (field->mask)
+		field->mask->peek = peek;
 }
 
-void	token_peek_reset(t_token *token)
+void	field_peek_advance(t_field *field)
 {
-	string_peek_reset(token->value);
-	if (token->mask)
-		string_peek_reset(token->mask);
+	string_peek_advance(field->value);
+	if (field->mask)
+		string_peek_advance(field->mask);
 }
 
-char	token_slice_char_at_peek(t_token *token)
+void	field_peek_reset(t_field *field)
+{
+	string_peek_reset(field->value);
+	if (field->mask)
+		string_peek_reset(field->mask);
+}
+
+char	field_shift_at_peek(t_field *field)
 {
 	char	c;
 
-	c = string_peek(token->value);
-	string_segment_remove(token->value, token->value->peek, 1);
-	if (token->mask)
-		string_segment_remove(token->mask, token->mask->peek, 1);
+	c = string_peek(field->value);
+	string_segment_remove(field->value, field->value->peek, 1);
+	if (field->mask)
+		string_segment_remove(field->mask, field->mask->peek, 1);
 	return (c);
+}
+
+void	field_shift(t_field *field)
+{
+	string_shift(field->value);
+	string_shift(field->mask);
+}
+
+t_field	*field_init(char *token_value, char *mask)
+{
+	t_field	*field;
+	size_t	token_value_length;
+
+	if (token_value == NULL)
+	{
+		report_error("field_init: error");
+		token_value = "";
+	}
+	field = track_malloc(sizeof(t_field));
+	field->value = track_malloc(sizeof(t_string));
+	string_init(field->value);
+	string_set(field->value, token_value);
+	field->mask = track_malloc(sizeof(t_string));
+	string_init(field->mask);
+	if (mask != NULL)
+		string_set(field->mask, mask);
+	else
+	{
+		token_value_length = ft_strlen(token_value);
+		string_ensure_capacity(field->mask, token_value_length);
+		ft_memset(field->mask->data, '0', token_value_length);
+		field->mask->size = token_value_length;
+	}
+	return (field);
+}
+///////////////////////////////// expansion utility functions ///////////////////////////////////////////////
+bool	remove_quotes_from_field(t_field *field)
+{
+	size_t	old_size;
+	char	in_quote;
+	char	c;
+	char	m;
+
+	old_size = field->value->size;
+	in_quote = '\0';
+	field_peek_reset(field);
+	while (true)
+	{
+		field_peek(field, &c, &m);
+		if (c == '\0')
+			break;
+		if (in_quote == '\0' && m == '0' && (c == '"' || c == '\''))
+			in_quote = field_shift_at_peek(field);
+		else if (in_quote == c && m == '0')
+			in_quote = field_shift_at_peek(field) != in_quote;
+		else
+			field_peek_advance(field);
+	}
+	return (field->value->size != old_size);
 }
 
 static bool	is_whitespace(char c)
@@ -66,57 +134,55 @@ static bool	is_valid_param_char(char c)
 	return (ft_isalnum(c) || c == '_');
 }
 
-void	token_update_mask(t_token *token, size_t start, size_t length,
-		size_t value_length)
+/////////////////////////////////// parameter expansion //////////////////////////
+void	field_replace(t_field *field, size_t start, size_t length,
+		char *value)
 {
 	char	*value_mask;
+	size_t	value_length;
 	
-	if (token->mask == NULL)
+	if (field->mask == NULL || value == NULL)
+	{
+		report_error("field_replace: error");
 		return ;
+	}
+	value_length = ft_strlen(value);
+	string_segment_replace(field->value, start, length, value);
 	value_mask = track_malloc((value_length + 1) * sizeof(char));
 	ft_memset(value_mask, '1', value_length);
-	string_segment_replace(token->mask, start, length, value_mask);
+	string_segment_replace(field->mask, start, length, value_mask);
 	resource_free(value_mask);
 }
 
-void	token_replace_param(t_token *token)
+void	expand_parameter(t_field *field)
 {
 	char	*param_name;
 	char	*param_value;
-	size_t	value_length;
 	size_t	start;
 
-	start = token->value->peek;
-	string_peek_advance(token->value);
-	while (is_valid_param_char(string_peek(token->value)))
-		string_peek_advance(token->value);
-	if (start + 1 == token->value->peek)
+	start = field->value->peek;
+	string_peek_advance(field->value);
+	while (is_valid_param_char(string_peek(field->value)))
+		string_peek_advance(field->value);
+	if (start + 1 == field->value->peek)
 		return ;
-	param_name = string_segment_extract(token->value, start,
-			token->value->peek - start);
+	param_name = string_segment_extract(field->value, start,
+			field->value->peek - start);
 	param_value = get_param_value(param_name + 1);
-	value_length = ft_strlen(param_value);
-	string_segment_replace(token->value, start,
-		token->value->peek - start, param_value);
-	token_update_mask(token, start, token->value->peek - start, value_length);
-	token->value->peek = start + value_length;
+	field_replace(field, start, field->value->peek - start, param_value);
+	field->value->peek = start + ft_strlen(param_value);
 }
 
-//TODO: what if the variable name starts with a digit?
-void	parameter_expansion(void *token_ptr)
+void	expand_field_parameter(t_field *field)
 {
-	t_token		*token;
-	char		in_quote;
-	char		c;
+	char c;
+	char in_quote;
 
 	in_quote = '\0';
-	token = token_ptr;
-	if (token->type == lexem_get_type("HERE_DOCUMENT"))
-		return ;
-	token_peek_reset(token);
+	field_peek_reset(field);
 	while (true)
 	{
-		c = string_peek(token->value);
+		c = string_peek(field->value);
 		if (c == '\0')
 			break ;
 		if (in_quote == '\0' && (c == '"' || c == '\''))
@@ -124,68 +190,76 @@ void	parameter_expansion(void *token_ptr)
 		else if (in_quote == c)
 			in_quote = '\0';
 		if (c == '$' && in_quote != '\'')
-			token_replace_param(token);
+			expand_parameter(field);
 		else
-			string_peek_advance(token->value);
+			string_peek_advance(field->value);
 	}
 }
-
-t_token	*token_slice(t_token *token)
+//TODO: what if the variable name starts with a digit?
+void	parameter_expansion(void *token_ptr)
 {
-	t_token	*field_token;
+	t_token		*token;
+	t_field		*field;
+
+	token = token_ptr;
+	if (token->type == lexem_get_type("HERE_DOCUMENT"))
+		return ;
+	token->fields = track_malloc(sizeof(t_array));
+	array_init(token->fields);
+	field = field_init(token->value, NULL);
+	expand_field_parameter(field);
+	array_push(token->fields, field);
+}
+
+
+
+///////////////////////////////// field splitting ////////////////////////////////
+t_field	*field_slice_up_to_peek(t_field *field)
+{
+	t_field	*new_field;
 	char	*value;
 	char	*mask;
 
-	if (token->value->peek == 0)
+	if (field->value->peek == 0)
 		return (NULL);
 
-	value = string_segment_slice(token->value, 0, token->value->peek);
-	mask = string_segment_slice(token->mask, 0, token->mask->peek);
-	field_token = token_init(token->type, value);
-	string_set(field_token->mask, mask);
-	token_peek_reset(token);
-	return (field_token);
+	value = string_segment_slice(field->value, 0, field->value->peek);
+	mask = string_segment_slice(field->mask, 0, field->mask->peek);
+	new_field = field_init(value, mask);
+	field_peek_reset(field);
+	return (new_field);
 }
 
-t_field	*field_init(int type)
+void	skip_field_splitting_chars(t_field *field)
+{
+	while (is_whitespace(string_peek(field->value))
+		&& string_peek(field->mask) == '1')
+		field_shift(field);
+}
+
+void extract_field(t_array *fields, t_field *field)
+{
+	t_field *new_field;
+
+	new_field = field_slice_up_to_peek(field);
+	if (new_field)
+		array_push(fields, new_field);
+	skip_field_splitting_chars(field);
+}
+
+void single_field_split(t_array *fields)
 {
 	t_field	*field;
-
-	field = track_malloc(sizeof(t_field));
-	field->type = type;
-	field->tokens = track_malloc(sizeof(t_array));
-	array_init(field->tokens);
-	return (field);
-}
-
-void	field_push_token(t_field *field, t_token *token)
-{
-	t_token	*field_token;
-
-	field_token = token_slice(token);
-	if (field_token)
-		array_push(field->tokens, field_token);
-	while (is_whitespace(string_peek(token->value))
-		&& string_peek(token->mask) == '1')
-	{
-		string_shift(token->value);
-		string_shift(token->mask);
-	}
-}
-
-t_field *field_splitting(t_token *token)
-{
-	t_field *field;
 	char in_quote;
 	char c;
 	char m;
 
-	field = field_init(token->type);
-	token_peek_reset(token);
+	field = array_shift(fields);
+	field_peek_reset(field);
 	in_quote = '\0';
 	while (true)
 	{
-		token_peek(token, &c, &m);
+		field_peek(field, &c, &m);
 		if (c == '\0')
 			break;
 		if (in_quote == '\0' && m == '0' && (c == '"' || c == '\''))
@@ -193,14 +267,53 @@ t_field *field_splitting(t_token *token)
 		else if (in_quote == c && m == '0')
 			in_quote = '\0';
 		if (is_whitespace(c) && m == '1' && in_quote == '\0')
-			field_push_token(field, token);
+			extract_field(fields, field);
 		else
-			token_peek_advance(token);
+			field_peek_advance(field);
 	}
-	if (token->value->size > 0)
-		array_push(field->tokens, token);
-	return (field);
+	if (field->value->size > 0)
+		array_push(fields, field);
 }
+
+bool	is_field_splitting_required(t_token *token)
+{
+	t_field *field;
+	char	*dolar_pos;
+	char	dolar;
+	char	c;
+	char	m;
+
+	dolar = '\0';
+	field = array_get(token->fields, 0);
+	dolar_pos = ft_strrchr(field->value->data, '$');
+	if (dolar_pos == NULL)
+		return (true);
+	field_peek_set(field, dolar_pos - field->value->data);
+	while (true)
+	{
+		field_peek(field, &c, &m);
+		if (c == '\0')
+			break;
+		if (c == '$' && m == '0' )
+			dolar = c;
+		else if (dolar == '$' && m == '1')
+			return (true);
+		field_peek_advance(field);
+	}
+	return (dolar == '\0');
+
+}
+
+void field_splitting(void *token_ptr)
+{
+	t_token *token;
+
+	token = token_ptr;
+	if (is_field_splitting_required(token))
+		single_field_split(token->fields);
+}
+
+/////////////////////////////// pathname expansion /////////////////////////////////
 
 void	array_merge(t_array *dest, t_array *src)
 {
@@ -214,53 +327,8 @@ void	array_merge(t_array *dest, t_array *src)
 	}
 }
 
-void	expand_redirect_list(t_ast_node *node, t_array *redirect_list)
-{
-	t_field		*field;
-	size_t		i;
 
-	array_do(node->redirect_list, parameter_expansion);
-	i = 0;
-	while (i < node->redirect_list->size)
-	{
-		field = field_splitting(node->redirect_list->data[i]);
-		array_push(redirect_list, field->tokens);
-		i++;
-	}
-	node->redirect_list = redirect_list;
-}
-
-void	expansion_and_field_splitting(t_ast_node *node)
-{
-	t_field		*field;
-	t_array		*argument_list;
-	t_array		*redirect_list;
-	size_t		i;
-
-	redirect_list = track_malloc(sizeof(t_array));
-	array_init(redirect_list);
-	if (node->type == AST_SUBSHELL)
-		return (expand_redirect_list(node, redirect_list));
-	argument_list = track_malloc(sizeof(t_array));
-	array_init(argument_list);
-	array_do(node->children, parameter_expansion);
-	i = 0;
-	while (i < node->children->size)
-	{
-		field = field_splitting(node->children->data[i]);
-		if (lexem_is_redirection(field->type))
-			array_push(redirect_list, field->tokens);
-		else
-			array_merge(argument_list, field->tokens);
-		i++;
-	}
-	node->children = argument_list;
-	node->redirect_list = redirect_list;
-}
-
-void token_remove_quotes(void *token_ptr);
-
-void	pattern_update_mask(t_token *pattern)
+void	pattern_update_mask(t_field *pattern)
 {
 	char	in_quote;
 	char	c;
@@ -282,21 +350,20 @@ void	pattern_update_mask(t_token *pattern)
 	}
 }
 
-t_token	*token_copy(t_token *token)
+t_field	*field_copy(t_field *field)
 {
-	t_token *copy;
+	t_field *copy;
 
-	if (!token)
+	if (!field)
 	{
 		report_error("token_copy: error");
 		return (NULL);
 	}
-	copy = token_init(token->type, token->value->data);
-	string_set(copy->mask, token->mask->data);
+	copy = field_init(field->value->data, field->mask->data);
 	return (copy);
 }
 
-char	*pattern_extract_dir_path(t_token *pattern)
+char	*pattern_extract_dir_path(t_field *pattern)
 {
 	char *dir_path;
 	size_t	len;
@@ -331,7 +398,7 @@ bool	target_entry_type(struct dirent *entry, char entry_type)
 void	recover_full_path(t_array *list, char *dir_path)
 {
 	size_t	i;
-	t_token	*entry;
+	t_field	*entry;
 
 	if (!ft_strchr(dir_path, '/'))
 		return ;
@@ -345,16 +412,16 @@ void	recover_full_path(t_array *list, char *dir_path)
 	}
 }
 
-void	append_trailing_slash(void	*token_ptr)
+void	append_trailing_slash(void	*field_ptr)
 {
-	t_token	*token;
+	t_field	*field;
 
-	token = token_ptr;
-	string_append(token->value, "/");
-	string_append(token->mask, "1");
+	field = field_ptr;
+	string_append(field->value, "/");
+	string_append(field->mask, "1");
 }
 
-bool	trim_trailing_slash(t_token *pattern)
+bool	trim_trailing_slash(t_field *pattern)
 {
 	t_string	*string;
 	ssize_t		i;
@@ -405,7 +472,7 @@ int matches_pattern(char *pattern_start, char *mask, char *str)
     return !*pattern;
 }
 
-void	*list_dentries(t_token *pattern, char *dir_path, int target_type)
+void	*list_dentries(t_field *pattern, char *dir_path, int target_type)
 {
 	t_array	*list;
 	struct dirent *entry;
@@ -425,20 +492,20 @@ void	*list_dentries(t_token *pattern, char *dir_path, int target_type)
 			continue ;
 		if (matches_pattern(pattern->value->data,
 					pattern->mask->data, entry->d_name))
-			array_push(list, token_init(0, entry->d_name));
+			array_push(list, field_init(entry->d_name, NULL));
     }
 	closedir(dir);
 	return (list);
 }
 
-t_array *list_files(t_token *pattern)
+t_array *list_files(t_field *pattern)
 {
     t_array	*found_dentries;
     char	*dir_path;
 	int		target_type;
 
 	pattern_update_mask(pattern);
-	token_remove_quotes(pattern);
+	remove_quotes_from_field(pattern);
 	target_type = DENTRY_VISIBLE;
 	target_type |= DENTRY_DIRECTORY * trim_trailing_slash(pattern);
     dir_path = pattern_extract_dir_path(pattern);
@@ -456,15 +523,15 @@ t_array *list_files(t_token *pattern)
     return (found_dentries);
 }
 
-t_array	*token_expand_pathname(t_token *token)
+t_array	*expand_field_pathname(int	token_type, t_field *field)
 {
 	t_array	*filenames;
 
-	if (token->type == lexem_get_type("HERE_DOCUMENT"))
+	if (token_type == lexem_get_type("HERE_DOCUMENT"))
 		return (NULL);
-	if (ft_strchr(token->value->data, '*') == NULL)
+	if (ft_strchr(field->value->data, '*') == NULL)
 		return (NULL);
-	filenames = list_files(token_copy(token));
+	filenames = list_files(field_copy(field));
 	if (filenames == NULL)
 		return (NULL);
 	return (filenames);
@@ -488,87 +555,40 @@ void	array_expand_at(t_array *array, size_t index, t_array *subarray)
 	}
 }
 
-void	expand_pattern_list(t_array *pattern_list)
+void	pathname_expansion(void *token_ptr)
 {
+	t_token *token;
 	t_array	*expansion_list;
 	size_t	i;
 
+	token = token_ptr;
 	i = 0;
-	while (i < pattern_list->size)
+	while (i < token->fields->size)
 	{
-		expansion_list = token_expand_pathname(pattern_list->data[i]);
+		expansion_list = expand_field_pathname(token->type, array_get(token->fields, i));
 		if (expansion_list)
 		{
-			array_expand_at(pattern_list, i, expansion_list);
+			array_expand_at(token->fields, i, expansion_list);
 			i += expansion_list->size;
 		}
 		else
 			i++;
 	}
 }
-
-void	pathname_expansion(t_ast_node *node)
+///////////////////////// quote removal //////////////////////////
+void single_field_quote_removal(void *field_ptr)
 {
-	size_t	i;
-	t_array	*redirects;
-
-	expand_pattern_list(node->children);
-	i = 0;
-	while (i < node->redirect_list->size)
-	{
-		redirects = node->redirect_list->data[i];
-		if (redirects->size == 1)
-			expand_pattern_list(redirects);
-		i++;
-	}
-}
-
-bool	remove_quotes(t_token *token)
-{
-	size_t	old_size;
-	char	in_quote;
-	char	c;
-	char	m;
-
-	old_size = token->value->size;
-	in_quote = '\0';
-	while (true)
-	{
-		token_peek(token, &c, &m);
-		if (c == '\0')
-			break;
-		if (in_quote == '\0' && m == '0' && (c == '"' || c == '\''))
-			in_quote = token_slice_char_at_peek(token);
-		else if (in_quote == c && m == '0')
-			in_quote = token_slice_char_at_peek(token) != in_quote;
-		else
-			token_peek_advance(token);
-	}
-	return (token->value->size != old_size);
-}
-
-void token_remove_quotes(void *token_ptr)
-{
-	t_token	*token;
+	t_field	*field;
 	
-	token = token_ptr;
-	token_peek_reset(token);
-	if (remove_quotes(token))
-		token->mask->data[0] = '2';
+	field = field_ptr;
+	if (remove_quotes_from_field(field))
+		field->mask->data[0] = '2';
 }
 
-void	quote_removal(t_ast_node *node)
+void	quote_removal(void *token_ptr)
 {
-	t_array	*tokens;
-	size_t	i;
+	t_token *token;
 
-	if (node->type == AST_SIMPLE_COMMAND)
-		array_do(node->children, token_remove_quotes);
-	i = 0;
-	while (i < node->redirect_list->size)
-	{
-		tokens = node->redirect_list->data[i];
-		array_do(tokens, token_remove_quotes);
-		i++;
-	}
+	token = token_ptr;
+	array_do(token->fields, single_field_quote_removal);
 }

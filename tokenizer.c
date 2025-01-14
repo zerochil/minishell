@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:07 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/07 18:16:39 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/14 08:32:05 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,18 +19,8 @@ t_token	*token_init(int type, char *value)
 
 	token = track_malloc(sizeof(t_token));
 	token->type = type;
-	token->value = NULL;
-	token->mask = NULL;
-	if (value)
-	{
-		token->value = track_malloc(sizeof(t_string));
-		string_init(token->value);
-		string_set(token->value, value);
-		token->mask = track_malloc(sizeof(t_string));
-		string_init(token->mask);
-		string_set(token->mask, value);
-		ft_memset(token->mask->data, '0', ft_strlen(value));
-	}
+	token->value = value;	
+	token->fields = NULL;
 	return (token);
 }
 
@@ -79,7 +69,7 @@ static t_token	*tokenize_non_word(t_string *input)
 		if (next_token == NULL)
 			token = token_init(lexem->type, NULL);
 		else
-			token = token_init(lexem->type, next_token->value->data);
+			token = token_init(lexem->type, next_token->value);
 	}
 	else
 		token = token_init(lexem->type, NULL);

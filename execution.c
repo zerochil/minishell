@@ -76,12 +76,13 @@ char *get_command_name(t_ast_node *command_node)
 	char *command_name;
 	t_token *token;
 
+	command_name = NULL;
 	if (command_node->type == AST_SIMPLE_COMMAND)
 	{
 		token = array_get(command_node->children, 0);
 		if (token == NULL)
 			return (NULL);
-		command_name = token->value->data;
+		command_name = token->value;
 	}
 	else
 		error("get_command_name: error");
@@ -271,7 +272,7 @@ char **get_arg_list(t_array *tokens)
 	while (i < tokens->size)
 	{
 		token = array_get(tokens, i);
-		args[i] = token->value->data;
+		args[i] = token->value;
 		i++;
 	}
 	args[i] = NULL;
@@ -366,7 +367,7 @@ int execute_simple_command(t_ast_node *node)
 	command_context.envp = env_get_array();
 	command_context.fd_in = fd_in;
 	command_context.fd_out = fd_out;
-
+	status = 0;
 	if (command_context.args[0] != NULL)
 	{
 		if (is_builtin(command_context.args[0]))
@@ -397,11 +398,11 @@ int handle_redirection(t_array *redirection_list, int *fd_out, int *fd_in)
 			return (report_error("minishell: ambiguous redirect"), -1);
 		token = array_shift(token_list);
 		if (token->type == lexem_get_type("REDIRECTION_IN") || token->type == lexem_get_type("HERE_DOCUMENT"))
-			open_error = open_file(token->value->data, O_RDONLY, fd_in);
+			open_error = open_file(token->value, O_RDONLY, fd_in);
 		else if (token->type == lexem_get_type("REDIRECTION_TRUNC"))
-			open_error = open_file(token->value->data, O_WRONLY | O_CREAT | O_TRUNC, fd_out);
+			open_error = open_file(token->value, O_WRONLY | O_CREAT | O_TRUNC, fd_out);
 		else if (token->type == lexem_get_type("REDIRECTION_APPEND"))
-			open_error = open_file(token->value->data, O_WRONLY | O_CREAT | O_APPEND, fd_out);
+			open_error = open_file(token->value, O_WRONLY | O_CREAT | O_APPEND, fd_out);
 		else
 			error("handle_redirection: error");
 		if (open_error == -1)

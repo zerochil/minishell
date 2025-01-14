@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/10 17:01:45 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/14 09:38:53 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,16 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 #include "execution.h"
+
+void	print_field(void *field_ptr)
+{
+	t_field	*field;
+
+	field = field_ptr;
+
+	printf("{%s}", field->value->data);
+	fflush(NULL);
+}
 
 void	print_token(void *token_ptr)
 {
@@ -38,17 +48,20 @@ void	print_token(void *token_ptr)
 		id = "EOF";
 	else
 		id = ((t_lexem *)(lexems->data[token->type - 1]))->identifier;
-	printf("[%s, %s]", id, token->value->data);
+	printf("[%s, ", id);
 	fflush(NULL);
+	array_do(token->fields, print_field);
+	printf("]");
 }
 
 void	print_redirection(void *tokens_ptr)
 {
-	t_array *tokens;
+	//t_array *tokens;
 
-	tokens = tokens_ptr;
+	//tokens = tokens_ptr;
 	printf("{");
-	array_do(tokens, print_token);
+//	array_do(tokens, print_token);
+	print_token(tokens_ptr);
 	printf("}");
 }
 
@@ -116,10 +129,11 @@ static void	handle_expansions(void *node_ptr)
 	if (node->type == AST_SUBSHELL)
 		array_do(node->children, handle_expansions);
 	
-	expansion_and_field_splitting(node);
-	pathname_expansion(node);
-	quote_removal(node);
-	array_do(node->redirect_list, handle_heredoc);
+	array_do(node->children, parameter_expansion);
+	array_do(node->children, field_splitting);
+	array_do(node->children, pathname_expansion);
+	array_do(node->children, quote_removal);
+	//array_do(node->redirect_list, handle_heredoc);
 }
 
 int	main()
@@ -140,7 +154,7 @@ int	main()
 		string_set(&input, line);
 		tokens = tokenize(&input);
 		list = generate_ast(tokens);
-		array_do(list, handle_expansions);
+	//	array_do(list, handle_expansions);
 		int status = execution(list);
 		manager_free_everything();
 		exit(status);
@@ -155,7 +169,8 @@ int	main()
 			continue ;
 		list = generate_ast(tokens);
 		array_do(list, handle_expansions);
-		execution(list);
+		array_do(list, print);
+		//execution(list);
 		free(line);
 	}
 	rl_clear_history();

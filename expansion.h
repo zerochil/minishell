@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/04 17:13:33 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/10 16:55:24 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/13 22:56:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,15 @@
 
 typedef struct s_field
 {
-	int		type;
-	t_array *tokens;
+	t_string	*value;
+	t_string	*mask;
 }	t_field;
 
-void	expansion_and_field_splitting(t_ast_node *node);
-void	pathname_expansion(t_ast_node *node);
-void	quote_removal(t_ast_node *node);
-void	token_replace_param(t_token *token);
 
+void	parameter_expansion(void *token_ptr);
+void	field_splitting(void *token_ptr);
+void	pathname_expansion(void *token_ptr);
+void	quote_removal(void *token_ptr);
+
+void	expand_parameter(t_field *field);
 #endif

@@ -224,27 +224,35 @@ char *get_token_symbol(int type)
 
 t_ast_node *simple_command(t_array *tokens)
 {
+	t_ast_node	*simple_command_node;
 	t_array	*argument_list;
+	t_array	*redirections;
 	t_token *token;
 
 	argument_list = track_malloc(sizeof(t_array));
 	array_init(argument_list);
+	redirections = track_malloc(sizeof(t_array));
+	array_init(redirections);
 	while (true)
 	{
 		token = array_peek(tokens);
-		if (lexem_is_redirection(token->type) || token->type == lexem_get_type("WORD"))
+		if (!lexem_is_redirection(token->type) && token->type != lexem_get_type("WORD"))
+			break;
+		if (lexem_is_redirection(token->type))
 		{
 			if (check_syntax_error(token->value == NULL, ERR_MISSING_FILENAME))
 				return NULL;
-			array_push(argument_list, token);
-			array_shift(tokens);
-			continue;
+			array_push(redirections, token);
 		}
-		break;
+		else
+			array_push(argument_list, token);
+		array_shift(tokens);
 	}
 	if (check_syntax_error(argument_list->size == 0, ERR_WORD_OR_REDIR))
 		return NULL;
-	return create_ast_node(argument_list, AST_SIMPLE_COMMAND);
+	simple_command_node = create_ast_node(argument_list, AST_SIMPLE_COMMAND);
+	simple_command_node->redirect_list = redirections;
+	return (simple_command_node);
 }
 
 
