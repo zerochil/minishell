@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/14 09:40:15 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/14 18:45:28 by inajah           ###   ########.fr       */
 /*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
@@ -71,10 +71,39 @@ void	field_shift(t_field *field)
 	string_shift(field->mask);
 }
 
+
+t_string *get_token_value_mask(char *token_value)
+{
+	t_string	*mask;
+	size_t	token_value_length;
+	char	in_quote;
+	size_t	i;
+
+	token_value_length = ft_strlen(token_value);
+	mask = track_malloc(sizeof(t_string));
+	string_init(mask);
+	string_ensure_capacity(mask, token_value_length);
+	mask->size = token_value_length;
+	in_quote = '\0';
+	i = 0;
+	while (token_value[i])
+	{
+		if (in_quote == '\0' && (token_value[i] == '\'' || token_value[i] == '"'))
+			in_quote = token_value[i];
+		else if (in_quote == token_value[i])
+			in_quote = '\0';
+		else if (in_quote == '\'')
+			mask->data[i] |= SINGLE_QUOTED;
+		else if (in_quote == '"')
+			mask->data[i] |= DOUBLE_QUOTED;
+		i++;
+	}
+	return (mask);
+}
+
 t_field	*field_init(char *token_value, char *mask)
 {
 	t_field	*field;
-	size_t	token_value_length;
 
 	if (token_value == NULL)
 	{
@@ -90,12 +119,7 @@ t_field	*field_init(char *token_value, char *mask)
 	if (mask != NULL)
 		string_set(field->mask, mask);
 	else
-	{
-		token_value_length = ft_strlen(token_value);
-		string_ensure_capacity(field->mask, token_value_length);
-		ft_memset(field->mask->data, '0', token_value_length);
-		field->mask->size = token_value_length;
-	}
+		field->mask = get_token_value_mask(token_value);
 	return (field);
 }
 ///////////////////////////////// expansion utility functions ///////////////////////////////////////////////
@@ -124,7 +148,7 @@ bool	remove_quotes_from_field(t_field *field)
 	return (field->value->size != old_size);
 }
 
-static bool	is_whitespace(char c)
+static bool	is_ifs(char c)
 {
 	return (c == ' ' || c == '\t' || c == '\n');
 }
@@ -138,62 +162,69 @@ static bool	is_valid_param_char(char c)
 void	field_replace(t_field *field, size_t start, size_t length,
 		char *value)
 {
-	char	*value_mask;
 	size_t	value_length;
-	
+
 	if (field->mask == NULL || value == NULL)
 	{
 		report_error("field_replace: error");
 		return ;
 	}
-	value_length = ft_strlen(value);
 	string_segment_replace(field->value, start, length, value);
-	value_mask = track_malloc((value_length + 1) * sizeof(char));
-	ft_memset(value_mask, '1', value_length);
-	string_segment_replace(field->mask, start, length, value_mask);
-	resource_free(value_mask);
+	string_segment_replace(field->mask, start, length, value);
+	value_length = ft_strlen(value);
+	ft_memset(field->mask->data + start, EXPANDED, value_length);
 }
 
-void	expand_parameter(t_field *field)
+bool	expand_parameter(t_field *field)
 {
 	char	*param_name;
 	char	*param_value;
+	size_t	value_length;
 	size_t	start;
+	bool	is_double_quoted;
 
 	start = field->value->peek;
-	string_peek_advance(field->value);
+	field_peek_advance(field);
 	while (is_valid_param_char(string_peek(field->value)))
-		string_peek_advance(field->value);
+		field_peek_advance(field);
 	if (start + 1 == field->value->peek)
-		return ;
+		return (false);
 	param_name = string_segment_extract(field->value, start,
 			field->value->peek - start);
 	param_value = get_param_value(param_name + 1);
+	value_length = ft_strlen(param_value);
+	is_double_quoted = field->mask->data[start] & DOUBLE_QUOTED;
 	field_replace(field, start, field->value->peek - start, param_value);
-	field->value->peek = start + ft_strlen(param_value);
+	if (is_double_quoted)
+		ft_memset(field->mask->data + start, EXPANDED | DOUBLE_QUOTED, value_length);
+	field_peek_set(field, start + value_length);
+	return (true);
 }
 
-void	expand_field_parameter(t_field *field)
+bool	expand_field_parameter(t_field *field)
 {
 	char c;
-	char in_quote;
+	char m;
+	bool	has_expanded;
+	bool	should_field_split;
 
-	in_quote = '\0';
+	should_field_split = false;
 	field_peek_reset(field);
 	while (true)
 	{
-		c = string_peek(field->value);
+		field_peek(field, &c, &m);
 		if (c == '\0')
 			break ;
-		if (in_quote == '\0' && (c == '"' || c == '\''))
-			in_quote = c;
-		else if (in_quote == c)
-			in_quote = '\0';
-		if (c == '$' && in_quote != '\'')
-			expand_parameter(field);
+		if (c == '$' && (m & SINGLE_QUOTED) == 0)
+		{
+			has_expanded = expand_parameter(field);
+			if ((m & DOUBLE_QUOTED) == 0)
+				should_field_split = has_expanded;
+		}
 		else
-			string_peek_advance(field->value);
+			field_peek_advance(field);
 	}
+	return should_field_split;
 }
 //TODO: what if the variable name starts with a digit?
 void	parameter_expansion(void *token_ptr)
@@ -202,12 +233,11 @@ void	parameter_expansion(void *token_ptr)
 	t_field		*field;
 
 	token = token_ptr;
-	if (token->type == lexem_get_type("HERE_DOCUMENT"))
-		return ;
 	token->fields = track_malloc(sizeof(t_array));
 	array_init(token->fields);
 	field = field_init(token->value, NULL);
-	expand_field_parameter(field);
+	//TODO:  handle this: $"HOME" -> HOME, $ gets consumed if it is not quoted and followed by a quote.
+	token->should_field_split = expand_field_parameter(field);
 	array_push(token->fields, field);
 }
 
@@ -230,44 +260,34 @@ t_field	*field_slice_up_to_peek(t_field *field)
 	return (new_field);
 }
 
-void	skip_field_splitting_chars(t_field *field)
+void	skip_ifs(t_field *field)
 {
-	while (is_whitespace(string_peek(field->value))
-		&& string_peek(field->mask) == '1')
+	while (is_ifs(string_peek(field->value))
+		&& (string_peek(field->mask) == EXPANDED))
 		field_shift(field);
-}
-
-void extract_field(t_array *fields, t_field *field)
-{
-	t_field *new_field;
-
-	new_field = field_slice_up_to_peek(field);
-	if (new_field)
-		array_push(fields, new_field);
-	skip_field_splitting_chars(field);
 }
 
 void single_field_split(t_array *fields)
 {
 	t_field	*field;
-	char in_quote;
-	char c;
-	char m;
+	t_field	*new_field;
+	char	c;
+	char	m;
 
 	field = array_shift(fields);
 	field_peek_reset(field);
-	in_quote = '\0';
 	while (true)
 	{
 		field_peek(field, &c, &m);
 		if (c == '\0')
 			break;
-		if (in_quote == '\0' && m == '0' && (c == '"' || c == '\''))
-			in_quote = c;
-		else if (in_quote == c && m == '0')
-			in_quote = '\0';
-		if (is_whitespace(c) && m == '1' && in_quote == '\0')
-			extract_field(fields, field);
+		if (is_ifs(c) && m == EXPANDED)
+		{
+			new_field = field_slice_up_to_peek(field);
+			if (new_field)
+				array_push(fields, new_field);
+			skip_ifs(field);
+		}
 		else
 			field_peek_advance(field);
 	}
@@ -275,41 +295,12 @@ void single_field_split(t_array *fields)
 		array_push(fields, field);
 }
 
-bool	is_field_splitting_required(t_token *token)
-{
-	t_field *field;
-	char	*dolar_pos;
-	char	dolar;
-	char	c;
-	char	m;
-
-	dolar = '\0';
-	field = array_get(token->fields, 0);
-	dolar_pos = ft_strrchr(field->value->data, '$');
-	if (dolar_pos == NULL)
-		return (true);
-	field_peek_set(field, dolar_pos - field->value->data);
-	while (true)
-	{
-		field_peek(field, &c, &m);
-		if (c == '\0')
-			break;
-		if (c == '$' && m == '0' )
-			dolar = c;
-		else if (dolar == '$' && m == '1')
-			return (true);
-		field_peek_advance(field);
-	}
-	return (dolar == '\0');
-
-}
-
 void field_splitting(void *token_ptr)
 {
 	t_token *token;
 
 	token = token_ptr;
-	if (is_field_splitting_required(token))
+	if (token->should_field_split)
 		single_field_split(token->fields);
 }
 

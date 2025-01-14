@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 15:17:55 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/13 22:46:39 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/14 15:33:07 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,10 @@ bool	was_quoted(t_field *field)
 {
 	return (field->mask->data[0] != '2');
 }
-
+//TODO: test this
+//$ env -i ./minishell; cat <<""$HOME 
+//		> $PWD
+//		> $HOME 
 //TODO: no idea what should happen if open/file creation fails.
 void	heredoc(char *path, t_field *delimiter)
 {

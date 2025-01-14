@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/14 09:38:53 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/14 18:47:34 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,28 @@ void	print_field(void *field_ptr)
 {
 	t_field	*field;
 
+
 	field = field_ptr;
 
-	printf("{%s}", field->value->data);
+	printf("{%s, ", field->value->data);
+#if 0
+	size_t	i=0;
+	while (i < field->mask->size)
+	{ 	
+		char c = 'O';
+		char q = ' ';
+		if (field->mask->data[i] & EXPANDED)
+			c = 'E';
+
+		if (field->mask->data[i] & SINGLE_QUOTED)
+			q = 'S';
+		else if (field->mask->data[i] & DOUBLE_QUOTED)
+			q = 'D';
+		printf("<%c%c>", c, q);
+		i++;
+	}
+#endif
+	printf("}");
 	fflush(NULL);
 }
 
@@ -129,7 +148,7 @@ static void	handle_expansions(void *node_ptr)
 	if (node->type == AST_SUBSHELL)
 		array_do(node->children, handle_expansions);
 	
-	array_do(node->children, parameter_expansion);
+	array_do(node->children, parameter_expansion); 
 	array_do(node->children, field_splitting);
 	array_do(node->children, pathname_expansion);
 	array_do(node->children, quote_removal);
