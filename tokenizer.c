@@ -15,7 +15,7 @@
 
 t_token	*token_init(int type, char *value)
 {
-	t_token		*token;
+	t_token	*token;
 
 	token = track_malloc(sizeof(t_token));
 	token->type = type;
@@ -45,7 +45,9 @@ static t_token	*tokenize_word(t_string *input)
 	while (1)
 	{
 		c = string_peek(input);
-		if (in_quote == '\0' && (ft_strchr(WHITE_SPACE, c) || array_find(lexems_get_instance(), input, lexem_match_word_break)))
+		if (in_quote == '\0' && (ft_strchr(WHITE_SPACE, c)
+				|| array_find(lexems_get_instance(), input,
+					lexem_match_word_break)))
 			break ;
 		else if (in_quote == c)
 			in_quote = '\0';
@@ -105,7 +107,6 @@ t_array	*tokenize(t_string *input)
 	t_array	*tokens;
 	t_token	*token;
 
-	// TODO: REMEMBER TO ADD SCOPE FOR ALLOCATED MEMORY AND FREE IT;
 	if (!is_quoted(input))
 	{
 		report_error("tokenizer: unbalanced quotes!");

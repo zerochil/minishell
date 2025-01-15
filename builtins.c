@@ -21,11 +21,12 @@ builtin_t *get_builtins_instance()
 	return (builtins);
 }
 
-int is_builtin(char *name)
+bool is_builtin(char *name)
 {
 	builtin_t *builtins;
 	int i;
 
+	// TODO: what if name is NULL?
 	builtins = get_builtins_instance();
 	i = 0;
 	while (builtins[i].name)

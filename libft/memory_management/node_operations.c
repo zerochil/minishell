@@ -73,6 +73,13 @@ t_rm_node	*rm_node_unlink(t_rm_node **head, void *target, int (*match)(void *,
 	return (NULL);
 }
 
+// h -> n1
+// n1 -> n2
+// n2 -> n3
+// n3 -> n4
+// n4 -> NUL
+
+
 t_rm_node	*rm_node_find(t_rm_node **head, void *target, int (*match)(void *,
 			void *))
 {

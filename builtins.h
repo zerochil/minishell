@@ -13,8 +13,7 @@ typedef struct s_builtin
 	int (*function)(char **, int);
 } builtin_t;
 
-int is_builtin(char *name);
-int execute_builtin(char **args, int out_fd);
+bool is_builtin(char *name);
 
 int builtin_cd(char **args, int out_fd);
 int builtin_pwd(char **args, int out_fd);

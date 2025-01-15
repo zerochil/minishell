@@ -21,33 +21,26 @@
 # define PATH_MAX 4096
 #endif
 
-typedef struct s_pipe
+typedef struct s_stream
 {
 	int read;
 	int write;
-} t_pipe;
+} t_stream;
 
-typedef struct s_pipeline_context
+typedef struct s_pipeline
 {
 	int last_command_pid;
-	t_pipe pipe;
+	t_stream pipe;
 	int write_end;
 	int read_end;
-} t_pipeline_context;
+} t_pipeline;
 
 typedef struct s_command_context
 {
-	char	**args;
-	char	**envp;
-	int		fd_out;
-	int		fd_in;
+	char		**args;
+	char		**envp;
+	t_stream	stream;
 } t_command_context;
-
-typedef struct s_context
-{
-	t_array	*ast_root_list;
-
-} t_context;
 
 int execution(t_array *ast_root_list);
 int execute_ast_node(t_ast_node *node);
@@ -58,7 +51,8 @@ int execute_command(t_ast_node *node);
 int execute_pipeline(t_ast_node *node);
 int execute_subshell(t_ast_node *node);
 int execute_simple_command(t_ast_node *node);
-int handle_redirection(t_array *token_list, int *fd_out, int *fd_in);
+
+int handle_redirection(t_array *redirection_list, t_stream *stream);
 int open_file(char *filename, int flags, int *fd);
 
 #endif
