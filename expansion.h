@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/04 17:13:33 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/14 18:00:20 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/15 09:01:02 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,8 @@
 
 # include "minishell.h"
 # include "ast.h"
+# include "field.h"
 # include <dirent.h>
-
-typedef struct s_field
-{
-	t_string	*value;
-	t_string	*mask;
-}	t_field;
 
 enum
 {

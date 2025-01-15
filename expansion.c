@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/14 18:45:28 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/15 16:07:38 by inajah           ###   ########.fr       */
 /*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
@@ -24,6 +24,7 @@ char	*get_param_value(char *param_name)
 	return (param_value);
 }
 
+// TODO: handle SEGFAULT when entring: < $arg
 
 //////////////////////////////// field helper functions //////////////////////////////////////
 void	field_peek(t_field *field, char *c, char *m)
@@ -114,34 +115,27 @@ t_field	*field_init(char *token_value, char *mask)
 	field->value = track_malloc(sizeof(t_string));
 	string_init(field->value);
 	string_set(field->value, token_value);
-	field->mask = track_malloc(sizeof(t_string));
-	string_init(field->mask);
+	field->mask = get_token_value_mask(token_value);
 	if (mask != NULL)
-		string_set(field->mask, mask);
-	else
-		field->mask = get_token_value_mask(token_value);
+		ft_memcpy(field->mask->data, mask, field->value->size);
 	return (field);
 }
 ///////////////////////////////// expansion utility functions ///////////////////////////////////////////////
 bool	remove_quotes_from_field(t_field *field)
 {
 	size_t	old_size;
-	char	in_quote;
 	char	c;
 	char	m;
 
 	old_size = field->value->size;
-	in_quote = '\0';
 	field_peek_reset(field);
 	while (true)
 	{
 		field_peek(field, &c, &m);
 		if (c == '\0')
 			break;
-		if (in_quote == '\0' && m == '0' && (c == '"' || c == '\''))
-			in_quote = field_shift_at_peek(field);
-		else if (in_quote == c && m == '0')
-			in_quote = field_shift_at_peek(field) != in_quote;
+		else if ((c == '\'' || c == '"' ) && m == ORIGINAL)
+			field_shift_at_peek(field);
 		else
 			field_peek_advance(field);
 	}
@@ -233,12 +227,9 @@ void	parameter_expansion(void *token_ptr)
 	t_field		*field;
 
 	token = token_ptr;
-	token->fields = track_malloc(sizeof(t_array));
-	array_init(token->fields);
-	field = field_init(token->value, NULL);
+	field = array_get(token->fields, 0);
 	//TODO:  handle this: $"HOME" -> HOME, $ gets consumed if it is not quoted and followed by a quote.
 	token->should_field_split = expand_field_parameter(field);
-	array_push(token->fields, field);
 }
 
 
@@ -318,36 +309,13 @@ void	array_merge(t_array *dest, t_array *src)
 	}
 }
 
-
-void	pattern_update_mask(t_field *pattern)
-{
-	char	in_quote;
-	char	c;
-
-	in_quote = '\0';
-	string_peek_reset(pattern->value);
-	while (true)
-	{
-		c = string_peek(pattern->value);
-		if (c == '\0')
-			break;
-		if (in_quote == '\0' && (c == '"' || c == '\''))
-			in_quote = c;
-		else if (in_quote == c)
-			in_quote = '\0';
-		else if (c == '*' && in_quote != '\0')
-			pattern->mask->data[pattern->value->peek] = '2';
-		string_peek_advance(pattern->value);
-	}
-}
-
 t_field	*field_copy(t_field *field)
 {
 	t_field *copy;
 
 	if (!field)
 	{
-		report_error("token_copy: error");
+		report_error("field_copy: error");
 		return (NULL);
 	}
 	copy = field_init(field->value->data, field->mask->data);
@@ -445,9 +413,9 @@ int matches_pattern(char *pattern_start, char *mask, char *str)
     double_assign(&star, &ss, NULL, NULL);
     while (*str)
     {	
-		if (*pattern == '*' && mask[pattern - pattern_start] != '2')
+		if (*pattern == '*' && mask[pattern - pattern_start] == ORIGINAL)
 		{
-            while (*(pattern + 1) == '*' && mask[(pattern + 1) - pattern_start] != '2')
+            while (*(pattern + 1) == '*' && mask[(pattern + 1) - pattern_start] == ORIGINAL)
                 pattern++;
             double_assign(&star, &ss, pattern++, str);
         }
@@ -458,9 +426,20 @@ int matches_pattern(char *pattern_start, char *mask, char *str)
 		else
             return 0;
     }
-    while (*pattern == '*' && mask[pattern - pattern_start] != '2')
+    while (*pattern == '*' && mask[pattern - pattern_start] == ORIGINAL)
         pattern++;
     return !*pattern;
+}
+
+t_field	*get_dentry_field(char *dentry_name)
+{
+	t_field	*dentry_field;
+
+	dentry_field = field_init(dentry_name, NULL);
+	// we never expand do pathname expansion inside quotes a.k.a '*' or "*"
+	// this means dentry_field mask is always set to only EXPANDED
+	ft_memset(dentry_field->mask->data, EXPANDED, dentry_field->mask->size);
+	return (dentry_field);
 }
 
 void	*list_dentries(t_field *pattern, char *dir_path, int target_type)
@@ -483,7 +462,7 @@ void	*list_dentries(t_field *pattern, char *dir_path, int target_type)
 			continue ;
 		if (matches_pattern(pattern->value->data,
 					pattern->mask->data, entry->d_name))
-			array_push(list, field_init(entry->d_name, NULL));
+			array_push(list, get_dentry_field(entry->d_name));
     }
 	closedir(dir);
 	return (list);
@@ -495,7 +474,6 @@ t_array *list_files(t_field *pattern)
     char	*dir_path;
 	int		target_type;
 
-	pattern_update_mask(pattern);
 	remove_quotes_from_field(pattern);
 	target_type = DENTRY_VISIBLE;
 	target_type |= DENTRY_DIRECTORY * trim_trailing_slash(pattern);
@@ -514,12 +492,10 @@ t_array *list_files(t_field *pattern)
     return (found_dentries);
 }
 
-t_array	*expand_field_pathname(int	token_type, t_field *field)
+t_array	*expand_field_pathname(t_field *field)
 {
 	t_array	*filenames;
 
-	if (token_type == lexem_get_type("HERE_DOCUMENT"))
-		return (NULL);
 	if (ft_strchr(field->value->data, '*') == NULL)
 		return (NULL);
 	filenames = list_files(field_copy(field));
@@ -556,7 +532,7 @@ void	pathname_expansion(void *token_ptr)
 	i = 0;
 	while (i < token->fields->size)
 	{
-		expansion_list = expand_field_pathname(token->type, array_get(token->fields, i));
+		expansion_list = expand_field_pathname(array_get(token->fields, i));
 		if (expansion_list)
 		{
 			array_expand_at(token->fields, i, expansion_list);
@@ -572,8 +548,7 @@ void single_field_quote_removal(void *field_ptr)
 	t_field	*field;
 	
 	field = field_ptr;
-	if (remove_quotes_from_field(field))
-		field->mask->data[0] = '2';
+	remove_quotes_from_field(field);
 }
 
 void	quote_removal(void *token_ptr)

@@ -248,7 +248,7 @@ t_ast_node *simple_command(t_array *tokens)
 			array_push(argument_list, token);
 		array_shift(tokens);
 	}
-	if (check_syntax_error(argument_list->size == 0, ERR_WORD_OR_REDIR))
+	if (check_syntax_error(argument_list->size == 0 && redirections->size == 0, ERR_WORD_OR_REDIR))
 		return NULL;
 	simple_command_node = create_ast_node(argument_list, AST_SIMPLE_COMMAND);
 	simple_command_node->redirect_list = redirections;

@@ -6,11 +6,10 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:07 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/14 08:32:05 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/14 21:01:25 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lexer.h"
 #include "tokenizer.h"
 
 t_token	*token_init(int type, char *value)
@@ -19,8 +18,13 @@ t_token	*token_init(int type, char *value)
 
 	token = track_malloc(sizeof(t_token));
 	token->type = type;
-	token->value = value;	
-	token->fields = NULL;
+	token->value = value;
+	if (value)
+	{
+		token->fields = track_malloc(sizeof(t_array));
+		array_init(token->fields);
+		array_push(token->fields, field_init(value, NULL));
+	}
 	return (token);
 }
 

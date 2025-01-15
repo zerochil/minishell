@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:33 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/14 17:58:31 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/14 20:55:01 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define TOKENIZER_H
 
 # include "lexer.h"
+# include "field.h"
 # include "libft/libft.h"
 
 # define META_CHARACTERS "|&()<>\n \t"

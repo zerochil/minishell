@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/14 18:47:34 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/15 16:21:15 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,6 +133,69 @@ static void	print(void *node_ptr)
 	}
 }
 
+enum
+{
+	NO_EXPANSIONS = 0,
+	PARAMETER_EXPANSION = 1,
+	FIELD_SPLITTING = 2,
+	PATHNAME_EXPANSION = 4,
+	QUOTE_REMOVAL = 8,
+	ALL_EXPANSIONS = 15,
+};
+
+bool	is_export_command(t_token *token)
+{
+	t_field	*field;
+
+	if (token->fields->size == 0)
+		return (false);
+	field = array_get(token->fields, 0);
+	return (ft_strcmp("export", field->value->data) == 0);
+}
+
+bool	is_assingment_word(t_token *token)
+{
+	//TODO: check if the token has this form: key=value or key+=value where key is a valid variable name
+	(void) token;
+	return (true);
+}
+
+void	expand_token(t_token *token, int flag)
+{
+	if (flag & PARAMETER_EXPANSION)
+		parameter_expansion(token);
+	if (flag & FIELD_SPLITTING)
+		field_splitting(token);
+	if (flag & PATHNAME_EXPANSION)
+		pathname_expansion(token);
+	if (flag & QUOTE_REMOVAL)
+		quote_removal(token);
+}
+
+void	expansion(t_array *tokens)
+{
+	t_token	*token;
+	int	flag;
+	bool	is_export;
+	size_t	i;
+
+	i = 0;
+	if (tokens->size == 0)
+		return ;
+	is_export = is_export_command(array_get(tokens, 0));
+	while (i < tokens->size)
+	{
+		token = array_get(tokens, i);
+		flag = ALL_EXPANSIONS;
+		if (token->type == lexem_get_type("HERE_DOCUMENT"))
+			flag = NO_EXPANSIONS;
+		else if (token->type == lexem_get_type("WORD") && is_export && is_assingment_word(token))
+			flag = PARAMETER_EXPANSION | QUOTE_REMOVAL;
+		expand_token(token, flag);
+		i++;
+	}
+}
+
 static void	handle_expansions(void *node_ptr)
 {
 	t_ast_node *node;
@@ -147,11 +210,9 @@ static void	handle_expansions(void *node_ptr)
 	}
 	if (node->type == AST_SUBSHELL)
 		array_do(node->children, handle_expansions);
-	
-	array_do(node->children, parameter_expansion); 
-	array_do(node->children, field_splitting);
-	array_do(node->children, pathname_expansion);
-	array_do(node->children, quote_removal);
+	if (node->type == AST_SIMPLE_COMMAND)
+		expansion(node->children);
+	expansion(node->redirect_list);
 	//array_do(node->redirect_list, handle_heredoc);
 }
 
