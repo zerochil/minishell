@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/15 16:21:15 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/15 16:33:19 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,7 +213,7 @@ static void	handle_expansions(void *node_ptr)
 	if (node->type == AST_SIMPLE_COMMAND)
 		expansion(node->children);
 	expansion(node->redirect_list);
-	//array_do(node->redirect_list, handle_heredoc);
+	array_do(node->redirect_list, handle_heredoc);
 }
 
 int	main()

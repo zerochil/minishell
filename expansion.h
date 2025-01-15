@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/04 17:13:33 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/15 09:01:02 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/15 17:10:18 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,5 +31,10 @@ void	field_splitting(void *token_ptr);
 void	pathname_expansion(void *token_ptr);
 void	quote_removal(void *token_ptr);
 
-bool	expand_parameter(t_field *field);
+bool	expand_field_parameter(t_field *field, int single_quoted_flag);
+bool	remove_quotes_from_field(t_field *field);
+
+
+void	field_set(t_field *field, char *value);
+
 #endif

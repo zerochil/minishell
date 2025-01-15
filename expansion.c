@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/15 16:07:38 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/15 17:11:15 by inajah           ###   ########.fr       */
 /*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
@@ -27,12 +27,14 @@ char	*get_param_value(char *param_name)
 // TODO: handle SEGFAULT when entring: < $arg
 
 //////////////////////////////// field helper functions //////////////////////////////////////
+
 void	field_peek(t_field *field, char *c, char *m)
 {
 	*c = string_peek(field->value);
 	if (field->mask)
 		*m = string_peek(field->mask);
 }
+
 
 void	field_peek_set(t_field *field, size_t peek)
 {
@@ -53,6 +55,14 @@ void	field_peek_reset(t_field *field)
 	string_peek_reset(field->value);
 	if (field->mask)
 		string_peek_reset(field->mask);
+}
+
+void	field_set(t_field *field, char *value)
+{
+	string_set(field->value, value);
+	string_set(field->mask, value);
+	field_peek_reset(field);
+	ft_memset(field->mask->data, EXPANDED, field->mask->size);
 }
 
 char	field_shift_at_peek(t_field *field)
@@ -195,7 +205,7 @@ bool	expand_parameter(t_field *field)
 	return (true);
 }
 
-bool	expand_field_parameter(t_field *field)
+bool	expand_field_parameter(t_field *field, int single_quoted_flag)
 {
 	char c;
 	char m;
@@ -209,7 +219,7 @@ bool	expand_field_parameter(t_field *field)
 		field_peek(field, &c, &m);
 		if (c == '\0')
 			break ;
-		if (c == '$' && (m & SINGLE_QUOTED) == 0)
+		if (c == '$' && (m & single_quoted_flag) == 0)
 		{
 			has_expanded = expand_parameter(field);
 			if ((m & DOUBLE_QUOTED) == 0)
@@ -229,7 +239,7 @@ void	parameter_expansion(void *token_ptr)
 	token = token_ptr;
 	field = array_get(token->fields, 0);
 	//TODO:  handle this: $"HOME" -> HOME, $ gets consumed if it is not quoted and followed by a quote.
-	token->should_field_split = expand_field_parameter(field);
+	token->should_field_split = expand_field_parameter(field, SINGLE_QUOTED);
 }
 
 
