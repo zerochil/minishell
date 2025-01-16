@@ -24,6 +24,12 @@
 	<generalized_readline_leak>
 	Memcheck:Leak
 	...
+	fun:add_history
+}
+{
+	<generalized_readline_leak>
+	Memcheck:Leak
+	...
 	fun:readline
 	...
 }

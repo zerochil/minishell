@@ -128,15 +128,6 @@ typedef struct s_context
 	t_array *pids;
 } t_context;
 
-t_context *get_context_instance()
-{
-	static t_context context;
-
-	if (context.pids == NULL)
-		array_init(context.pids);
-	return (&context);
-}
-
 int	main()
 {
 	char		*line;

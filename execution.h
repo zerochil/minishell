@@ -27,14 +27,6 @@ typedef struct s_stream
 	int write;
 } t_stream;
 
-typedef struct s_pipeline
-{
-	int last_command_pid;
-	t_stream pipe;
-	int write_end;
-	int read_end;
-} t_pipeline;
-
 typedef struct s_command_context
 {
 	char		**args;

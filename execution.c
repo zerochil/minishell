@@ -1,10 +1,9 @@
 #include "execution.h"
 
-int clean_exit(int status)
+void clean_exit(int status)
 {
 	destroy_context();
 	exit(status);
-	return (status);
 }
 
 typedef struct s_context
@@ -18,7 +17,11 @@ t_context *get_context_instance()
 	static t_context context;
 
 	if (context.pids == NULL)
+	{
+		/*printf("jidosa");*/
+		context.pids = track_malloc(sizeof(t_array));
 		array_init(context.pids);
+	}
 	return (&context);
 }
 
@@ -113,9 +116,8 @@ int is_pid(void *elment_ptr, void *target_ptr)
 
 void pid_remove(pid_t pid)
 {
-	// TODO: change this so it's array_do compatible
+	// TODO: change this so it's array_do compatible??
 	t_context *context;
-	size_t i;
 	pid_t p;
 
 	context = get_context_instance();
@@ -169,6 +171,7 @@ t_stream *stream_init(int pipeline_size)
 	int i;
 
 	streamline = track_malloc(sizeof(t_stream) * (pipeline_size + 1));
+	i = 0;
 	while (i < pipeline_size)
 	{
 		streamline[i].read = -1;
@@ -193,26 +196,32 @@ void create_pipe(t_stream *streamline, int index)
 	streamline[index + 1].read = p.read;
 }
 
-void close_stream(t_stream stream)
+void stream_close(t_stream *stream)
 {
-	if (stream.read >= 0 && stream.read != STDIN_FILENO)
-		close(stream.read);
-	if (stream.write >= 0  && stream.write != STDOUT_FILENO)
-		close(stream.write);
+	if (stream->read >= 0 && stream->read != STDIN_FILENO)
+	{
+		close(stream->read);
+		stream->read = -1;
+	}
+	if (stream->write >= 0  && stream->write != STDOUT_FILENO)
+	{
+		close(stream->write);
+		stream->write = -1;
+	}
 }
 
-void set_std_stream(t_stream stream)
+void stream_dup2stdio(t_stream *stream)
 {
-	if (stream.read != STDIN_FILENO)
-		if (dup2(stream.read, STDIN_FILENO) == -1)
+	if (stream->read != STDIN_FILENO)
+		if (dup2(stream->read, STDIN_FILENO) == -1)
 			error("dup2: error");
-	if (stream.write != STDOUT_FILENO)
-		if (dup2(stream.write, STDOUT_FILENO) == -1)
+	if (stream->write != STDOUT_FILENO)
+		if (dup2(stream->write, STDOUT_FILENO) == -1)
 			error("dup2: error");
-	close_stream(stream);
+	stream_close(stream);
 } 
 
-pid_t fork_and_execute(t_array *commands, t_stream *streamline, int index)
+pid_t fork_and_execute(t_array *commands, t_stream *streamline, size_t index)
 {
 	pid_t pid;
 	int status;
@@ -225,11 +234,12 @@ pid_t fork_and_execute(t_array *commands, t_stream *streamline, int index)
 	}
 	else if (pid > 0)
 		return (pid);
-	set_std_stream(streamline[index]);
+	stream_dup2stdio(&streamline[index]);
 	if (index != commands->size - 1)
-		close_stream(streamline[index]);
+		stream_close(&streamline[index + 1]);
 	status = execute_command(array_get(commands, index));
-	return (clean_exit(status));
+	clean_exit(status);
+	return (-1);
 }
 
 int execute_pipeline(t_ast_node *node)
@@ -241,7 +251,7 @@ int execute_pipeline(t_ast_node *node)
 	pid_t pid;
 
 	commands = node->children;
-	if (should_not_fork(commands) == 0)
+	if (should_not_fork(commands))
 		return (execute_command(array_get(commands, 0)));
 	index = 0;
 	streamline = stream_init(commands->size);
@@ -250,7 +260,7 @@ int execute_pipeline(t_ast_node *node)
 		if (index < commands->size - 1)
 			create_pipe(streamline, index);
 		pid = fork_and_execute(commands, streamline, index);
-		close_stream(streamline[index]);
+		stream_close(&streamline[index]);
 		pid_push(pid);
 		index++;
 	}
@@ -283,16 +293,16 @@ int execute_command(t_ast_node *node)
 
 int execute_subshell(t_ast_node *node)
 {
-	pid_t pid;
 	int status;
 	t_stream stream;
 
-	pid = fork();
+	stream = (t_stream){.read = STDIN_FILENO, .write = STDOUT_FILENO};
 	if (handle_redirection(node->redirect_list, &stream) == -1)
-		clean_exit(1);
-	set_std_stream(stream);
+		return (-1);
+	stream_dup2stdio(&stream);
 	status = execute_compound_command(array_get(node->children, 0));
-	return (clean_exit(WEXITSTATUS(status)));
+	clean_exit(WEXITSTATUS(status));
+	return (-1);
 }
 
 char **get_arg_list(t_array *tokens)
@@ -359,17 +369,17 @@ int execute_external(t_command_context *command_context)
 {
 	char *command_path;
 
-	set_std_stream(command_context->stream);
+	stream_dup2stdio(&command_context->stream);
 	command_path = get_command_path(command_context->args[0]);
 	if (command_path == NULL || access(command_path, F_OK) == -1)
 	{
 		report_error("minishell: command not found");
-		clean_exit(127);
+		return (127);
 	}
 	command_context->args[0] = command_path;
 	execve(command_context->args[0], command_context->args, command_context->envp);
 	perror("minishell: external");
-	return (clean_exit(127)); // TODO: check if this is correct
+	return (127); // TODO: check if this is correct
 }
 
 int execute_builtin(char **args, int out_fd)
@@ -392,12 +402,10 @@ int execute_simple_command(t_ast_node *node)
 {
 	t_command_context command_context;
 	int status;
-	t_stream stream;
 
-	command_context.stream.read = STDIN_FILENO;
-	command_context.stream.write = STDOUT_FILENO;
+	command_context.stream = (t_stream){.read = STDIN_FILENO, .write = STDOUT_FILENO};
 	if(handle_redirection(node->redirect_list, &command_context.stream) == -1)
-		return (-1);
+		return (1);
 	command_context.args = get_arg_list(node->children);
 	command_context.envp = env_get_array();
 	if (command_context.args[0] != NULL)
@@ -407,7 +415,7 @@ int execute_simple_command(t_ast_node *node)
 		else
 			status = execute_external(&command_context);
 	}
-	close_stream(stream);
+	stream_close(&command_context.stream);
 	return (status);
 }
 
@@ -434,7 +442,7 @@ int handle_redirection(t_array *redirection_list, t_stream *stream)
 		else
 			error("handle_redirection: error");
 		if (open_error == -1)
-			return (-1);
+			return (stream_close(stream), -1);
 	}
 	return (0);
 }
