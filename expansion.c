@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/15 17:11:15 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/16 09:12:14 by inajah           ###   ########.fr       */
 /*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
@@ -18,13 +18,14 @@ char	*get_param_value(char *param_name)
 {
 	char	*param_value;
 
+	if (ft_strcmp(param_name, "?") == 0)
+		return "EXIT_STATUS";
 	param_value = env_get(param_name);
 	if (param_value == NULL)
 		return ("");
 	return (param_value);
 }
 
-// TODO: handle SEGFAULT when entring: < $arg
 
 //////////////////////////////// field helper functions //////////////////////////////////////
 
@@ -157,7 +158,7 @@ static bool	is_ifs(char c)
 	return (c == ' ' || c == '\t' || c == '\n');
 }
 
-static bool	is_valid_param_char(char c)
+static bool	is_valid_parameter_name_char(char c)
 {
 	return (ft_isalnum(c) || c == '_');
 }
@@ -179,29 +180,52 @@ void	field_replace(t_field *field, size_t start, size_t length,
 	ft_memset(field->mask->data + start, EXPANDED, value_length);
 }
 
+char *get_parameter_name(t_field *field, size_t dolar_position)
+{
+	char	c;
+	char	m;
+
+	field_peek_advance(field);
+	field_peek(field, &c, &m);
+	if (ft_isalpha(c) || c == '_')
+	{
+		field_peek_advance(field);
+		while (true)
+		{
+			field_peek(field, &c, &m);
+			if (is_valid_parameter_name_char(c) == false)
+				break;
+			field_peek_advance(field);
+		}
+	}
+	if (dolar_position + 1 == field->value->peek && c != '?')
+		return (NULL);
+	else if(dolar_position + 1 == field->value->peek && c == '?')
+		field_peek_advance(field);
+	return (string_segment_extract(field->value, dolar_position,
+					field->value->peek - dolar_position));
+}
+
 bool	expand_parameter(t_field *field)
 {
 	char	*param_name;
 	char	*param_value;
 	size_t	value_length;
-	size_t	start;
+	size_t	dolar_position;
 	bool	is_double_quoted;
 
-	start = field->value->peek;
-	field_peek_advance(field);
-	while (is_valid_param_char(string_peek(field->value)))
-		field_peek_advance(field);
-	if (start + 1 == field->value->peek)
+	dolar_position = field->value->peek;
+	param_name = get_parameter_name(field, dolar_position);
+	if (param_name == NULL)
 		return (false);
-	param_name = string_segment_extract(field->value, start,
-			field->value->peek - start);
 	param_value = get_param_value(param_name + 1);
 	value_length = ft_strlen(param_value);
-	is_double_quoted = field->mask->data[start] & DOUBLE_QUOTED;
-	field_replace(field, start, field->value->peek - start, param_value);
+	is_double_quoted = field->mask->data[dolar_position] & DOUBLE_QUOTED;
+	field_replace(field, dolar_position,
+			field->value->peek - dolar_position, param_value);
 	if (is_double_quoted)
-		ft_memset(field->mask->data + start, EXPANDED | DOUBLE_QUOTED, value_length);
-	field_peek_set(field, start + value_length);
+		ft_memset(field->mask->data + dolar_position, EXPANDED | DOUBLE_QUOTED, value_length);
+	field_peek_set(field, dolar_position + value_length);
 	return (true);
 }
 
@@ -387,7 +411,8 @@ void	append_trailing_slash(void	*field_ptr)
 
 	field = field_ptr;
 	string_append(field->value, "/");
-	string_append(field->mask, "1");
+	string_append(field->mask, "/");
+	field->mask->data[field->mask->size - 1] = EXPANDED;
 }
 
 bool	trim_trailing_slash(t_field *pattern)
@@ -446,7 +471,7 @@ t_field	*get_dentry_field(char *dentry_name)
 	t_field	*dentry_field;
 
 	dentry_field = field_init(dentry_name, NULL);
-	// we never expand do pathname expansion inside quotes a.k.a '*' or "*"
+	// we never do pathname expansion inside quotes a.k.a '*' or "*"
 	// this means dentry_field mask is always set to only EXPANDED
 	ft_memset(dentry_field->mask->data, EXPANDED, dentry_field->mask->size);
 	return (dentry_field);
