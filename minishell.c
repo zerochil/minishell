@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/15 16:33:19 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/16 16:13:04 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,7 +241,12 @@ int	main()
 	}
 	while (1)
 	{
-		line = readline("minishell> ");
+		line = readline(prompt());
+		if (line == NULL || ft_strlen(line) == 0)
+		{
+			free(line);
+			continue;
+		}
 		add_history(line);
 		string_set(&input, line);
 		tokens = tokenize(&input);
@@ -249,8 +254,8 @@ int	main()
 			continue ;
 		list = generate_ast(tokens);
 		array_do(list, handle_expansions);
-		array_do(list, print);
-		//execution(list);
+		//array_do(list, print);
+		execution(list);
 		free(line);
 	}
 	rl_clear_history();

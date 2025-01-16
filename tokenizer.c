@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:07 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/14 21:01:25 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/16 09:49:40 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ static t_token	*tokenize_word(t_string *input)
 	return (token_init(0, word));
 }
 
-static t_token	*tokenize_non_word(t_string *input)
+static	t_token	*tokenize_non_word(t_string *input)
 {
 	t_array	*lexems;
 	t_lexem	*lexem;
