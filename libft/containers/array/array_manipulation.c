@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 10:57:55 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/10 16:59:48 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/17 10:02:50 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,4 +95,21 @@ void *array_replace(t_array *array, size_t index, void *element)
 	old_element = array->data[index];
 	array->data[index] = element;
 	return (old_element);
+}
+
+void	array_merge(t_array *dest, t_array *src)
+{
+	size_t	i;
+
+	if (!dest || !src)
+	{
+		ft_putendl_fd("Error: array_merge", 2);
+		return ;
+	}
+	i = 0;
+	while (i < src->size)
+	{
+		array_push(dest, src->data[i]);
+		i++;
+	}
 }

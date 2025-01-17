@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/17 09:48:14 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/17 10:05:15 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,6 @@ bool	is_assingment_word(t_token *token)
 	key = get_key(token->value);
 	if (key == NULL)
 		return (false);
-	printf("DEBUG: is_assingment_word: key=%s\n", key);
 	free(key);
 	return (true);
 }
@@ -256,8 +255,8 @@ int	main()
 			continue ;
 		list = generate_ast(tokens);
 		array_do(list, handle_expansions);
-		array_do(list, print);
-		//execution(list);
+		//array_do(list, print);
+		execution(list);
 		free(line);
 	}
 	rl_clear_history();

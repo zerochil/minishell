@@ -261,22 +261,39 @@ int execute_subshell(t_ast_node *node)
 	return (WTERMSIG(status) + 128);
 }
 
-char **get_arg_list(t_array *tokens)
+char **build_arg_list(t_array *fields)
 {
-	t_token *token;
+	t_field *field;
 	char **args;
 	size_t i;
 
-	args = track_malloc(sizeof(char *) * (tokens->size + 1));
+	args = track_malloc(sizeof(char *) * (fields->size + 1));
 	i = 0;
-	while (i < tokens->size)
+	while (i < fields->size)
 	{
-		token = array_get(tokens, i);
-		args[i] = token->value;
+		field = array_get(fields, i);
+		args[i] = field->value->data;
 		i++;
 	}
 	args[i] = NULL;
 	return (args);
+}
+
+char **get_arg_list(t_array	*tokens)
+{
+	t_token *token;
+	t_array	fields;
+	size_t	i;
+
+	array_init(&fields);
+	i = 0;
+	while (i < tokens->size)
+	{
+		token = array_get(tokens, i);
+		array_merge(&fields, token->fields);
+		i++;
+	}
+	return (build_arg_list(&fields));
 }
 
 char *get_command_path(char *command_name)
@@ -387,22 +404,22 @@ int handle_redirection(t_array *redirection_list, int *fd_out, int *fd_in)
 {
 	int open_error;
 	t_token *token;
-	t_array *token_list;
+	t_field *field;
 
 	while (true)
 	{
-		token_list = array_shift(redirection_list);
-		if (token_list == NULL)
+		token = array_shift(redirection_list);
+		if (token == NULL)
 			break;
-		if (token_list->size != 1)
+		if (token->fields->size != 1)
 			return (report_error("minishell: ambiguous redirect"), -1);
-		token = array_shift(token_list);
+		field = array_shift(token->fields);
 		if (token->type == lexem_get_type("REDIRECTION_IN") || token->type == lexem_get_type("HERE_DOCUMENT"))
-			open_error = open_file(token->value, O_RDONLY, fd_in);
+			open_error = open_file(field->value->data, O_RDONLY, fd_in);
 		else if (token->type == lexem_get_type("REDIRECTION_TRUNC"))
-			open_error = open_file(token->value, O_WRONLY | O_CREAT | O_TRUNC, fd_out);
+			open_error = open_file(field->value->data, O_WRONLY | O_CREAT | O_TRUNC, fd_out);
 		else if (token->type == lexem_get_type("REDIRECTION_APPEND"))
-			open_error = open_file(token->value, O_WRONLY | O_CREAT | O_APPEND, fd_out);
+			open_error = open_file(field->value->data, O_WRONLY | O_CREAT | O_APPEND, fd_out);
 		else
 			error("handle_redirection: error");
 		if (open_error == -1)

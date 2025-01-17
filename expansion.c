@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/16 10:02:04 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/17 10:04:37 by inajah           ###   ########.fr       */
 /*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
@@ -330,18 +330,6 @@ void field_splitting(void *token_ptr)
 }
 
 /////////////////////////////// pathname expansion /////////////////////////////////
-
-void	array_merge(t_array *dest, t_array *src)
-{
-	size_t	i;
-
-	i = 0;
-	while (i < src->size)
-	{
-		array_push(dest, src->data[i]);
-		i++;
-	}
-}
 
 t_field	*field_copy(t_field *field)
 {
