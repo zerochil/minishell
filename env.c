@@ -84,7 +84,7 @@ t_array *get_environment_instance()
 	return (&environment);
 }
 
-static char *get_key(char *var)
+char *get_key(char *var)
 {
 	char *equal_pos;
 	int key_len;

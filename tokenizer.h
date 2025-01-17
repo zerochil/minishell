@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:33 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/07 18:17:25 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/14 20:55:01 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define TOKENIZER_H
 
 # include "lexer.h"
+# include "field.h"
 # include "libft/libft.h"
 
 # define META_CHARACTERS "|&()<>\n \t"
@@ -22,8 +23,9 @@
 typedef struct s_token
 {
 	int			type;
-	t_string	*value;
-	t_string	*mask;
+	char		*value;
+	bool		should_field_split;
+	t_array		*fields; 
 }				t_token;
 
 t_array	*tokenize(t_string *input);

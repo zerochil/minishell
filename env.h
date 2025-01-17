@@ -11,6 +11,7 @@ void env_unset(char *var);
 char *env_get(char *key);
 char **env_get_array();
 
+char *get_key(char *var);
 int compare_strings(void *a, void *b);
 int match_key(void *element_ptr, void *target_ptr);
 

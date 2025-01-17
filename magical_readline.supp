@@ -2,16 +2,6 @@
 	<generalized_readline_leak>
 	Memcheck:Leak
 	...
-	fun:tokenize
-	...
-}
-
-
-
-{
-	<generalized_readline_leak>
-	Memcheck:Leak
-	...
 	fun:rl_redisplay
 }
 {

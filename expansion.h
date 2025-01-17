@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/04 17:13:33 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/10 16:55:24 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/15 17:10:18 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,26 @@
 
 # include "minishell.h"
 # include "ast.h"
+# include "field.h"
 # include <dirent.h>
 
-typedef struct s_field
+enum
 {
-	int		type;
-	t_array *tokens;
-}	t_field;
+	ORIGINAL = 0,		// 000
+	EXPANDED = 1, 		// 001                
+	SINGLE_QUOTED = 2,  // 010
+	DOUBLE_QUOTED = 4,  // 100
+};
 
-void	expansion_and_field_splitting(t_ast_node *node);
-void	pathname_expansion(t_ast_node *node);
-void	quote_removal(t_ast_node *node);
-void	token_replace_param(t_token *token);
+void	parameter_expansion(void *token_ptr);
+void	field_splitting(void *token_ptr);
+void	pathname_expansion(void *token_ptr);
+void	quote_removal(void *token_ptr);
+
+bool	expand_field_parameter(t_field *field, int single_quoted_flag);
+bool	remove_quotes_from_field(t_field *field);
+
+
+void	field_set(t_field *field, char *value);
 
 #endif

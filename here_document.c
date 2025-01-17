@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 15:17:55 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/10 17:14:41 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/15 17:21:00 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,43 +49,21 @@ bool	is_delimiter(t_string *line, t_string *delimiter)
 	return (string_match(line, delimiter->data, ft_strcmp, 0));
 }
 
-void	expand_parameters(t_string *string)
-{
-	t_token	token;
-	char c;
-
-	string_peek_reset(string);
-	token.type = 0;
-	token.value = string;
-	token.mask = NULL;
-	while (true)
-	{
-		c = string_peek(string);
-		if (c == '\0')
-			break;
-		if (c != '$')
-			string_peek_advance(string);
-		else
-			token_replace_param(&token);
-	}
-}
-
-bool	was_quoted(t_token *token)
-{
-	return (token->mask->data[0] != '2');
-}
-
+//TODO: test this
+//$ env -i ./minishell; cat <<""$HOME 
+//		> $PWD
+//		> $HOME 
 //TODO: no idea what should happen if open/file creation fails.
-void	heredoc(char *path, t_token *delimiter)
+void	heredoc(char *path, t_field *delimiter, bool should_expand)
 {
 	int		fd;
 	char	*line;
-	t_string string;
+	t_field *field;
 
 	fd = open(path, O_WRONLY | O_TRUNC | O_CREAT, 0644);
 	if (fd < 0)
 		return ;
-	string_init(&string);
+	field = field_init("", NULL);
 	while (true)
 	{
 		line = readline("> ");
@@ -94,30 +72,32 @@ void	heredoc(char *path, t_token *delimiter)
 			printf(ERR_HEREDOC_DELIM" (wanted `%s')\n", delimiter->value->data);
 			break;
 		}
-		string_set(&string, line);
-		if (is_delimiter(&string, delimiter->value))
+		field_set(field, line);
+		if (is_delimiter(field->value, delimiter->value))
 			break ;
-		if (was_quoted(delimiter))
-			expand_parameters(&string);
-		write(fd, string.data, string.size);
+		if (should_expand)
+			expand_field_parameter(field, 0);
+		write(fd, field->value->data, field->value->size);
 		write(fd, "\n", 1);
 	}
 	close(fd);
 }
 
-void	handle_heredoc(void *tokens_ptr)
+void	handle_heredoc(void *token_ptr)
 {
-	t_array	*tokens;
 	t_token	*token;
+	t_field	*field;
 	char	*temp_name;
+	bool	should_expand;
 
-	tokens = tokens_ptr;
-	if (tokens->size != 1)
+	token = token_ptr;
+	if (token->fields->size != 1)
 		return ;
-	token = tokens->data[0];
 	if (token->type != lexem_get_type("HERE_DOCUMENT"))
 		return ;
+	field = array_get(token->fields, 0);
 	temp_name = generate_random_name();
-	heredoc(temp_name, token);
-	string_set(token->value, temp_name);
+	should_expand = (remove_quotes_from_field(field) == false);
+	heredoc(temp_name, field, should_expand);
+	string_set(field->value, temp_name);
 }

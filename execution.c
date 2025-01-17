@@ -149,6 +149,7 @@ int should_not_fork(t_array *commands)
 {
 	t_ast_node *command_node;
 	t_token *token;
+	t_field	*field;
 	char *command_name;
 
 	if (commands->size != 1)
@@ -159,7 +160,8 @@ int should_not_fork(t_array *commands)
 	token = array_get(command_node->children, 0);
 	if (token == NULL)
 		return (0);
-	command_name = token->value->data;
+	field = array_get(token->fields, 0);
+	command_name = field->value->data;
 	if (is_builtin(command_name) == 0)
 		return (0);
 	return (1);
@@ -305,22 +307,39 @@ int execute_subshell(t_ast_node *node)
 	return (-1);
 }
 
+char **build_arg_list(t_array *fields)
+{
+        t_field *field;
+        char **args;
+        size_t i;
+
+        args = track_malloc(sizeof(char *) * (fields->size + 1));
+        i = 0;
+        while (i < fields->size)
+        {
+                field = array_get(fields, i);
+                args[i] = field->value->data;
+                i++;
+        }
+        args[i] = NULL;
+        return (args);
+}
+
 char **get_arg_list(t_array *tokens)
 {
-	t_token *token;
-	char **args;
-	size_t i;
+        t_token *token;
+        t_array fields;
+        size_t  i;
 
-	args = track_malloc(sizeof(char *) * (tokens->size + 1));
-	i = 0;
-	while (i < tokens->size)
-	{
-		token = array_get(tokens, i);
-		args[i] = token->value->data;
-		i++;
-	}
-	args[i] = NULL;
-	return (args);
+        array_init(&fields);
+        i = 0;
+        while (i < tokens->size)
+        {
+                token = array_get(tokens, i);
+                array_merge(&fields, token->fields);
+                i++;
+        }
+        return (build_arg_list(&fields));
 }
 
 char *build_command_path(char *path, char *command_name)
@@ -408,6 +427,7 @@ int execute_simple_command(t_ast_node *node)
 		return (1);
 	command_context.args = get_arg_list(node->children);
 	command_context.envp = env_get_array();
+	status = 0;
 	if (command_context.args[0] != NULL)
 	{
 		if (is_builtin(command_context.args[0]))
@@ -423,22 +443,22 @@ int handle_redirection(t_array *redirection_list, t_stream *stream)
 {
 	int open_error;
 	t_token *token;
-	t_array *token_list;
+	t_field *field;
 
 	while (true)
 	{
-		token_list = array_shift(redirection_list);
-		if (token_list == NULL)
+		token = array_shift(redirection_list);
+		if (token == NULL)
 			break;
-		if (token_list->size != 1)
+		if (token->fields->size != 1)
 			return (report_error("minishell: ambiguous redirect"), -1);
-		token = array_shift(token_list);
+		field = array_shift(token->fields);
 		if (token->type == lexem_get_type("REDIRECTION_IN") || token->type == lexem_get_type("HERE_DOCUMENT"))
-			open_error = open_file(token->value->data, O_RDONLY, &stream->read);
+			open_error = open_file(field->value->data, O_RDONLY, &stream->read);
 		else if (token->type == lexem_get_type("REDIRECTION_TRUNC"))
-			open_error = open_file(token->value->data, O_WRONLY | O_CREAT | O_TRUNC, &stream->write);
+			open_error = open_file(field->value->data, O_WRONLY | O_CREAT | O_TRUNC, &stream->write);
 		else if (token->type == lexem_get_type("REDIRECTION_APPEND"))
-			open_error = open_file(token->value->data, O_WRONLY | O_CREAT | O_APPEND, &stream->write);
+			open_error = open_file(field->value->data, O_WRONLY | O_CREAT | O_APPEND, &stream->write);
 		else
 			error("handle_redirection: error");
 		if (open_error == -1)

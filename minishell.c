@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/10 17:01:45 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/17 16:29:20 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,35 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 #include "execution.h"
+
+void	print_field(void *field_ptr)
+{
+	t_field	*field;
+
+
+	field = field_ptr;
+
+	printf("{%s, ", field->value->data);
+#if 0
+	size_t	i=0;
+	while (i < field->mask->size)
+	{ 	
+		char c = 'O';
+		char q = ' ';
+		if (field->mask->data[i] & EXPANDED)
+			c = 'E';
+
+		if (field->mask->data[i] & SINGLE_QUOTED)
+			q = 'S';
+		else if (field->mask->data[i] & DOUBLE_QUOTED)
+			q = 'D';
+		printf("<%c%c>", c, q);
+		i++;
+	}
+#endif
+	printf("}");
+	fflush(NULL);
+}
 
 void	print_token(void *token_ptr)
 {
@@ -38,17 +67,20 @@ void	print_token(void *token_ptr)
 		id = "EOF";
 	else
 		id = ((t_lexem *)(lexems->data[token->type - 1]))->identifier;
-	printf("[%s, %s]", id, token->value->data);
+	printf("[%s, ", id);
 	fflush(NULL);
+	array_do(token->fields, print_field);
+	printf("]");
 }
 
 void	print_redirection(void *tokens_ptr)
 {
-	t_array *tokens;
+	//t_array *tokens;
 
-	tokens = tokens_ptr;
+	//tokens = tokens_ptr;
 	printf("{");
-	array_do(tokens, print_token);
+//	array_do(tokens, print_token);
+	print_token(tokens_ptr);
 	printf("}");
 }
 
@@ -101,6 +133,69 @@ static void	print(void *node_ptr)
 	}
 }
 
+enum
+{
+	NO_EXPANSIONS = 0,
+	PARAMETER_EXPANSION = 1,
+	FIELD_SPLITTING = 2,
+	PATHNAME_EXPANSION = 4,
+	QUOTE_REMOVAL = 8,
+	ALL_EXPANSIONS = 15,
+};
+
+bool	is_export_command(t_token *token)
+{
+	return (ft_strcmp("export", token->value) == 0);
+}
+
+bool	is_assingment_word(t_token *token)
+{
+	char *key;
+
+	key = get_key(token->value);
+	if (key == NULL)
+		return (false);
+	free(key);
+	return (true);
+}
+
+void	expand_token(t_token *token, int flag)
+{
+	if (flag & PARAMETER_EXPANSION)
+		parameter_expansion(token);
+	if (flag & FIELD_SPLITTING)
+		field_splitting(token);
+	if (flag & PATHNAME_EXPANSION)
+		pathname_expansion(token);
+	if (flag & QUOTE_REMOVAL)
+		quote_removal(token);
+}
+
+void	expansion(t_array *tokens)
+{
+	t_token	*token;
+	int	flag;
+	bool	is_export;
+	size_t	i;
+
+	i = 0;
+	if (tokens->size == 0)
+		return ;
+	is_export = false;
+	while (i < tokens->size)
+	{
+		token = array_get(tokens, i);
+		flag = ALL_EXPANSIONS;
+		if (token->type == lexem_get_type("HERE_DOCUMENT"))
+			flag = NO_EXPANSIONS;
+		else if (token->type == lexem_get_type("WORD") && is_export && is_assingment_word(token))
+			flag = PARAMETER_EXPANSION | QUOTE_REMOVAL;
+		expand_token(token, flag);
+		is_export = is_export_command(token);
+		i++;
+	}
+}
+
 static void	handle_expansions(void *node_ptr)
 {
 	t_ast_node *node;
@@ -115,18 +210,11 @@ static void	handle_expansions(void *node_ptr)
 	}
 	if (node->type == AST_SUBSHELL)
 		array_do(node->children, handle_expansions);
-	
-	expansion_and_field_splitting(node);
-	pathname_expansion(node);
-	quote_removal(node);
+	if (node->type == AST_SIMPLE_COMMAND)
+		expansion(node->children);
+	expansion(node->redirect_list);
 	array_do(node->redirect_list, handle_heredoc);
 }
-
-typedef struct s_context
-{
-	t_array	*ast_root_list;
-	t_array *pids;
-} t_context;
 
 int	main()
 {
@@ -146,14 +234,20 @@ int	main()
 		string_set(&input, line);
 		tokens = tokenize(&input);
 		list = generate_ast(tokens);
-		array_do(list, handle_expansions);
+	//	array_do(list, handle_expansions);
 		int status = execution(list);
 		manager_free_everything();
 		exit(status);
 	}
 	while (1)
 	{
-		line = readline("minishell> ");
+		line = readline(prompt());
+		if (line == NULL || ft_strlen(line) == 0)
+		{
+			free(line);
+			continue;
+		}
+		//TODO: add command to history if it is different than the previous one.
 		add_history(line);
 		string_set(&input, line);
 		tokens = tokenize(&input);
@@ -161,6 +255,7 @@ int	main()
 			continue ;
 		list = generate_ast(tokens);
 		array_do(list, handle_expansions);
+		//array_do(list, print);
 		execution(list);
 		free(line);
 	}
