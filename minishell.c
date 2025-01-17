@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/16 16:13:04 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/17 09:48:14 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,18 +145,19 @@ enum
 
 bool	is_export_command(t_token *token)
 {
-	t_field	*field;
-
-	if (token->fields->size == 0)
-		return (false);
-	field = array_get(token->fields, 0);
-	return (ft_strcmp("export", field->value->data) == 0);
+	return (ft_strcmp("export", token->value) == 0);
 }
 
 bool	is_assingment_word(t_token *token)
 {
 	//TODO: check if the token has this form: key=value or key+=value where key is a valid variable name
-	(void) token;
+	char *key;
+
+	key = get_key(token->value);
+	if (key == NULL)
+		return (false);
+	printf("DEBUG: is_assingment_word: key=%s\n", key);
+	free(key);
 	return (true);
 }
 
@@ -182,7 +183,7 @@ void	expansion(t_array *tokens)
 	i = 0;
 	if (tokens->size == 0)
 		return ;
-	is_export = is_export_command(array_get(tokens, 0));
+	is_export = false;
 	while (i < tokens->size)
 	{
 		token = array_get(tokens, i);
@@ -192,6 +193,7 @@ void	expansion(t_array *tokens)
 		else if (token->type == lexem_get_type("WORD") && is_export && is_assingment_word(token))
 			flag = PARAMETER_EXPANSION | QUOTE_REMOVAL;
 		expand_token(token, flag);
+		is_export = is_export_command(token);
 		i++;
 	}
 }
@@ -254,8 +256,8 @@ int	main()
 			continue ;
 		list = generate_ast(tokens);
 		array_do(list, handle_expansions);
-		//array_do(list, print);
-		execution(list);
+		array_do(list, print);
+		//execution(list);
 		free(line);
 	}
 	rl_clear_history();
