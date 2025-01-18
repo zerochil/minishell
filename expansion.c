@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/18 09:17:06 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/18 10:20:25 by inajah           ###   ########.fr       */
 /*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
@@ -636,24 +636,16 @@ void	expansion(t_array *tokens)
 	}
 }
 
-void	handle_expansions(void *node_ptr)
+void	handle_expansions(t_ast_node *command)
 {
-	t_ast_node *node;
-
-	node = node_ptr;
-	if (node->children == NULL)
-		return ;
-	if (node->type != AST_SIMPLE_COMMAND && node->type != AST_SUBSHELL)
+	// TODO: chof lik hadi: $xbs kat woli b7ala derti $x
+	if (command->type != AST_SIMPLE_COMMAND && command->type != AST_SUBSHELL)
 	{
-		 array_do(node->children, handle_expansions);
-		 return ;
-	}
-	if (node->type == AST_SUBSHELL)
-	{
-		expansion(node->redirect_list);
+		error("Error: handle_expansions");
 		return ;
 	}
-	expansion(node->children);
-	expansion(node->redirect_list);
-	array_do(node->redirect_list, handle_heredoc);
+	if (command->type == AST_SIMPLE_COMMAND)
+		expansion(command->children);
+	expansion(command->redirect_list);
+	// array_do(node->redirect_list, handle_heredoc);
 }

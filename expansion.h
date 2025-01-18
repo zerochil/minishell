@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/04 17:13:33 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/18 08:56:58 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/18 10:10:28 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,8 @@ enum
 	ALL_EXPANSIONS = 15,
 };
 
-void	handle_expansions(void *node_ptr);
+void	handle_expansions(t_ast_node *command);
+void	expansion(t_array *tokens);
 
 bool	expand_field_parameter(t_field *field, int single_quoted_flag);
 bool	remove_quotes_from_field(t_field *field);

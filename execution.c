@@ -176,12 +176,10 @@ t_stream *stream_init(int pipeline_size)
 	i = 0;
 	while (i < pipeline_size)
 	{
-		streamline[i].read = -1;
-		streamline[i].write = -1;
+		streamline[i].read = STDIN_FILENO;
+		streamline[i].write = STDOUT_FILENO;
 		i++;
 	}
-	streamline[0].read = STDIN_FILENO;
-	streamline[pipeline_size - 1].write = STDOUT_FILENO;
 	return (streamline);
 }
 
@@ -223,19 +221,21 @@ void stream_dup2stdio(t_stream *stream)
 	stream_close(stream);
 } 
 
-pid_t fork_and_execute(t_array *commands, t_stream *streamline, size_t index)
+pid_t fork_and_execute(t_array *commands, t_stream *streamline, size_t index, int *pid)
 {
-	pid_t pid;
+	//pid_t pid;
 	int status;
 
-	pid = fork();
-	if (pid == -1)
+	if (should_not_fork(commands))
+		return (execute_command(array_get(commands, index)));
+	*pid = fork();
+	if (*pid == -1)
 	{
 		perror("minishell");
 		error(NULL);
 	}
-	else if (pid > 0)
-		return (pid);
+	else if (*pid > 0)
+		return (*pid);
 	stream_dup2stdio(&streamline[index]);
 	if (index != commands->size - 1)
 		stream_close(&streamline[index + 1]);
@@ -252,22 +252,23 @@ int execute_pipeline(t_ast_node *node)
 	int status;
 	pid_t pid;
 
-	handle_expansions(node);
 	commands = node->children;
-	if (should_not_fork(commands))
-		return (execute_command(array_get(commands, 0)));
 	index = 0;
 	streamline = stream_init(commands->size);
+	pid = -1;
 	while (index < commands->size)
 	{
+
+		handle_expansions(array_get(commands, index));
 		if (index < commands->size - 1)
 			create_pipe(streamline, index);
-		pid = fork_and_execute(commands, streamline, index);
+		status = fork_and_execute(commands, streamline, index, &pid);
 		stream_close(&streamline[index]);
-		pid_push(pid);
+		// pid_push(pid);
 		index++;
 	}
-	waitpid(pid, &status, 0);
+	if (pid > 0)
+		waitpid(pid, &status, 0);
 	while (wait(NULL) > 0)
 		;
 	/*parameter_set("?", ft_itoa(WEXITSTATUS(status)));*/
