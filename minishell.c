@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/17 16:29:20 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/18 08:58:55 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 #include "minishell.h"
 #include "tokenizer.h"
 #include "ast.h"
-#include "expansion.h"
-#include "here_document.h"
 #include <readline/history.h>
 #include <readline/readline.h>
 #include "execution.h"
@@ -133,89 +131,6 @@ static void	print(void *node_ptr)
 	}
 }
 
-enum
-{
-	NO_EXPANSIONS = 0,
-	PARAMETER_EXPANSION = 1,
-	FIELD_SPLITTING = 2,
-	PATHNAME_EXPANSION = 4,
-	QUOTE_REMOVAL = 8,
-	ALL_EXPANSIONS = 15,
-};
-
-bool	is_export_command(t_token *token)
-{
-	return (ft_strcmp("export", token->value) == 0);
-}
-
-bool	is_assingment_word(t_token *token)
-{
-	char *key;
-
-	key = get_key(token->value);
-	if (key == NULL)
-		return (false);
-	free(key);
-	return (true);
-}
-
-void	expand_token(t_token *token, int flag)
-{
-	if (flag & PARAMETER_EXPANSION)
-		parameter_expansion(token);
-	if (flag & FIELD_SPLITTING)
-		field_splitting(token);
-	if (flag & PATHNAME_EXPANSION)
-		pathname_expansion(token);
-	if (flag & QUOTE_REMOVAL)
-		quote_removal(token);
-}
-
-void	expansion(t_array *tokens)
-{
-	t_token	*token;
-	int	flag;
-	bool	is_export;
-	size_t	i;
-
-	i = 0;
-	if (tokens->size == 0)
-		return ;
-	is_export = false;
-	while (i < tokens->size)
-	{
-		token = array_get(tokens, i);
-		flag = ALL_EXPANSIONS;
-		if (token->type == lexem_get_type("HERE_DOCUMENT"))
-			flag = NO_EXPANSIONS;
-		else if (token->type == lexem_get_type("WORD") && is_export && is_assingment_word(token))
-			flag = PARAMETER_EXPANSION | QUOTE_REMOVAL;
-		expand_token(token, flag);
-		is_export = is_export_command(token);
-		i++;
-	}
-}
-
-static void	handle_expansions(void *node_ptr)
-{
-	t_ast_node *node;
-
-	node = node_ptr;
-	if (node->children == NULL)
-		return ;
-	if (node->type != AST_SIMPLE_COMMAND && node->type != AST_SUBSHELL)
-	{
-		 array_do(node->children, handle_expansions);
-		 return ;
-	}
-	if (node->type == AST_SUBSHELL)
-		array_do(node->children, handle_expansions);
-	if (node->type == AST_SIMPLE_COMMAND)
-		expansion(node->children);
-	expansion(node->redirect_list);
-	array_do(node->redirect_list, handle_heredoc);
-}
-
 int	main()
 {
 	char		*line;
@@ -254,7 +169,7 @@ int	main()
 		if (tokens == NULL)
 			continue ;
 		list = generate_ast(tokens);
-		array_do(list, handle_expansions);
+		//array_do(list, handle_expansions);
 		//array_do(list, print);
 		execution(list);
 		free(line);

@@ -14,6 +14,7 @@
 #include "tokenizer.h"
 #include "builtins.h"
 #include "env.h"
+#include "expansion.h"
 #include "utils.h"
 
 

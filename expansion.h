@@ -6,14 +6,14 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/04 17:13:33 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/15 17:10:18 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/18 08:56:58 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef EXPANSION_H
 # define EXPANSION_H
 
-# include "minishell.h"
+# include "here_document.h"
 # include "ast.h"
 # include "field.h"
 # include <dirent.h>
@@ -26,14 +26,20 @@ enum
 	DOUBLE_QUOTED = 4,  // 100
 };
 
-void	parameter_expansion(void *token_ptr);
-void	field_splitting(void *token_ptr);
-void	pathname_expansion(void *token_ptr);
-void	quote_removal(void *token_ptr);
+enum
+{
+	NO_EXPANSIONS = 0,
+	PARAMETER_EXPANSION = 1,
+	FIELD_SPLITTING = 2,
+	PATHNAME_EXPANSION = 4,
+	QUOTE_REMOVAL = 8,
+	ALL_EXPANSIONS = 15,
+};
+
+void	handle_expansions(void *node_ptr);
 
 bool	expand_field_parameter(t_field *field, int single_quoted_flag);
 bool	remove_quotes_from_field(t_field *field);
-
 
 void	field_set(t_field *field, char *value);
 

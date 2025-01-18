@@ -252,6 +252,7 @@ int execute_pipeline(t_ast_node *node)
 	int status;
 	pid_t pid;
 
+	handle_expansions(node);
 	commands = node->children;
 	if (should_not_fork(commands))
 		return (execute_command(array_get(commands, 0)));
