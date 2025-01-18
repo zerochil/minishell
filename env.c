@@ -9,11 +9,20 @@ int match_key(void *element_ptr, void *target_ptr)
 {
 	char *element;
 	char *target;
+	size_t	element_length;
+	size_t	target_length;
 
 	element = (char *)element_ptr;
 	target = (char *)target_ptr;
+	//printf("DEBUG: match_key: element:%s | target:%s\n", element, target);
 	if (ft_strchr(element, '='))
-		return (ft_strncmp(element, target, ft_strcspn(element, "=")) == 0);
+	{
+		element_length = ft_strcspn(element, "=");
+		target_length = ft_strlen(target);
+		if (element_length < target_length)
+			element_length = target_length;
+		return (ft_strncmp(element, target, element_length) == 0);
+	}
 	return (ft_strcmp(element, target) == 0);
 }
 
