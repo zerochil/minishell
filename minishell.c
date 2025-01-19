@@ -20,6 +20,10 @@
 #include <readline/readline.h>
 #include "execution.h"
 
+#include "signals.h"
+#include <termios.h>
+#include "utils.h"
+
 void	print_field(void *field_ptr)
 {
 	t_field	*field;
@@ -216,6 +220,7 @@ static void	handle_expansions(void *node_ptr)
 	array_do(node->redirect_list, handle_heredoc);
 }
 
+
 int	main()
 {
 	char		*line;
@@ -223,8 +228,29 @@ int	main()
 	t_array		*tokens;
 	t_array		*list;
 
+	// TODO: reset STDI/O to default in case of: `./minishell < file`;
+	// TODO: init all instances
 	get_environment_instance();
+	get_context_instance();
+
 	string_init(&input);
+
+    struct sigaction sa;
+    sa.sa_handler = handle_signal;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+
+    sigaction(SIGQUIT, &sa, NULL);
+    sigaction(SIGINT, &sa, NULL);
+
+
+    /*struct termios old_termios;*/
+	/*configure_terminal(&old_termios);*/
+    /*struct termios new_termios;*/
+    /*tcgetattr(STDIN_FILENO, &new_termios);*/
+    /*new_termios.c_lflag &= ~ECHOCTL; // Disable echo of control characters*/
+    /*tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);*/
+
 
 	if (isatty(0) == 0)
 	{
@@ -245,7 +271,8 @@ int	main()
 		if (line == NULL || ft_strlen(line) == 0)
 		{
 			free(line);
-			continue;
+			destroy_context();
+			exit(0);
 		}
 		//TODO: add command to history if it is different than the previous one.
 		add_history(line);

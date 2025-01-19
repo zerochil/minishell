@@ -6,26 +6,6 @@ void clean_exit(int status)
 	exit(status);
 }
 
-typedef struct s_context
-{
-	t_array	*ast_root_list;
-	t_array *pids;
-} t_context;
-
-t_context *get_context_instance()
-{
-	static t_context context;
-
-	if (context.pids == NULL)
-	{
-		/*printf("jidosa");*/
-		context.pids = track_malloc(sizeof(t_array));
-		array_init(context.pids);
-	}
-	return (&context);
-}
-
-
 int execution(t_array *ast_root_list)
 {
 	t_ast_node *ast_root;
@@ -132,6 +112,14 @@ void pid_push(pid_t pid)
 
 	context = get_context_instance();
 	array_push(context->pids, (void *)(intptr_t)pid);
+}
+
+bool pid_is_empty(void)
+{
+	t_context *context;
+
+	context = get_context_instance();
+	return (context->pids->size == 0);
 }
 
 // ->> END PID MANAGEMENT

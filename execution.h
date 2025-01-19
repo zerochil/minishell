@@ -15,6 +15,7 @@
 #include "builtins.h"
 #include "env.h"
 #include "utils.h"
+#include "context.h"
 
 
 #ifndef PATH_MAX
