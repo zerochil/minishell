@@ -6,13 +6,108 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 15:17:55 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/15 17:21:00 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/19 16:01:55 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "here_document.h"
 
-char	*generate_random_name(void)
+#define ERR_HEREDOC_DELIM "minishell: warning: here_document delimited by end-of-file"
+
+bool	is_delimiter(char *line, char *delimiter)
+{
+	if (ft_strlen(line) == 1 && line[0] == '\n')
+		return (false);
+	return (ft_strcmp(line, delimiter) == 0);
+}
+
+static size_t	get_second_line(char *input)
+{
+	char in_quote;
+	char c;
+	size_t	i;
+
+	in_quote = '\0';
+	i = 0;
+	while (input[i])
+	{
+		c = input[i];
+		if (c == '\0')
+			break;
+		if (in_quote == '\0' && (c == '\'' || c == '"'))
+			in_quote = c;
+		else if (in_quote == c)
+			in_quote = '\0';
+		if (in_quote == '\0' && c == '\n')
+			break;
+		i++;
+	}
+	return (i);
+}
+
+static size_t start_here_document_prompt(t_string *input, char *delimiter)
+{
+	char *line;
+
+	while (true)
+	{
+		line = readline("> ");
+		if (line == NULL)
+		{
+			printf(ERR_HEREDOC_DELIM" (wanted `%s')\n", delimiter);
+			break ;
+		}
+		if (is_delimiter(line, delimiter))
+			break ;
+		string_append(input, line);
+		string_append(input, "\n");
+		free(line);
+	}
+	free(line);
+	return (input->size);
+}
+
+static size_t get_delimiter_position(t_string *input, size_t start, char *delimiter)
+{
+	size_t	end;
+
+	while (start < input->size)
+	{
+		//printf("input: \"%s\",size: %ld, start: %ld\n", input->data, input->size, start);
+		end  = get_second_line(input->data + start);
+		//printf("-end: %ld\n", end);
+		if (is_delimiter(string_segment_extract(input, start, end - start), delimiter))
+			return (start);
+		start = end + 1;
+	}
+	return (start_here_document_prompt(input, delimiter));
+}
+
+static void expand_parameter_heredoc(t_string *content)
+{
+	(void)content;
+}
+
+char *get_here_document_content(t_string *input, t_field *delimiter)
+{
+	t_string content;
+	bool delimiter_quoted;
+	size_t start;
+	size_t delimiter_position;
+
+	delimiter_quoted = remove_quotes_from_field(delimiter);
+	start = get_second_line(input->data);
+	delimiter_position = get_delimiter_position(input, start, delimiter->value->data);
+	if (delimiter_position < input->size)
+		string_segment_remove(input, delimiter_position, delimiter->value->size + 1);
+	string_init(&content);
+	string_set(&content, string_segment_slice(input, start, delimiter_position - start));
+	if (!delimiter_quoted)
+		expand_parameter_heredoc(&content);
+	return (content.data);
+}
+
+static char	*generate_random_name_here(void)
 {
 	char	*path;
 	char	*id;
@@ -40,64 +135,17 @@ char	*generate_random_name(void)
 	return (path);
 }
 
-#define ERR_HEREDOC_DELIM "minishell: warning: here_document delimited by end-of-file"
-
-bool	is_delimiter(t_string *line, t_string *delimiter)
+char *here_document_to_temp_file(char *here_document_content)
 {
-	if (line->size == 1 && string_peek(line) == '\n')
-		return (false);
-	return (string_match(line, delimiter->data, ft_strcmp, 0));
-}
+	char *filename;
+	int	fd;
 
-//TODO: test this
-//$ env -i ./minishell; cat <<""$HOME 
-//		> $PWD
-//		> $HOME 
-//TODO: no idea what should happen if open/file creation fails.
-void	heredoc(char *path, t_field *delimiter, bool should_expand)
-{
-	int		fd;
-	char	*line;
-	t_field *field;
-
-	fd = open(path, O_WRONLY | O_TRUNC | O_CREAT, 0644);
+	filename = generate_random_name_here();
+	fd = open(filename, O_WRONLY | O_TRUNC | O_CREAT, 0644);
 	if (fd < 0)
-		return ;
-	field = field_init("", NULL);
-	while (true)
-	{
-		line = readline("> ");
-		if (line == NULL)
-		{
-			printf(ERR_HEREDOC_DELIM" (wanted `%s')\n", delimiter->value->data);
-			break;
-		}
-		field_set(field, line);
-		if (is_delimiter(field->value, delimiter->value))
-			break ;
-		if (should_expand)
-			expand_field_parameter(field, 0);
-		write(fd, field->value->data, field->value->size);
-		write(fd, "\n", 1);
-	}
+		return (filename);
+	write(fd, here_document_content, ft_strlen(here_document_content));
 	close(fd);
+	return (filename);
 }
 
-void	handle_heredoc(void *token_ptr)
-{
-	t_token	*token;
-	t_field	*field;
-	char	*temp_name;
-	bool	should_expand;
-
-	token = token_ptr;
-	if (token->fields->size != 1)
-		return ;
-	if (token->type != lexem_get_type("HERE_DOCUMENT"))
-		return ;
-	field = array_get(token->fields, 0);
-	temp_name = generate_random_name();
-	should_expand = (remove_quotes_from_field(field) == false);
-	heredoc(temp_name, field, should_expand);
-	string_set(field->value, temp_name);
-}

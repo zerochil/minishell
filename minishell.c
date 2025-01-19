@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/18 08:58:55 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/19 15:19:26 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,6 +168,7 @@ int	main()
 		tokens = tokenize(&input);
 		if (tokens == NULL)
 			continue ;
+		//array_do(tokens, print_token);
 		list = generate_ast(tokens);
 		//array_do(list, handle_expansions);
 		//array_do(list, print);

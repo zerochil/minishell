@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:33 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/14 20:55:01 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/19 13:11:59 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include "lexer.h"
 # include "field.h"
+# include "here_document.h"
 # include "libft/libft.h"
 
 # define META_CHARACTERS "|&()<>\n \t"

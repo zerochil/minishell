@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/18 12:12:27 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/19 13:22:45 by inajah           ###   ########.fr       */
 /*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
@@ -31,6 +31,11 @@ char	*get_param_value(char *param_name)
 
 void	field_peek(t_field *field, char *c, char *m)
 {
+	if (field == NULL || c == NULL || m == NULL)
+	{
+		report_error("Error: field_peek");
+		return ;
+	}
 	*c = string_peek(field->value);
 	if (field->mask)
 		*m = string_peek(field->mask);
@@ -39,6 +44,11 @@ void	field_peek(t_field *field, char *c, char *m)
 
 void	field_peek_set(t_field *field, size_t peek)
 {
+	if (field == NULL || peek >= field->value->size)
+	{
+		report_error("Error: field_peek_set");
+		return ;
+	}
 	field->value->peek = peek;
 	if (field->mask)
 		field->mask->peek = peek;
@@ -46,6 +56,11 @@ void	field_peek_set(t_field *field, size_t peek)
 
 void	field_peek_advance(t_field *field)
 {
+	if (field == NULL)
+	{
+		report_error("Error: field_peek_advance");
+		return ;
+	}
 	string_peek_advance(field->value);
 	if (field->mask)
 		string_peek_advance(field->mask);
@@ -53,23 +68,38 @@ void	field_peek_advance(t_field *field)
 
 void	field_peek_reset(t_field *field)
 {
+	if (field == NULL)
+	{
+		report_error("Error: field_peek");
+		return ;
+	}
 	string_peek_reset(field->value);
 	if (field->mask)
 		string_peek_reset(field->mask);
 }
 
-void	field_set(t_field *field, char *value)
+void	field_set(t_field *field, char *value, unsigned char mask)
 {
+	if (field == NULL)
+	{
+		report_error("Error: field_set");
+		return ;
+	}
 	string_set(field->value, value);
 	string_set(field->mask, value);
 	field_peek_reset(field);
-	ft_memset(field->mask->data, EXPANDED, field->mask->size);
+	ft_memset(field->mask->data, mask, field->mask->size);
 }
 
 char	field_shift_at_peek(t_field *field)
 {
 	char	c;
 
+	if (field == NULL)
+	{
+		report_error("Error: field_shift_at_peek");
+		return (-1);
+	}
 	c = string_peek(field->value);
 	string_segment_remove(field->value, field->value->peek, 1);
 	if (field->mask)
@@ -79,6 +109,11 @@ char	field_shift_at_peek(t_field *field)
 
 void	field_shift(t_field *field)
 {
+	if (field == NULL)
+	{
+		report_error("Error: field_shift");
+		return ;
+	}
 	string_shift(field->value);
 	string_shift(field->mask);
 }
@@ -647,5 +682,4 @@ void	handle_expansions(t_ast_node *command)
 	if (command->type == AST_SIMPLE_COMMAND)
 		expansion(command->children);
 	expansion(command->redirect_list);
-	// array_do(node->redirect_list, handle_heredoc);
 }

@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:07 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/16 09:49:40 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/19 15:36:09 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ t_token	*token_init(int type, char *value)
 	token = track_malloc(sizeof(t_token));
 	token->type = type;
 	token->value = value;
+	token->fields = NULL;
 	if (value)
 	{
 		token->fields = track_malloc(sizeof(t_array));
@@ -94,6 +95,20 @@ static t_token	*tokenize_next(t_string *input)
 	return (token);
 }
 
+static void	tokenize_here_document(t_token *token, t_string *input)
+{
+	char *here_document_content;
+	char *filename;
+	t_field *delimiter;
+
+	if (token->fields == NULL)
+		return ;
+	delimiter = array_get(token->fields, 0);
+	here_document_content = get_here_document_content(input, delimiter);
+	filename = here_document_to_temp_file(here_document_content);
+	field_set(delimiter, filename, 0);
+}
+
 t_array	*tokenize(t_string *input)
 {
 	t_array	*tokens;
@@ -110,6 +125,9 @@ t_array	*tokenize(t_string *input)
 	while (1)
 	{
 		token = tokenize_next(input);
+		//TODO: check if we've found a here_document token;
+		if (token->type == lexem_get_type("HERE_DOCUMENT"))
+			tokenize_here_document(token, input);
 		array_push(tokens, token);
 		if (token->type == -1)
 			break ;
