@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 15:17:55 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/19 16:01:55 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/19 20:52:37 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,19 +16,28 @@
 
 bool	is_delimiter(char *line, char *delimiter)
 {
-	if (ft_strlen(line) == 1 && line[0] == '\n')
+	size_t	line_length;
+	size_t	delimiter_length;
+
+	line_length = ft_strlen(line);
+	if (line_length == 1 && line[0] == '\n')
 		return (false);
-	return (ft_strcmp(line, delimiter) == 0);
+	delimiter_length = ft_strlen(delimiter);
+	if (line_length > 0 && line[line_length - 1] == '\n')
+		line_length--;
+	if (delimiter_length > line_length)
+		line_length = delimiter_length;
+	return (ft_strncmp(line, delimiter, line_length) == 0);
 }
 
-static size_t	get_second_line(char *input)
+static size_t	get_second_line(char *input, size_t start)
 {
 	char in_quote;
 	char c;
 	size_t	i;
 
 	in_quote = '\0';
-	i = 0;
+	i = start;
 	while (input[i])
 	{
 		c = input[i];
@@ -39,16 +48,17 @@ static size_t	get_second_line(char *input)
 		else if (in_quote == c)
 			in_quote = '\0';
 		if (in_quote == '\0' && c == '\n')
-			break;
+			return (i + 1);
 		i++;
 	}
-	return (i);
+	return i;
 }
 
 static size_t start_here_document_prompt(t_string *input, char *delimiter)
 {
 	char *line;
 
+	string_append(input, "\n");
 	while (true)
 	{
 		line = readline("> ");
@@ -67,25 +77,46 @@ static size_t start_here_document_prompt(t_string *input, char *delimiter)
 	return (input->size);
 }
 
+int	expand_parameter(t_string *string, char *parameter_name);
+char *get_parameter_name(t_string *string, size_t dolar_position);
+
 static size_t get_delimiter_position(t_string *input, size_t start, char *delimiter)
 {
 	size_t	end;
+	char *tmp;
 
 	while (start < input->size)
 	{
-		//printf("input: \"%s\",size: %ld, start: %ld\n", input->data, input->size, start);
-		end  = get_second_line(input->data + start);
-		//printf("-end: %ld\n", end);
-		if (is_delimiter(string_segment_extract(input, start, end - start), delimiter))
+		//printf("# input: \"%s\",size: %ld, start: %ld\n", input->data, input->size, start);
+		end = get_second_line(input->data, start);
+		//printf("# end: %ld\n", end);
+		tmp = string_segment_extract(input, start, end - start);
+		//printf("slice: %s\n", tmp);
+		if (is_delimiter(tmp, delimiter))
 			return (start);
-		start = end + 1;
+		start = end;
 	}
 	return (start_here_document_prompt(input, delimiter));
 }
 
 static void expand_parameter_heredoc(t_string *content)
 {
-	(void)content;
+	char 	*parameter_name;
+	char	c;
+
+	while (true)
+	{
+		c = string_peek(content);
+		if (c == '\0')
+			break ;
+		if (c == '$')
+		{
+			parameter_name = get_parameter_name(content, content->peek);
+			if (expand_parameter(content, parameter_name) > 0)
+				continue;
+		}
+		string_peek_advance(content);
+	}
 }
 
 char *get_here_document_content(t_string *input, t_field *delimiter)
@@ -96,7 +127,7 @@ char *get_here_document_content(t_string *input, t_field *delimiter)
 	size_t delimiter_position;
 
 	delimiter_quoted = remove_quotes_from_field(delimiter);
-	start = get_second_line(input->data);
+	start = get_second_line(input->data, 0);
 	delimiter_position = get_delimiter_position(input, start, delimiter->value->data);
 	if (delimiter_position < input->size)
 		string_segment_remove(input, delimiter_position, delimiter->value->size + 1);

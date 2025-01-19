@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/19 13:22:45 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/19 20:50:15 by inajah           ###   ########.fr       */
 /*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
@@ -14,16 +14,16 @@
 #include "expansion.h"
 #include "env.h"
 
-char	*get_param_value(char *param_name)
+char	*parameter_get(char *parameter_name)
 {
-	char	*param_value;
+	char	*parameter_value;
 
-	if (ft_strcmp(param_name, "?") == 0)
+	if (ft_strcmp(parameter_name, "?") == 0)
 		return "EXIT_STATUS";
-	param_value = env_get(param_name);
-	if (param_value == NULL)
+	parameter_value = env_get(parameter_name);
+	if (parameter_value == NULL)
 		return ("");
-	return (param_value);
+	return (parameter_value);
 }
 
 
@@ -44,7 +44,7 @@ void	field_peek(t_field *field, char *c, char *m)
 
 void	field_peek_set(t_field *field, size_t peek)
 {
-	if (field == NULL || peek >= field->value->size)
+	if (field == NULL || peek > field->value->size)
 	{
 		report_error("Error: field_peek_set");
 		return ;
@@ -215,52 +215,70 @@ void	field_replace(t_field *field, size_t start, size_t length,
 	ft_memset(field->mask->data + start, EXPANDED, value_length);
 }
 
-char *get_parameter_name(t_field *field, size_t dolar_position)
+char *get_parameter_name(t_string *string, size_t dolar_position)
 {
-	char	c;
-	char	m;
+	char *str;
+	size_t i;
 
-	field_peek_advance(field);
-	field_peek(field, &c, &m);
-	if (ft_isalpha(c) || c == '_')
+	str = string->data;
+	i = dolar_position + 1;
+	if (!ft_isalpha(str[i]) && str[i] != '_' && str[i] != '?')
 	{
-		field_peek_advance(field);
-		while (true)
-		{
-			field_peek(field, &c, &m);
-			if (is_valid_parameter_name_char(c) == false)
-				break;
-			field_peek_advance(field);
-		}
-	}
-	if (dolar_position + 1 == field->value->peek && c != '?')
+		string_peek_advance(string);
 		return (NULL);
-	else if(dolar_position + 1 == field->value->peek && c == '?')
-		field_peek_advance(field);
-	return (string_segment_extract(field->value, dolar_position,
-					field->value->peek - dolar_position));
+	}
+	while (is_valid_parameter_name_char(str[i]))
+		i++;
+	if(dolar_position + 1 == i && str[i] == '?')
+		i++;
+	return (string_segment_extract(string, dolar_position,
+					i - dolar_position));
 }
 
-bool	expand_parameter(t_field *field)
+int	expand_parameter(t_string *string, char *parameter_name)
 {
-	char	*param_name;
-	char	*param_value;
+	char	*parameter_value;
 	size_t	value_length;
+	size_t	key_length;
 	size_t	dolar_position;
-	bool	is_double_quoted;
+
+	if (parameter_name == NULL)
+		return (-1);
+	dolar_position = string->peek;
+	parameter_value = parameter_get(parameter_name + 1);
+	key_length = ft_strlen(parameter_name);
+	value_length = ft_strlen(parameter_value);
+	string_segment_replace(string, dolar_position, key_length, parameter_value);
+	string->peek += value_length;
+	return (value_length);
+}
+
+void	expand_mask_at_peek(t_string *mask, int key_length, int value_length, int value_mask)
+{
+	char *tmp;
+
+	tmp = safe_malloc((value_length + 1) * sizeof(char));
+	ft_memset(tmp, value_mask, value_length);
+	string_segment_replace(mask, mask->peek, key_length, tmp);
+	free(tmp);
+}
+
+bool	expand_parameter_in_field(t_field *field)
+{
+	char 	*parameter_name;
+	size_t	dolar_position;
+	size_t	value_length;
+	int		mask;
 
 	dolar_position = field->value->peek;
-	param_name = get_parameter_name(field, dolar_position);
-	if (param_name == NULL)
+	parameter_name = get_parameter_name(field->value, dolar_position);
+	value_length = expand_parameter(field->value, parameter_name);
+	if (value_length < 0)
 		return (false);
-	param_value = get_param_value(param_name + 1);
-	value_length = ft_strlen(param_value);
-	is_double_quoted = field->mask->data[dolar_position] & DOUBLE_QUOTED;
-	field_replace(field, dolar_position,
-			field->value->peek - dolar_position, param_value);
-	if (is_double_quoted)
-		ft_memset(field->mask->data + dolar_position, EXPANDED | DOUBLE_QUOTED, value_length);
-	field_peek_set(field, dolar_position + value_length);
+	mask = EXPANDED | (field->mask->data[dolar_position] & DOUBLE_QUOTED);
+	expand_mask_at_peek(field->mask, ft_strlen(parameter_name), value_length, mask);
+	//field_peek_set(field, dolar_position + value_length);
+	//print_field(field);
 	return (true);
 }
 
@@ -280,9 +298,10 @@ bool	expand_field_parameter(t_field *field, int single_quoted_flag)
 			break ;
 		if (c == '$' && (m & single_quoted_flag) == 0)
 		{
-			has_expanded = expand_parameter(field);
+			has_expanded = expand_parameter_in_field(field);
 			if ((m & DOUBLE_QUOTED) == 0)
 				should_field_split = has_expanded;
+			field->mask->peek = field->value->peek;
 		}
 		else
 			field_peek_advance(field);

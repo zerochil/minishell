@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/19 15:19:26 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/19 18:53:08 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void	print_field(void *field_ptr)
 	field = field_ptr;
 
 	printf("{%s, ", field->value->data);
-#if 0
+#if 1
 	size_t	i=0;
 	while (i < field->mask->size)
 	{ 	
