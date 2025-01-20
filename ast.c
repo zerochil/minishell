@@ -35,7 +35,9 @@ t_ast_node	*create_ast_node(t_array *children, t_ast_type type)
 	return (node);
 }
 
-t_array	*generate_ast(t_array *tokens)
+//TODO: make command list work
+
+t_array *generate_ast(t_array *tokens)
 {
 	t_array		*ast_list;
 	t_ast_node	*node;
@@ -63,6 +65,8 @@ t_array	*generate_ast(t_array *tokens)
 			}
 		}
 		array_push(ast_list, node);
+		linebreak(tokens);
+		token = array_peek(tokens);
 		if (token->type == -1)
 			break ;
 	}
@@ -186,6 +190,8 @@ t_ast_node	*subshell(t_array *tokens)
 	if (node == NULL)
 		return (NULL);
 	linebreak(tokens);
+	array_do(tokens, print_token);
+	printf("\n");
 	token = array_peek(tokens);
 	if (check_syntax_error(token->type != lexem_get_type("CLOSE_PARENTHESIS"),
 			ERR_CLOSE_PARENTHESIS))

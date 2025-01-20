@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 09:31:44 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/20 21:24:46 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,17 @@
 #include "execution.h"
 #include <readline/history.h>
 #include <readline/readline.h>
+#include <signal.h>
+
+void handler(int sig)
+{
+	(void)sig;
+	wait(NULL);
+	write(1, "\n", 1);
+    rl_on_new_line(); 
+    //rl_replace_line("", 0);
+	return;
+}
 
 int	main(void)
 {

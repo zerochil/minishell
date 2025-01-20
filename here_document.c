@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 15:17:55 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/20 09:15:19 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/20 18:49:56 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,34 +152,74 @@ static char	*random_filename(void)
 	return (path);
 }
 
-static char *write_to_temp_file(char *content)
+static void write_to_temp_file(char *filename, char *content)
 {
-	char *filename;
 	int	fd;
 
-	filename = random_filename();
 	fd = open(filename, O_WRONLY | O_TRUNC | O_CREAT, 0644);
 	if (fd < 0 || content == NULL)
 	{
 		report_error("Error: write_to_temp_file");
-		return (filename);
+		return ;
 	}
 	write(fd, content, ft_strlen(content));
 	close(fd);
-	return (filename);
 }
 
-char *create_here_document(t_string *input, t_field *delimiter)
+void	here_document_signal_handler(int sig)
+{
+	(void)sig;
+	exit(130);
+}
+
+void	here_document_signals_setup(void)
+{
+	int	sig;
+
+	sig = 1;
+	while (sig < NSIG)
+	{
+		signal(sig, SIG_IGN);
+		sig++;
+	}
+	signal(SIGINT, here_document_signal_handler);
+}
+
+void	here_document_child_process(char *filename, t_string *input, t_field *delimiter)
 {
 	t_string *content;
-	char	*filename;
 	bool delimiter_quoted;
 
 	delimiter_quoted = remove_quotes_from_field(delimiter);
 	content = get_here_document_content(input, delimiter->value->data);
 	if (!delimiter_quoted)
 		expand_parameter_heredoc(content);
-	filename = write_to_temp_file(content->data);
+	write_to_temp_file(filename, content->data);
+	exit(0);
+}
+
+char *create_here_document(t_string *input, t_field *delimiter)
+{
+	char	*filename;
+	pid_t	pid;
+	int		status;
+
+	filename = random_filename();
+	pid = fork();
+	if (pid < 0)
+		error(strerror(errno));
+	else if (pid == 0)
+	{
+		here_document_signals_setup();
+		here_document_child_process(filename, input, delimiter);
+	}
+	wait(&status);
+	if (status > 0)
+	{
+		rl_replace_line("", 0);
+		rl_redisplay();
+		return (NULL);
+	}
 	return (filename);
 }
 

@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:07 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 09:21:58 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/20 18:46:40 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,16 +97,19 @@ static t_token	*tokenize_next(t_string *input)
 	return (token);
 }
 
-static void	tokenize_here_document(t_token *token, t_string *input)
+static bool	tokenize_here_document(t_token *token, t_string *input)
 {
 	char *filename;
 	t_field *delimiter;
 
 	if (token->fields == NULL)
-		return ;
+		return false;
 	delimiter = array_get(token->fields, 0);
 	filename = create_here_document(input, delimiter);
+	if (filename == NULL)
+		return false;
 	field_set(delimiter, filename, 0);
+	return true;
 }
 
 t_array	*tokenize(t_string *input)
@@ -125,9 +128,8 @@ t_array	*tokenize(t_string *input)
 	while (1)
 	{
 		token = tokenize_next(input);
-		//TODO: check if we've found a here_document token;
-		if (token->type == lexem_get_type("HERE_DOCUMENT"))
-			tokenize_here_document(token, input);
+		if (token->type == lexem_get_type("HERE_DOCUMENT") && !tokenize_here_document(token, input))
+			return (NULL);
 		array_push(tokens, token);
 		if (token->type == -1)
 			break ;

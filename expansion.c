@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/19 20:54:04 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/20 14:14:34 by inajah           ###   ########.fr       */
 /*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
@@ -267,7 +267,7 @@ bool	expand_parameter_in_field(t_field *field)
 {
 	char 	*parameter_name;
 	size_t	dolar_position;
-	size_t	value_length;
+	ssize_t	value_length;
 	int		mask;
 
 	dolar_position = field->value->peek;

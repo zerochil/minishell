@@ -6,14 +6,17 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 18:06:13 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/20 09:05:33 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/20 18:28:17 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HERE_DOCUMENT_H
 # define HERE_DOCUMENT_H
 
-
+# include <signal.h>
+# include <sys/wait.h>
+# include <stdlib.h>
+# include <errno.h>
 # include "libft/libft.h"
 # include "field.h"
 # include <readline/history.h>
