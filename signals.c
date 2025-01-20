@@ -1,64 +1,50 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   prompt.c                                           :+:      :+:    :+:   */
+/*   signals.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
+/*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/16 09:16:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/16 17:05:54 by inajah           ###   ########.fr       */
+/*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
+/*   Updated: 2025/01/20 15:37:48 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <signal.h>
-#include <stdio.h>
-#include <readline/readline.h>
-#include "libft/libft.h"
-#include "context.h"
-#include <sys/wait.h>
+#include "signals.h"
 
-
-void handle_sigint(t_array *pids)
+void	setup_signals(void)
 {
-	int status;
+	struct sigaction	sa;
 
-	if (pids->size == 0)
-	{
-		ft_putstr_fd("\n", 1);
-		rl_on_new_line();
-		rl_replace_line("", 0);
-		rl_redisplay();
-		return ;
-	}
-	// this is redudant, to remove, array_shift & wait are done in the pipeline.
-	while(pids->size > 0)
-	{
-		wait(&status);
-		array_shift(pids);
-	}
-	ft_putstr_fd("\n", 1);
+	sa.sa_handler = SIG_IGN;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sigaction(SIGQUIT, &sa, NULL);
+	sa.sa_handler = handle_signal;
+	sigaction(SIGINT, &sa, NULL);
 }
 
-void handle_sigquit(t_array *pids)
+void	setup_child_signals(void)
 {
-	if (pids->size == 0)
-	{
-		rl_redisplay();
-		return;
-	}
-	// this is redudant, to remove, array_shift is done in the pipeline.
-	while(pids->size > 0)
-		array_shift(pids);
-	ft_putstr_fd("Quit: 3\n", 1);
+	signal(SIGINT, SIG_DFL);
+	signal(SIGQUIT, SIG_DFL);
 }
 
-void handle_signal(int signal)
+void	handle_signal(int signo)
 {
-	t_context *context;
+	t_context	*context;
 
 	context = get_context_instance();
-	if (signal == SIGINT)
-		handle_sigint(context->pids);
-	else if (signal == SIGQUIT)
-		handle_sigquit(context->pids);
+	if (signo == SIGINT)
+	{
+		if (!context->foreground)
+			ft_putchar_fd('\n', STDERR_FILENO);
+		else
+		{
+			ft_putchar_fd('\n', STDERR_FILENO);
+			rl_on_new_line();
+			rl_replace_line("", 0);
+			rl_redisplay();
+		}
+	}
 }

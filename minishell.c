@@ -6,41 +6,40 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/17 16:29:20 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/20 16:17:10 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ast.h"
-#include "minishell.h"
-#include "tokenizer.h"
-#include "ast.h"
+#include "execution.h"
 #include "expansion.h"
 #include "here_document.h"
+#include "minishell.h"
+#include "signals.h"
+#include "tokenizer.h"
+#include "utils.h"
+
+#include "env.h"
+
 #include <readline/history.h>
 #include <readline/readline.h>
-#include "execution.h"
-
-#include "signals.h"
-#include <termios.h>
-#include "utils.h"
 
 void	print_field(void *field_ptr)
 {
 	t_field	*field;
-
+	char	c;
+	char	q;
 
 	field = field_ptr;
-
 	printf("{%s, ", field->value->data);
 #if 0
 	size_t	i=0;
 	while (i < field->mask->size)
 	{ 	
-		char c = 'O';
-		char q = ' ';
+		c = 'O';
+		q = ' ';
 		if (field->mask->data[i] & EXPANDED)
 			c = 'E';
-
 		if (field->mask->data[i] & SINGLE_QUOTED)
 			q = 'S';
 		else if (field->mask->data[i] & DOUBLE_QUOTED)
@@ -58,6 +57,7 @@ void	print_token(void *token_ptr)
 	t_array	*lexems;
 	t_token	*token;
 	char	*id;
+
 	lexems = lexems_get_instance();
 	token = token_ptr;
 	if (token == NULL)
@@ -67,7 +67,7 @@ void	print_token(void *token_ptr)
 	}
 	if (token->type == 0)
 		id = "WORD";
-	else if(token->type == -1)
+	else if (token->type == -1)
 		id = "EOF";
 	else
 		id = ((t_lexem *)(lexems->data[token->type - 1]))->identifier;
@@ -79,18 +79,17 @@ void	print_token(void *token_ptr)
 
 void	print_redirection(void *tokens_ptr)
 {
-	//t_array *tokens;
-
-	//tokens = tokens_ptr;
+	// t_array *tokens;
+	// tokens = tokens_ptr;
 	printf("{");
-//	array_do(tokens, print_token);
+	//	array_do(tokens, print_token);
 	print_token(tokens_ptr);
 	printf("}");
 }
 
 static void	print(void *node_ptr);
 
-static void print_children(t_array *children, char *symb)
+static void	print_children(t_array *children, char *symb)
 {
 	printf("%s ", symb);
 	array_do(children, print);
@@ -101,8 +100,8 @@ static void	print(void *node_ptr)
 	t_ast_node	*node;
 
 	node = node_ptr;
-	if(node == NULL)
-		return;
+	if (node == NULL)
+		return ;
 	if (node->type == AST_COMPLETE_COMMAND)
 	{
 		print_children(node->children, "Complete: ");
@@ -154,7 +153,7 @@ bool	is_export_command(t_token *token)
 
 bool	is_assingment_word(t_token *token)
 {
-	char *key;
+	char	*key;
 
 	key = get_key(token->value);
 	if (key == NULL)
@@ -178,7 +177,7 @@ void	expand_token(t_token *token, int flag)
 void	expansion(t_array *tokens)
 {
 	t_token	*token;
-	int	flag;
+	int		flag;
 	bool	is_export;
 	size_t	i;
 
@@ -192,7 +191,8 @@ void	expansion(t_array *tokens)
 		flag = ALL_EXPANSIONS;
 		if (token->type == lexem_get_type("HERE_DOCUMENT"))
 			flag = NO_EXPANSIONS;
-		else if (token->type == lexem_get_type("WORD") && is_export && is_assingment_word(token))
+		else if (token->type == lexem_get_type("WORD") && is_export
+			&& is_assingment_word(token))
 			flag = PARAMETER_EXPANSION | QUOTE_REMOVAL;
 		expand_token(token, flag);
 		is_export = is_export_command(token);
@@ -202,15 +202,15 @@ void	expansion(t_array *tokens)
 
 static void	handle_expansions(void *node_ptr)
 {
-	t_ast_node *node;
+	t_ast_node	*node;
 
 	node = node_ptr;
 	if (node->children == NULL)
 		return ;
 	if (node->type != AST_SIMPLE_COMMAND && node->type != AST_SUBSHELL)
 	{
-		 array_do(node->children, handle_expansions);
-		 return ;
+		array_do(node->children, handle_expansions);
+		return ;
 	}
 	if (node->type == AST_SUBSHELL)
 		array_do(node->children, handle_expansions);
@@ -220,38 +220,21 @@ static void	handle_expansions(void *node_ptr)
 	array_do(node->redirect_list, handle_heredoc);
 }
 
-
-int	main()
+int	main(void)
 {
-	char		*line;
-	t_string	input;
-	t_array		*tokens;
-	t_array		*list;
+	char			*line;
+	t_string		input;
+	t_array			*tokens;
+	t_array			*list;
+	t_context		*context;
+	int				status;
 
 	// TODO: reset STDI/O to default in case of: `./minishell < file`;
-	// TODO: init all instances
+	// TODO: init all instances in some function? or is there a better design than individual instances?
 	get_environment_instance();
-	get_context_instance();
-
+	context = get_context_instance();
 	string_init(&input);
-
-    struct sigaction sa;
-    sa.sa_handler = handle_signal;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-
-    sigaction(SIGQUIT, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
-
-
-    /*struct termios old_termios;*/
-	/*configure_terminal(&old_termios);*/
-    /*struct termios new_termios;*/
-    /*tcgetattr(STDIN_FILENO, &new_termios);*/
-    /*new_termios.c_lflag &= ~ECHOCTL; // Disable echo of control characters*/
-    /*tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);*/
-
-
+	setup_signals();
 	if (isatty(0) == 0)
 	{
 		line = get_next_line(0);
@@ -260,21 +243,24 @@ int	main()
 		string_set(&input, line);
 		tokens = tokenize(&input);
 		list = generate_ast(tokens);
-	//	array_do(list, handle_expansions);
-		int status = execution(list);
+		//	array_do(list, handle_expansions);
+		status = execution(list);
 		manager_free_everything();
 		exit(status);
 	}
 	while (1)
 	{
+		context->foreground = true;
 		line = readline(prompt());
+		context->foreground = false;
 		if (line == NULL || ft_strlen(line) == 0)
 		{
+			// TODO: this is fucking problematic; how to differentiate between ctrl-d and a simple enter?
 			free(line);
 			destroy_context();
 			exit(0);
 		}
-		//TODO: add command to history if it is different than the previous one.
+		// TODO: add command to history if it is different than the previous one.
 		add_history(line);
 		string_set(&input, line);
 		tokens = tokenize(&input);
@@ -282,7 +268,7 @@ int	main()
 			continue ;
 		list = generate_ast(tokens);
 		array_do(list, handle_expansions);
-		//array_do(list, print);
+		// array_do(list, print);
 		execution(list);
 		free(line);
 	}

@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:07 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/16 09:49:40 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/20 15:37:48 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 t_token	*token_init(int type, char *value)
 {
-	t_token		*token;
+	t_token	*token;
 
 	token = track_malloc(sizeof(t_token));
 	token->type = type;
@@ -39,7 +39,9 @@ static t_token	*tokenize_word(t_string *input)
 	while (1)
 	{
 		c = string_peek(input);
-		if (in_quote == '\0' && (ft_strchr(WHITE_SPACE, c) || array_find(lexems_get_instance(), input, lexem_match_word_break)))
+		if (in_quote == '\0' && (ft_strchr(WHITE_SPACE, c)
+				|| array_find(lexems_get_instance(), input,
+					lexem_match_word_break)))
 			break ;
 		else if (in_quote == c)
 			in_quote = '\0';
@@ -53,7 +55,7 @@ static t_token	*tokenize_word(t_string *input)
 	return (token_init(0, word));
 }
 
-static	t_token	*tokenize_non_word(t_string *input)
+static t_token	*tokenize_non_word(t_string *input)
 {
 	t_array	*lexems;
 	t_lexem	*lexem;
