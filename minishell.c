@@ -36,7 +36,6 @@ int	main(void)
 	t_array			*tokens;
 	t_array			*list;
 	t_context		*context;
-	int				status;
 
 	// TODO: reset STDI/O to default in case of: `./minishell < file`;
 	// TODO: init all instances in some function? or is there a better design than individual instances?
@@ -44,41 +43,28 @@ int	main(void)
 	context = get_context_instance();
 	string_init(&input);
 	setup_signals();
-	if (isatty(0) == 0)
-	{
-		line = get_next_line(0);
-		if (ft_strchr(line, '\n'))
-			*ft_strchr(line, '\n') = '\0';
-		string_set(&input, line);
-		tokens = tokenize(&input);
-		list = generate_ast(tokens);
-		//	array_do(list, handle_expansions);
-		status = execution(list);
-		manager_free_everything();
-		exit(status);
-	}
 	while (1)
 	{
 		context->foreground = true;
 		line = readline(prompt());
 		context->foreground = false;
-		if (line == NULL || ft_strlen(line) == 0)
+		if (line == NULL)
 		{
-			// TODO: this is fucking problematic; how to differentiate between ctrl-d and a simple enter?
 			free(line);
 			destroy_context();
 			exit(0);
 		}
-		// TODO: add command to history if it is different than the previous one.
+		if (*line == '\0')
+		{
+			free(line);
+			continue ;
+		}
 		add_history(line);
 		string_set(&input, line);
 		tokens = tokenize(&input);
 		if (tokens == NULL)
 			continue ;
-		//array_do(tokens, print_token);
 		list = generate_ast(tokens);
-		//array_do(list, handle_expansions);
-		//array_do(list, print);
 		execution(list);
 		free(line);
 	}

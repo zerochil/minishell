@@ -88,6 +88,7 @@ int	execute_compound_command(t_ast_node *node)
 
 int	execute_command(t_ast_node *node)
 {
+	handle_expansions(node);
 	if (node->type == AST_SUBSHELL)
 		return (execute_subshell(node));
 	else if (node->type == AST_SIMPLE_COMMAND)

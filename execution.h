@@ -16,6 +16,7 @@
 # include "ast.h"
 # include "stream.h"
 # include "execution_pipeline.h"
+# include "expansion.h"
 
 typedef struct s_command_context
 {
