@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 15:17:55 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/19 20:52:37 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/20 09:15:19 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,11 +54,12 @@ static size_t	get_second_line(char *input, size_t start)
 	return i;
 }
 
-static size_t start_here_document_prompt(t_string *input, char *delimiter)
+static void	start_here_document_prompt(t_string *here_doc, char *delimiter)
 {
 	char *line;
 
-	string_append(input, "\n");
+	if (here_doc->size > 0)
+		string_append(here_doc, "\n");
 	while (true)
 	{
 		line = readline("> ");
@@ -69,34 +70,37 @@ static size_t start_here_document_prompt(t_string *input, char *delimiter)
 		}
 		if (is_delimiter(line, delimiter))
 			break ;
-		string_append(input, line);
-		string_append(input, "\n");
+		string_append(here_doc, line);
+		string_append(here_doc, "\n");
 		free(line);
 	}
 	free(line);
-	return (input->size);
+	return;
 }
 
 int	expand_parameter(t_string *string, char *parameter_name);
 char *get_parameter_name(t_string *string, size_t dolar_position);
 
-static size_t get_delimiter_position(t_string *input, size_t start, char *delimiter)
+t_string *get_here_document_content(t_string *input, char *delimiter)
 {
+	t_string *here_doc;
 	size_t	end;
-	char *tmp;
+	size_t	start;
+	char *line;
 
+	here_doc = track_malloc(sizeof(t_string));
+	string_init(here_doc);
+	start = get_second_line(input->data, 0);
 	while (start < input->size)
 	{
-		//printf("# input: \"%s\",size: %ld, start: %ld\n", input->data, input->size, start);
 		end = get_second_line(input->data, start);
-		//printf("# end: %ld\n", end);
-		tmp = string_segment_extract(input, start, end - start);
-		//printf("slice: %s\n", tmp);
-		if (is_delimiter(tmp, delimiter))
-			return (start);
-		start = end;
+		line = string_segment_slice(input, start, end - start);
+		if (is_delimiter(line, delimiter))
+			return (here_doc);
+		string_append(here_doc, line);
 	}
-	return (start_here_document_prompt(input, delimiter));
+	start_here_document_prompt(here_doc, delimiter);
+	return (here_doc);
 }
 
 static void expand_parameter_heredoc(t_string *content)
@@ -104,6 +108,7 @@ static void expand_parameter_heredoc(t_string *content)
 	char 	*parameter_name;
 	char	c;
 
+	string_peek_reset(content);
 	while (true)
 	{
 		c = string_peek(content);
@@ -119,26 +124,7 @@ static void expand_parameter_heredoc(t_string *content)
 	}
 }
 
-char *get_here_document_content(t_string *input, t_field *delimiter)
-{
-	t_string content;
-	bool delimiter_quoted;
-	size_t start;
-	size_t delimiter_position;
-
-	delimiter_quoted = remove_quotes_from_field(delimiter);
-	start = get_second_line(input->data, 0);
-	delimiter_position = get_delimiter_position(input, start, delimiter->value->data);
-	if (delimiter_position < input->size)
-		string_segment_remove(input, delimiter_position, delimiter->value->size + 1);
-	string_init(&content);
-	string_set(&content, string_segment_slice(input, start, delimiter_position - start));
-	if (!delimiter_quoted)
-		expand_parameter_heredoc(&content);
-	return (content.data);
-}
-
-static char	*generate_random_name_here(void)
+static char	*random_filename(void)
 {
 	char	*path;
 	char	*id;
@@ -166,17 +152,34 @@ static char	*generate_random_name_here(void)
 	return (path);
 }
 
-char *here_document_to_temp_file(char *here_document_content)
+static char *write_to_temp_file(char *content)
 {
 	char *filename;
 	int	fd;
 
-	filename = generate_random_name_here();
+	filename = random_filename();
 	fd = open(filename, O_WRONLY | O_TRUNC | O_CREAT, 0644);
-	if (fd < 0)
+	if (fd < 0 || content == NULL)
+	{
+		report_error("Error: write_to_temp_file");
 		return (filename);
-	write(fd, here_document_content, ft_strlen(here_document_content));
+	}
+	write(fd, content, ft_strlen(content));
 	close(fd);
+	return (filename);
+}
+
+char *create_here_document(t_string *input, t_field *delimiter)
+{
+	t_string *content;
+	char	*filename;
+	bool delimiter_quoted;
+
+	delimiter_quoted = remove_quotes_from_field(delimiter);
+	content = get_here_document_content(input, delimiter->value->data);
+	if (!delimiter_quoted)
+		expand_parameter_heredoc(content);
+	filename = write_to_temp_file(content->data);
 	return (filename);
 }
 

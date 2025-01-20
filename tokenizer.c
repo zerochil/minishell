@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:07 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/19 15:36:09 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/20 09:21:58 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,15 +97,13 @@ static t_token	*tokenize_next(t_string *input)
 
 static void	tokenize_here_document(t_token *token, t_string *input)
 {
-	char *here_document_content;
 	char *filename;
 	t_field *delimiter;
 
 	if (token->fields == NULL)
 		return ;
 	delimiter = array_get(token->fields, 0);
-	here_document_content = get_here_document_content(input, delimiter);
-	filename = here_document_to_temp_file(here_document_content);
+	filename = create_here_document(input, delimiter);
 	field_set(delimiter, filename, 0);
 }
 

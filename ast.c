@@ -1,5 +1,6 @@
 #include "ast.h"
 #include "tokenizer.h"
+#include "debug.h"
 
 
 char *syntax_error(char *message)
@@ -97,7 +98,6 @@ t_ast_node *command_list(t_array *tokens)
 	array_init(commands);
 	linebreak(tokens);
 	command = compound_command(tokens);
-	linebreak(tokens);
 	if (command == NULL)
 		return NULL;
 	array_push(commands, command);
