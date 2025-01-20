@@ -1,23 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.h                                        :+:      :+:    :+:   */
+/*   execution_pipeline.h                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 15:37:49 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/20 16:20:32 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MINISHELL_H
-# define MINISHELL_H
+#ifndef PIPELINE_H
+# define PIPELINE_H
 
-# include "libft/libft.h"
-# include "env.h"
-# include "context.h"
+# include <errno.h>
+# include <sys/wait.h>
+# include "signals.h"
+# include "stream.h"
 
-void	print_token(void *token_ptr);
-char	*prompt(void);
+typedef struct s_pipeline_state
+{
+	t_array		*commands;
+	t_stream	*streamline;
+	size_t		index;
+	pid_t		last_pid;
+}				t_pipeline_state;
+
+void			pipeline_init(t_pipeline_state *state, t_array *commands);
+int				wait_for_pipeline(t_pipeline_state *state);
 
 #endif

@@ -18,16 +18,21 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 
-int	main()
+int	main(void)
 {
-	char		*line;
-	t_string	input;
-	t_array		*tokens;
-	t_array		*list;
+	char			*line;
+	t_string		input;
+	t_array			*tokens;
+	t_array			*list;
+	t_context		*context;
+	int				status;
 
+	// TODO: reset STDI/O to default in case of: `./minishell < file`;
+	// TODO: init all instances in some function? or is there a better design than individual instances?
 	get_environment_instance();
+	context = get_context_instance();
 	string_init(&input);
-
+	setup_signals();
 	if (isatty(0) == 0)
 	{
 		line = get_next_line(0);
@@ -36,20 +41,24 @@ int	main()
 		string_set(&input, line);
 		tokens = tokenize(&input);
 		list = generate_ast(tokens);
-	//	array_do(list, handle_expansions);
-		int status = execution(list);
+		//	array_do(list, handle_expansions);
+		status = execution(list);
 		manager_free_everything();
 		exit(status);
 	}
 	while (1)
 	{
+		context->foreground = true;
 		line = readline(prompt());
+		context->foreground = false;
 		if (line == NULL || ft_strlen(line) == 0)
 		{
+			// TODO: this is fucking problematic; how to differentiate between ctrl-d and a simple enter?
 			free(line);
-			continue;
+			destroy_context();
+			exit(0);
 		}
-		//TODO: add command to history if it is different than the previous one.
+		// TODO: add command to history if it is different than the previous one.
 		add_history(line);
 		string_set(&input, line);
 		tokens = tokenize(&input);
