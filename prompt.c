@@ -6,12 +6,14 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/16 09:16:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/16 17:05:54 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/21 09:36:20 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "env.h"
+#include "expansion.h"
 #include "execution.h"
+#include "signals.h"
 #include "libft/libft.h"
 
 static char	*prompt_user_name(void)
@@ -59,8 +61,7 @@ static char	*prompt_exit_code(void)
 {
 	char *exit_code;
 
-	exit_code = "0";
-	//exit_code = get_param_value("?");
+	exit_code = parameter_get("?");
 	return (exit_code);
 }
 /*

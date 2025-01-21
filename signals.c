@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 15:37:48 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/21 10:03:15 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,26 @@ void	setup_child_signals(void)
 {
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
+}
+
+void	setup_here_doc_signals(void)
+{
+	int	signo;
+
+	signo = 1;
+	while (signo < NSIG)
+	{
+		if (signo != SIGKILL || signo != SIGSTOP)
+			signal(signo, SIG_IGN);
+		signo++;
+	}
+}
+
+void	handle_here_doc_signal(int signo)
+{
+	(void)signo;
+	destroy_context();
+	exit(130);
 }
 
 void	handle_signal(int signo)

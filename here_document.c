@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 15:17:55 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/20 18:49:56 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/21 09:57:40 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ static size_t	get_second_line(char *input, size_t start)
 	return i;
 }
 
-static void	start_here_document_prompt(t_string *here_doc, char *delimiter)
+void	start_here_doc_prompt(t_string *here_doc, char *delimiter)
 {
 	char *line;
 
@@ -75,35 +75,13 @@ static void	start_here_document_prompt(t_string *here_doc, char *delimiter)
 		free(line);
 	}
 	free(line);
-	return;
+	return ;
 }
 
 int	expand_parameter(t_string *string, char *parameter_name);
 char *get_parameter_name(t_string *string, size_t dolar_position);
 
-t_string *get_here_document_content(t_string *input, char *delimiter)
-{
-	t_string *here_doc;
-	size_t	end;
-	size_t	start;
-	char *line;
-
-	here_doc = track_malloc(sizeof(t_string));
-	string_init(here_doc);
-	start = get_second_line(input->data, 0);
-	while (start < input->size)
-	{
-		end = get_second_line(input->data, start);
-		line = string_segment_slice(input, start, end - start);
-		if (is_delimiter(line, delimiter))
-			return (here_doc);
-		string_append(here_doc, line);
-	}
-	start_here_document_prompt(here_doc, delimiter);
-	return (here_doc);
-}
-
-static void expand_parameter_heredoc(t_string *content)
+void expand_parameter_here_doc(t_string *content)
 {
 	char 	*parameter_name;
 	char	c;
@@ -122,6 +100,75 @@ static void expand_parameter_heredoc(t_string *content)
 		}
 		string_peek_advance(content);
 	}
+}
+
+
+bool create_here_doc_temp_file(char *filename, t_string *here_doc, bool should_expand)
+{
+	int	fd;
+
+	fd = open(filename, O_WRONLY | O_TRUNC | O_CREAT, 0644);
+	if (fd < 0 || here_doc == NULL || here_doc->data == NULL)
+	{
+		report_error("Error: create_here_doc_temp_file");
+		return (false);
+	}
+	if (should_expand)
+		expand_parameter_here_doc(here_doc);
+	write(fd, here_doc->data, here_doc->size);
+	close(fd);
+	return (true);
+}
+
+
+
+
+bool here_document_child_process(char *filename, t_string *here_doc, t_field *delimiter, bool should_expand)
+{
+	pid_t pid;
+	int	status;
+
+	pid = fork();
+	if (pid < 0)
+		error(strerror(errno));
+	else if (pid == 0)
+	{
+		setup_here_doc_signals();
+		signal(SIGINT, handle_here_doc_signal);
+		start_here_doc_prompt(here_doc, delimiter->value->data);
+		create_here_doc_temp_file(filename, here_doc, should_expand);
+		exit (0);
+	}
+	wait(&status);
+	if (status > 0)
+	{
+		printf("here_doc exit: %d\n", status);
+		return (false);
+	}
+	return (true);
+}
+
+bool here_document(char *filename, t_string *input, t_field *delimiter)
+{
+	t_string *here_doc;
+	size_t	end;
+	size_t	start;
+	char *line;
+	bool should_expand;
+
+	here_doc = track_malloc(sizeof(t_string));
+	string_init(here_doc);
+	should_expand = (remove_quotes_from_field(delimiter) == false);
+	start = get_second_line(input->data, 0);
+	while (start < input->size)
+	{
+		end = get_second_line(input->data, start);
+		line = string_segment_slice(input, start, end - start);
+		if (is_delimiter(line, delimiter->value->data))
+			return (create_here_doc_temp_file(filename, here_doc, should_expand));
+		string_append(here_doc, line);
+	}
+	return (here_document_child_process(filename, here_doc, delimiter, should_expand));
 }
 
 static char	*random_filename(void)
@@ -152,74 +199,13 @@ static char	*random_filename(void)
 	return (path);
 }
 
-static void write_to_temp_file(char *filename, char *content)
-{
-	int	fd;
-
-	fd = open(filename, O_WRONLY | O_TRUNC | O_CREAT, 0644);
-	if (fd < 0 || content == NULL)
-	{
-		report_error("Error: write_to_temp_file");
-		return ;
-	}
-	write(fd, content, ft_strlen(content));
-	close(fd);
-}
-
-void	here_document_signal_handler(int sig)
-{
-	(void)sig;
-	exit(130);
-}
-
-void	here_document_signals_setup(void)
-{
-	int	sig;
-
-	sig = 1;
-	while (sig < NSIG)
-	{
-		signal(sig, SIG_IGN);
-		sig++;
-	}
-	signal(SIGINT, here_document_signal_handler);
-}
-
-void	here_document_child_process(char *filename, t_string *input, t_field *delimiter)
-{
-	t_string *content;
-	bool delimiter_quoted;
-
-	delimiter_quoted = remove_quotes_from_field(delimiter);
-	content = get_here_document_content(input, delimiter->value->data);
-	if (!delimiter_quoted)
-		expand_parameter_heredoc(content);
-	write_to_temp_file(filename, content->data);
-	exit(0);
-}
-
 char *create_here_document(t_string *input, t_field *delimiter)
 {
 	char	*filename;
-	pid_t	pid;
-	int		status;
 
 	filename = random_filename();
-	pid = fork();
-	if (pid < 0)
-		error(strerror(errno));
-	else if (pid == 0)
-	{
-		here_document_signals_setup();
-		here_document_child_process(filename, input, delimiter);
-	}
-	wait(&status);
-	if (status > 0)
-	{
-		rl_replace_line("", 0);
-		rl_redisplay();
-		return (NULL);
-	}
-	return (filename);
+	if (here_document(filename, input, delimiter))
+		return (filename);
+	return (NULL);
 }
 

@@ -190,8 +190,6 @@ t_ast_node	*subshell(t_array *tokens)
 	if (node == NULL)
 		return (NULL);
 	linebreak(tokens);
-	array_do(tokens, print_token);
-	printf("\n");
 	token = array_peek(tokens);
 	if (check_syntax_error(token->type != lexem_get_type("CLOSE_PARENTHESIS"),
 			ERR_CLOSE_PARENTHESIS))
