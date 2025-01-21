@@ -45,7 +45,7 @@ int	main(void)
 	while (1)
 	{
 		context->foreground = true;
-		line = readline(". ->>");
+		line = readline(prompt());
 		context->foreground = false;
 		if (line == NULL)
 		{
