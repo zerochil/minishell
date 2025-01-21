@@ -78,7 +78,7 @@ char	*get_command_path(char *command_name)
 	path_list = ft_split(path_env, ':');
 	resource_track(path_list, free_strings);
 	i = 0;
-	while (path_list[i] != NULL)
+	while (path_list[i] != NULL && *command_name != '\0')
 	{
 		path = path_list[i];
 		command_path = build_command_path(path, command_name);

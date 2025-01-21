@@ -25,22 +25,20 @@ static char	*prompt_user_name(void)
 		return "I have no name";
 	return (user_name);
 }
-
+/*
 static void	shrink_home_path_to_tilde(t_string *prompt)
 {
 	char	*home_path;
-	char	*path;
 	size_t	len;
 
 	home_path = env_get("HOME");
 	if (home_path == NULL)
 		return ;
 	len = ft_strlen(home_path);
-	path = ft_strchr(prompt->data, '/');
-	if (ft_strncmp(path, home_path, len) == 0)
-		string_segment_replace(prompt, path - prompt->data, len, "~");
+	if (ft_strncmp(prompt->data, home_path, len) == 0)
+		string_segment_replace(prompt, 0, len, "~");
 	prompt->data[prompt->size] = '\0';
-}
+}*/
 
 static char	*prompt_cwd(void)
 {
@@ -91,6 +89,5 @@ char	*prompt(void)
 	string_append(&string, prompt_exit_code());
 	string_append(&string, "]");
 	string_append(&string, "$ ");
-	shrink_home_path_to_tilde(&string);
 	return (string.data);
 }

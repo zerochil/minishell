@@ -68,7 +68,7 @@ void	string_append(t_string *string, const char *text)
 	}
 	text_len = ft_strlen(text);
 	string_ensure_capacity(string, string->size + text_len);
-	ft_memcpy(string->data + string->size, text, text_len);
+	ft_memcpy(string->data + string->size, text, text_len + 1);
 	string->size += text_len;
 }
 

@@ -1,0 +1,7 @@
+{
+	<generalized_readline_leak>
+	Memcheck:Leak
+	...
+	fun:malloc
+	...
+}

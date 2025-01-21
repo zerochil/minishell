@@ -50,7 +50,7 @@ int	open_file(char *filename, int flags, int *fd)
 	*fd = open(filename, flags, 0644);
 	if (*fd == -1)
 	{
-		perror("minishell");
+		display_error(SHELL_NAME, filename, strerror(errno));
 		return (-1);
 	}
 	return (0);

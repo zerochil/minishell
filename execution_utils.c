@@ -12,9 +12,29 @@
 
 #include "execution.h"
 #include "utils.h"
+#include <sys/stat.h>
 
 void	clean_exit(int status)
 {
 	destroy_context();
 	exit(status);
+}
+
+bool is_directory(char *path)
+{
+	struct stat path_stat;
+
+	if (stat(path, &path_stat) == -1)
+		return (false);
+	return (S_ISDIR(path_stat.st_mode));
+}
+
+void display_error(char *program_name, char *command, char *error)
+{
+	ft_putstr_fd(program_name, STDERR_FILENO);
+	ft_putstr_fd(": ", STDERR_FILENO);
+	ft_putstr_fd(command, STDERR_FILENO);
+	ft_putstr_fd(": ", STDERR_FILENO);
+	ft_putstr_fd(error, STDERR_FILENO);
+	ft_putstr_fd("\n", STDERR_FILENO);
 }

@@ -18,6 +18,9 @@
 # include "execution_pipeline.h"
 # include "expansion.h"
 
+# define SHELL_NAME "minishell"
+# define ERR_COMMAND_NOT_FOUND "command not found"
+
 typedef struct s_command_context
 {
 	char		**args;
@@ -45,5 +48,7 @@ int				open_redirection_files(t_array *redirection_list,
 int				open_file(char *filename, int flags, int *fd);
 
 void			clean_exit(int status);
+bool			is_directory(char *path);
+void			display_error(char *program_name, char *command, char *error);
 
 #endif

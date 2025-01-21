@@ -37,77 +37,137 @@ t_ast_node	*create_ast_node(t_array *children, t_ast_type type)
 
 //TODO: make command list work
 
-t_array *generate_ast(t_array *tokens)
-{
-	t_array		*ast_list;
-	t_ast_node	*node;
-	t_token		*token;
-	int			newline_type;
+/*t_array *generate_ast(t_array *tokens)*/
+/*{*/
+/*	t_array		*ast_list;*/
+/*	t_ast_node	*node;*/
+/*	t_token		*token;*/
+/*	int			newline_type;*/
+/**/
+/*	newline_type = lexem_get_type("NEWLINE");*/
+/*	ast_list = track_malloc(sizeof(t_array));*/
+/*	array_init(ast_list);*/
+/*	while (true)*/
+/*	{*/
+/*		syntax_error(NULL);*/
+/*		node = complete_command(tokens);*/
+/*		token = array_peek(tokens);*/
+/*		if (token->type != -1 && token->type != newline_type)*/
+/*		{*/
+/*			// skip_line(tokens, node);*/
+/*			node->error_message = syntax_error("");*/
+/*			node->children = NULL;*/
+/*			if (node->error_message == NULL)*/
+/*				node->error_message = syntax_error("syntax error near unexpected token");*/
+/*			while (token->type != -1 && token->type != newline_type)*/
+/*			{*/
+/*				array_shift(tokens);*/
+/*				token = array_peek(tokens);*/
+/*			}*/
+/*		}*/
+/*		array_push(ast_list, node);*/
+/*		linebreak(tokens);*/
+/*		token = array_peek(tokens);*/
+/*		if (token->type == -1)*/
+/*			break ;*/
+/*	}*/
+/*	return (ast_list);*/
+/*}*/
 
-	newline_type = lexem_get_type("NEWLINE");
-	ast_list = track_malloc(sizeof(t_array));
-	array_init(ast_list);
-	while (true)
-	{
-		syntax_error(NULL);
-		node = complete_command(tokens);
-		token = array_peek(tokens);
-		if (token->type != -1 && token->type != newline_type)
-		{
-			node->error_message = syntax_error("");
-			node->children = NULL;
-			if (node->error_message == NULL)
-				node->error_message = syntax_error("syntax error near unexpected token");
-			while (token->type != -1 && token->type != newline_type)
-			{
-				array_shift(tokens);
-				token = array_peek(tokens);
-			}
-		}
-		array_push(ast_list, node);
-		linebreak(tokens);
-		token = array_peek(tokens);
-		if (token->type == -1)
-			break ;
-	}
-	return (ast_list);
+
+
+t_array	*complete_command(t_array *tokens)
+{
+	linebreak(tokens);
+	return (command_list(tokens));
 }
 
-t_ast_node	*complete_command(t_array *tokens)
-{
-	t_ast_node	*command_list_node;
-	t_ast_node	*node;
 
-	/*t_array		*ast_list;*/
-	command_list_node = command_list(tokens);
-	if (command_list_node == NULL)
-	{
-		node = create_ast_node(NULL, AST_COMPLETE_COMMAND);
-		node->error_message = syntax_error("");
-		return (node);
-	}
-	command_list_node->type = AST_COMPLETE_COMMAND;
-	return (command_list_node);
+
+
+
+
+// ================<< COMPOND COMMAND >>================
+
+char *set_error_message()
+{
+	char *error_message;
+
+	error_message = syntax_error("");
+	if (error_message == NULL)
+		error_message = syntax_error("syntax error near unexpected token");
+	return (error_message);
 }
 
-t_ast_node	*command_list(t_array *tokens)
+bool is_compound_terminated(t_array *tokens)
 {
-	t_array		*commands;
-	t_ast_node	*command;
+	t_token	*token;
+
+	token = array_peek(tokens);
+	return (token->type == -1 || token->type == lexem_get_type("NEWLINE"));
+}
+
+void skip_line(t_array *tokens)
+{
+	while (is_compound_terminated(tokens) == false)
+		array_shift(tokens);
+}
+
+bool check_compound_termination(t_ast_node *compound_node, t_array *tokens)
+{
+	if (compound_node != NULL && is_compound_terminated(tokens))
+		return (true);
+	return (false);
+}
+
+void push_error_node(t_array *ast_list, t_array *tokens)
+{
+	t_ast_node	*error_node;
+
+	error_node = create_ast_node(NULL, AST_INVALID_COMMAND);
+	error_node->error_message = set_error_message();
+	array_push(ast_list, error_node);
+	skip_line(tokens);
+}
+
+bool is_EOF(t_array *tokens)
+{
+	t_token	*token;
+
+	token = array_peek(tokens);
+	return (token->type == -1);
+}
+
+t_array	*command_list(t_array *tokens)
+{
+	t_array		*compound_list;
+	t_ast_node	*compound_node;
 
 	// TODO: rewrite the top 3 functions in recursive top down;
-	commands = track_malloc(sizeof(t_array));
-	array_init(commands);
-	linebreak(tokens);
-	command = compound_command(tokens);
-	if (command == NULL)
-		return (NULL);
-	array_push(commands, command);
-	return (create_ast_node(commands, AST_COMMAND_LIST));
+	// TODO: reset error messages
+	compound_list = track_malloc(sizeof(t_array));
+	array_init(compound_list);
+	while (true)
+	{
+		compound_node = compound_command(tokens);
+		if (check_compound_termination(compound_node, tokens) == false)
+			push_error_node(compound_list, tokens);
+		else
+			array_push(compound_list, compound_node);
+		if (linebreak(tokens) == false)
+			break;
+	}
+	return (compound_list);
 }
 
-int	is_logical_and_or(t_token *token)
+
+// ================<< COMPOND COMMAND >>================
+
+int	is_logical_and_or(t_array *tokens)
 {
+	t_token	*token;
+
+	token = array_peek(tokens);
 	if (token->type == lexem_get_type("LOGIC_AND"))
 		return (AST_BINARY_AND);
 	if (token->type == lexem_get_type("LOGIC_OR"))
@@ -117,7 +177,6 @@ int	is_logical_and_or(t_token *token)
 
 t_ast_node	*compound_command(t_array *tokens)
 {
-	t_token		*token;
 	t_ast_node	*pipes;
 	t_array		*compounds;
 	int			type;
@@ -130,8 +189,7 @@ t_ast_node	*compound_command(t_array *tokens)
 		if (pipes == NULL)
 			return (NULL);
 		array_push(compounds, pipes);
-		token = array_peek(tokens);
-		type = is_logical_and_or(token);
+		type = is_logical_and_or(tokens);
 		if (type != -1)
 		{
 			array_push(compounds, create_ast_node(NULL, type));
@@ -159,10 +217,11 @@ t_ast_node	*pipeline(t_array *tokens)
 			return (NULL);
 		array_push(pipes, command_node);
 		token = array_peek(tokens);
-		if (token->type != lexem_get_type("PIPE"))
+		if (token->type == lexem_get_type("PIPE"))
+			array_shift(tokens);
+		else
 			break ;
 		linebreak(tokens);
-		array_shift(tokens);
 	}
 	return (create_ast_node(pipes, AST_PIPELINE));
 }
@@ -170,36 +229,51 @@ t_ast_node	*pipeline(t_array *tokens)
 t_ast_node	*command(t_array *tokens)
 {
 	t_token	*token;
+	t_ast_node	*subshell_node;
 
 	token = array_peek(tokens);
 	if (token->type == lexem_get_type("OPEN_PARENTHESIS"))
 	{
 		array_shift(tokens);
-		return (subshell(tokens));
+		subshell_node = subshell(tokens);
+		token = array_peek(tokens);
+		if (token->type == lexem_get_type("CLOSE_PARENTHESIS"))
+			array_shift(tokens);
+		else
+			return (syntax_error(ERR_CLOSE_PARENTHESIS), NULL);
+		return (subshell_node);
 	}
 	return (simple_command(tokens));
 }
 
 t_ast_node	*subshell(t_array *tokens)
 {
-	t_ast_node	*children_node;
-	t_ast_node	*node;
+	t_array	*compound_list;
+	t_ast_node	*compound_node;
 	t_token		*token;
+	t_ast_node	*subshell_node;
 
-	node = command_list(tokens);
-	if (node == NULL)
-		return (NULL);
-	linebreak(tokens);
-	token = array_peek(tokens);
-	if (check_syntax_error(token->type != lexem_get_type("CLOSE_PARENTHESIS"),
-			ERR_CLOSE_PARENTHESIS))
-		return (NULL);
-	array_shift(tokens);
-	node->type = AST_SUBSHELL;
-	children_node = array_get(node->children, 0);
-	children_node->type = AST_COMPOUND_COMMAND;
-	node->redirect_list = redirect_list(tokens);
-	return (node);
+	compound_list = track_malloc(sizeof(t_array));
+	array_init(compound_list);
+	while (true)
+	{
+		linebreak(tokens);
+		compound_node = compound_command(tokens);
+		if (compound_node == NULL)
+			return (NULL);
+		array_push(compound_list, compound_node);
+		linebreak(tokens);
+		token = array_peek(tokens);
+		if (token->type == lexem_get_type("CLOSE_PARENTHESIS"))
+			break ;
+		/*if (check_compound_termination(compound_node, tokens) == false)*/
+		/*	return (NULL);*/
+	}
+	if (compound_list->size == 0)
+		return (syntax_error(ERR_EMPTY_COMMAND), NULL);
+	subshell_node = create_ast_node(compound_list, AST_SUBSHELL);
+	subshell_node->redirect_list = redirect_list(tokens);
+	return (subshell_node);
 }
 
 char	*get_token_symbol(int type)
@@ -272,11 +346,8 @@ t_array	*redirect_list(t_array *tokens)
 		token = array_peek(tokens);
 		if (lexem_is_redirection(token->type) == false)
 			break ;
-		if (token->value == NULL)
-		{
-			syntax_error("Missing filename");
+		if (check_syntax_error(token->value == NULL, ERR_MISSING_FILENAME))
 			return NULL;
-		}
 		array_push(redirections, token);
 		array_shift(tokens);
 	}

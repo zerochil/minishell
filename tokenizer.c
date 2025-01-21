@@ -102,8 +102,6 @@ static bool	tokenize_here_document(t_token *token, t_string *input)
 	char *filename;
 	t_field *delimiter;
 
-	if (token->fields == NULL)
-		return false;
 	delimiter = array_get(token->fields, 0);
 	filename = create_here_document(input, delimiter);
 	if (filename == NULL)
@@ -128,8 +126,9 @@ t_array	*tokenize(t_string *input)
 	while (1)
 	{
 		token = tokenize_next(input);
-		if (token->type == lexem_get_type("HERE_DOCUMENT") && !tokenize_here_document(token, input))
-			return (NULL);
+		if (token->type == lexem_get_type("HERE_DOCUMENT") 
+			&& token->value && !tokenize_here_document(token, input))
+				return (NULL);
 		array_push(tokens, token);
 		if (token->type == -1)
 			break ;

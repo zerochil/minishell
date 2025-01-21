@@ -16,18 +16,24 @@
 int	execute_external(t_command_context *command_context)
 {
 	char	*command_path;
-
+//TODO: check if command path is a directory, return 126 and error message: Is a directory
 	stream_dup2stdio(&command_context->stream);
 	command_path = get_command_path(command_context->args[0]);
-	if (command_path == NULL || access(command_path, F_OK) == -1)
+	if (command_path == NULL)//|| access(command_path, F_OK) == -1)
 	{
-		report_error("minishell: command not found");
+		display_error(SHELL_NAME, command_context->args[0], ERR_COMMAND_NOT_FOUND);
 		return (127);
+	}
+	if (is_directory(command_path))
+	{
+		display_error(SHELL_NAME, command_context->args[0], "Is a directory");
+		return (126);
 	}
 	command_context->args[0] = command_path;
 	execve(command_context->args[0], command_context->args,
 		command_context->envp);
-	perror("minishell: external");
+	display_error(SHELL_NAME, command_context->args[0], strerror(errno));
+	//perror("minishell: external");
 	return (127); // TODO: check if this is correct
 }
 

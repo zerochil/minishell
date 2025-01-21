@@ -66,7 +66,8 @@ int	main(void)
 		tokens = tokenize(&input);
 		if (tokens == NULL)
 			continue ;
-		list = generate_ast(tokens);
+		list = complete_command(tokens);
+	//	array_do(list, print);
 		execution(list);
 		free(line);
 	}

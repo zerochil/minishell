@@ -22,26 +22,26 @@ int	execution(t_array *ast_root_list)
 		ast_root = array_shift(ast_root_list);
 		if (ast_root == NULL)
 			break ;
-		if (ast_root->children == NULL)
+		if (ast_root->type == AST_INVALID_COMMAND)
 		{
 			report_error(ast_root->error_message);
 			status = 2;
 			continue ;
 		}
-		status = execute_complete_command(ast_root);
+		status = execute_compound_command(ast_root);
 	}
 	return (status);
 }
 
-int	execute_complete_command(t_ast_node *node)
-{
-	t_ast_node	*compound_command_node;
-
-	compound_command_node = array_shift(node->children);
-	if (compound_command_node == NULL)
-		return (-1);
-	return (execute_compound_command(compound_command_node));
-}
+/*int	execute_complete_command(t_ast_node *node)*/
+/*{*/
+/*	t_ast_node	*compound_command_node;*/
+/**/
+/*	compound_command_node = array_shift(node->children);*/
+/*	if (compound_command_node == NULL)*/
+/*		return (-1);*/
+/*	return (execute_compound_command(compound_command_node));*/
+/*}*/
 
 /*int execute_command_list(t_ast_node *node)*/
 /*{*/
@@ -97,13 +97,21 @@ int	execute_command(t_ast_node *node)
 int	execute_subshell(t_ast_node *node)
 {
 	int			status;
+	size_t		index;
 	t_stream	stream;
 
 	stream = (t_stream){.read = STDIN_FILENO, .write = STDOUT_FILENO};
 	if (open_redirection_files(node->redirect_list, &stream) == -1)
 		return (-1);
 	stream_dup2stdio(&stream);
-	status = execute_compound_command(array_get(node->children, 0));
-	clean_exit(WEXITSTATUS(status));
-	return (-1);
+	index = 0;
+	while (index < node->children->size)
+	{
+		status = execute_compound_command(array_get(node->children, index));
+		if (status == SIGINT_EXIT)
+			break;
+		index++;
+	}
+	destroy_context();
+	exit(status);
 }

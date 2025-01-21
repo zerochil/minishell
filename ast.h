@@ -34,6 +34,7 @@ typedef enum e_ast_type
 	AST_SIMPLE_COMMAND,
 	AST_BINARY_OR,
 	AST_BINARY_AND,
+	AST_INVALID_COMMAND,
 }							t_ast_type;
 
 typedef struct 				s_ast_node
@@ -44,9 +45,10 @@ typedef struct 				s_ast_node
 	char 					*error_message;
 }							t_ast_node;
 
-t_array *generate_ast(t_array *tokens);
-t_ast_node *complete_command(t_array *tokens);
-t_ast_node *command_list(t_array *tokens);
+/*t_array *generate_ast(t_array *tokens);*/
+/*t_ast_node *complete_command(t_array *tokens);*/
+t_array	*complete_command(t_array *tokens);
+t_array	*command_list(t_array *tokens);
 t_ast_node *compound_command(t_array *tokens);
 t_ast_node *pipeline(t_array *tokens);
 t_ast_node *command(t_array *tokens);
