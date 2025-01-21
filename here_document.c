@@ -122,12 +122,15 @@ bool create_here_doc_temp_file(char *filename, t_string *here_doc, bool should_e
 
 
 
+#include <termios.h>
 
 bool here_document_child_process(char *filename, t_string *here_doc, t_field *delimiter, bool should_expand)
 {
 	pid_t pid;
 	int	status;
+	struct termios old_termios;
 
+	tcgetattr(0, &old_termios);
 	pid = fork();
 	if (pid < 0)
 		error(strerror(errno));
@@ -137,6 +140,7 @@ bool here_document_child_process(char *filename, t_string *here_doc, t_field *de
 		signal(SIGINT, handle_here_doc_signal);
 		start_here_doc_prompt(here_doc, delimiter->value->data);
 		create_here_doc_temp_file(filename, here_doc, should_expand);
+		tcsetattr(0, TCSANOW, &old_termios);
 		exit (0);
 	}
 	wait(&status);
