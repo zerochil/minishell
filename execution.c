@@ -67,6 +67,7 @@ int	execute_compound_command(t_ast_node *node)
 		if (command_node->type == AST_PIPELINE)
 		{
 			last_exit_status = execute_pipeline(command_node);
+			set_exit_status(last_exit_status);
 			if (last_exit_status == SIGINT_EXIT)
 				return (last_exit_status);
 			continue;

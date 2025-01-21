@@ -44,3 +44,11 @@ char *get_exit_status(void)
 	}
 	return (last_exit_str);
 }
+
+struct termios *get_old_termios()
+{
+	t_context	*context;
+
+	context = get_context_instance();
+	return (&context->old_termios);
+}

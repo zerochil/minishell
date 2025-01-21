@@ -40,8 +40,11 @@ int	main(void)
 	// TODO: init all instances in some function? or is there a better design than individual instances?
 	get_environment_instance();
 	context = get_context_instance();
+	tcgetattr(0, &context->old_termios);
 	string_init(&input);
 	setup_signals();
+
+
 	while (1)
 	{
 		context->foreground = true;

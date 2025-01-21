@@ -64,6 +64,7 @@ int	execute_pipeline(t_ast_node *node)
 	int					exit_status;
 
 	pipeline_init(&state, node->children);
+	// TODO: get this out of here
 	if (should_not_fork(state.commands))
 		return (execute_command(array_get(state.commands, 0)));
 	while (state.index < state.commands->size)
@@ -76,6 +77,5 @@ int	execute_pipeline(t_ast_node *node)
 		state.index++;
 	}
 	exit_status = wait_for_pipeline(&state);
-	set_exit_status(exit_status);
 	return (exit_status);
 }

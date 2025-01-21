@@ -18,7 +18,7 @@ void	setup_signals(void)
 
 	sa.sa_handler = SIG_IGN;
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
+	sa.sa_flags = SA_RESTART;
 	sigaction(SIGQUIT, &sa, NULL);
 	sa.sa_handler = handle_signal;
 	sigaction(SIGINT, &sa, NULL);
@@ -58,7 +58,10 @@ void	handle_signal(int signo)
 	if (signo == SIGINT)
 	{
 		if (!context->foreground)
+		{
 			ft_putchar_fd('\n', STDERR_FILENO);
+			rl_on_new_line();
+		}
 		else
 		{
 			ft_putchar_fd('\n', STDERR_FILENO);
