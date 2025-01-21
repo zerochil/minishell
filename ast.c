@@ -78,6 +78,7 @@ t_ast_node	*create_ast_node(t_array *children, t_ast_type type)
 
 t_array	*complete_command(t_array *tokens)
 {
+	//TODO: set exit status for syntax error
 	linebreak(tokens);
 	return (command_list(tokens));
 }

@@ -20,6 +20,8 @@ void	setup_signals(void)
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	sigaction(SIGQUIT, &sa, NULL);
+	sigaction(SIGTSTP, &sa, NULL);
+	sigaction(SIGTERM, &sa, NULL);
 	sa.sa_handler = handle_signal;
 	sigaction(SIGINT, &sa, NULL);
 }
@@ -60,10 +62,11 @@ void	handle_signal(int signo)
 		if (!context->foreground)
 		{
 			ft_putchar_fd('\n', STDERR_FILENO);
-			rl_on_new_line();
+			/*rl_on_new_line();*/
 		}
 		else
 		{
+			set_exit_status(130);
 			ft_putchar_fd('\n', STDERR_FILENO);
 			rl_on_new_line();
 			rl_replace_line("", 0);

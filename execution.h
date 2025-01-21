@@ -20,6 +20,7 @@
 
 # define SHELL_NAME "minishell"
 # define ERR_COMMAND_NOT_FOUND "command not found"
+# define ERR_IS_DIRECTORY "Is a directory"
 
 typedef struct s_command_context
 {

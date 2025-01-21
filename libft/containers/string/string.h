@@ -14,6 +14,7 @@
 #define STRING_H
 
 #include "../_containers_dependencies.h"
+#include <stdbool.h>
 
 typedef struct s_string
 {
@@ -44,5 +45,7 @@ void string_segment_remove(t_string *string, size_t start, size_t length);
 void string_segment_replace(t_string *string, size_t start, size_t length, const char *new_text);
 char *string_segment_extract(t_string *string, size_t start, size_t length);
 char *string_segment_slice(t_string *string, size_t start, size_t length);
+
+void string_replace(t_string *string, const char *old_text, const char *new_text);
 
 #endif
