@@ -11,16 +11,14 @@ bool is_valid_string(bool is_valid(char, int), char *str, size_t length)
 {
 	size_t i;
 
-	if (str == NULL)
-		return (false);
-	if (length == 0)
+	if (str == NULL || is_valid == NULL || length == 0)
 		return (false);
 	if (length > ft_strlen(str))
 		length = ft_strlen(str);
 	i = 0;
 	while (i < length)
 	{
-		if (!is_valid(str[i], i))
+		if (is_valid(str[i], i) == false)
 			return (false);
 		i++;
 	}

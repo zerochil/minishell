@@ -19,7 +19,7 @@ char	*parameter_get(char *parameter_name)
 	char	*parameter_value;
 
 	if (ft_strcmp(parameter_name, "?") == 0)
-		return "EXIT_STATUS";
+		return get_exit_status();
 	parameter_value = env_get(parameter_name);
 	if (parameter_value == NULL)
 		return ("");

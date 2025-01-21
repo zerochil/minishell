@@ -61,7 +61,7 @@ pid_t	fork_and_execute(t_array *commands, t_stream *streamline, size_t index)
 int	execute_pipeline(t_ast_node *node)
 {
 	t_pipeline_state	state;
-	int					status;
+	int					exit_status;
 
 	pipeline_init(&state, node->children);
 	if (should_not_fork(state.commands))
@@ -75,6 +75,7 @@ int	execute_pipeline(t_ast_node *node)
 		stream_close(&state.streamline[state.index]);
 		state.index++;
 	}
-	status = wait_for_pipeline(&state);
-	return (status);
+	exit_status = wait_for_pipeline(&state);
+	set_exit_status(exit_status);
+	return (exit_status);
 }

@@ -17,7 +17,6 @@
 #include "execution.h"
 #include <readline/history.h>
 #include <readline/readline.h>
-#include <signal.h>
 
 void handler(int sig)
 {
@@ -46,7 +45,7 @@ int	main(void)
 	while (1)
 	{
 		context->foreground = true;
-		line = readline(prompt());
+		line = readline(". ->>");
 		context->foreground = false;
 		if (line == NULL)
 		{

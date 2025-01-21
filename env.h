@@ -3,6 +3,7 @@
 
 #include "libft/libft.h"
 #include "utils.h"
+#include "context.h"
 
 void set_default_env_vars(t_array *environment);
 t_array *get_environment_instance();

@@ -63,24 +63,19 @@ int	execute_compound_command(t_ast_node *node)
 	{
 		command_node = array_shift(node->children);
 		if (command_node == NULL)
-			break ;
+			break;
 		if (command_node->type == AST_PIPELINE)
 		{
 			last_exit_status = execute_pipeline(command_node);
 			if (last_exit_status == SIGINT_EXIT)
 				return (last_exit_status);
+			continue;
 		}
-		else if (command_node->type == AST_BINARY_AND)
-		{
-			if (last_exit_status != 0)
-				break ;
-		}
-		else if (command_node->type == AST_BINARY_OR)
-		{
-			if (last_exit_status == 0)
-				break ;
-		}
-		else
+		if ((command_node->type == AST_BINARY_AND && last_exit_status != 0) ||
+			(command_node->type == AST_BINARY_OR && last_exit_status == 0))
+			break;
+		if (command_node->type != AST_BINARY_AND && 
+			command_node->type != AST_BINARY_OR)
 			error("execute_compound_command: error");
 	}
 	return (last_exit_status);

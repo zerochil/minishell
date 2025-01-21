@@ -13,9 +13,10 @@
 #ifndef EXPANSION_H
 # define EXPANSION_H
 
+# include <dirent.h>
 # include "ast.h"
 # include "field.h"
-# include <dirent.h>
+#include "context.h"
 
 enum
 {

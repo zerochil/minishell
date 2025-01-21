@@ -18,3 +18,29 @@ t_context	*get_context_instance(void)
 
 	return (&context);
 }
+
+void set_exit_status(int status)
+{
+	t_context	*context;
+
+	context = get_context_instance();
+	context->exit_status = status;
+}
+
+char *get_exit_status(void)
+{
+	t_context	*context;
+	static int last_exit;
+	static char* last_exit_str;
+
+	context = get_context_instance();
+	if (last_exit != context->exit_status || last_exit_str == NULL)
+	{
+		last_exit = context->exit_status;
+		if (last_exit_str)
+			resource_free(last_exit_str);
+		last_exit_str = ft_itoa(last_exit);
+		resource_track(last_exit_str, free);
+	}
+	return (last_exit_str);
+}

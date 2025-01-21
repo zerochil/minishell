@@ -1,5 +1,41 @@
 #include "env.h"
 
+char *get_key(char *var)
+{
+	int key_len;
+
+	key_len = ft_strcspn(var, "=");
+	if (key_len > 0 && var[key_len] == '=' && var[key_len - 1] == '+')
+		key_len--;
+	if (key_len <= 0)
+		key_len = ft_strlen(var);
+	if (is_valid_string(is_valid_identifier, var, key_len) == false)
+		return (NULL);
+	return (ft_strndup(var, key_len));
+}
+
+static char *get_value(char *var)
+{
+	char *equal_pos;
+
+	equal_pos = ft_strchr(var, '=');
+	if (equal_pos)
+		return (equal_pos + 1);
+	else
+		return ("");
+}
+
+/*static char *get_value(char *var)*/
+/*{*/
+/*	char *equal_pos;*/
+/**/
+/*	equal_pos = ft_strchr(var, '=');*/
+/*	if (equal_pos)*/
+/*		return (equal_pos + 1);*/
+/*	return (NULL);*/
+/*}*/
+
+
 int compare_strings(void *a, void *b)
 {
 	return (ft_strcmp(a, b));
@@ -14,7 +50,6 @@ int match_key(void *element_ptr, void *target_ptr)
 
 	element = (char *)element_ptr;
 	target = (char *)target_ptr;
-	//printf("DEBUG: match_key: element:%s | target:%s\n", element, target);
 	if (ft_strchr(element, '='))
 	{
 		element_length = ft_strcspn(element, "=");
@@ -93,36 +128,6 @@ t_array *get_environment_instance()
 	return (&environment);
 }
 
-char *get_key(char *var)
-{
-	char *equal_pos;
-	int key_len;
-
-	equal_pos = ft_strchr(var, '=');
-	key_len = ft_strlen(var);
-	if (equal_pos)
-	{
-		if (equal_pos == var)
-			key_len = 0;
-		else if (equal_pos[-1] == '+')
-			key_len = equal_pos - var - 1;
-		else
-			key_len = equal_pos - var;
-	}
-	if (is_valid_string(is_valid_identifier, var, key_len) == false)
-		return (NULL);
-	return (ft_strndup(var, key_len));
-}
-
-static char *get_value(char *var)
-{
-	char *equal_pos;
-
-	equal_pos = ft_strchr(var, '=');
-	if (equal_pos)
-		return (equal_pos + 1);
-	return (NULL);
-}
 
 char *env_set_append(char *var, char *key)
 {
@@ -150,6 +155,8 @@ bool env_set(char *var)
 	key = get_key(var);
 	if (key == NULL)
 		return (manager_scope_end(), false);
+	if (ft_strchr(var, '=') == NULL && env_get(key) && *get_value(var) == '\0')
+		return (manager_scope_end(), true);
 	if(ft_strchr(var, '=') && ft_strchr(var, '=')[-1] == '+')
 		new_var = env_set_append(var, key);
 	else
@@ -188,12 +195,7 @@ char *env_get(char *key)
 	environment = get_environment_instance();
 	value = array_find(environment, key, match_key);
 	if (value)
-	{
-		if (ft_strchr(value, '='))
-			return (ft_strchr(value, '=') + 1);
-		else
-			return ("");
-	}
+		return (get_value(value));
 	return (NULL);
 }
 
