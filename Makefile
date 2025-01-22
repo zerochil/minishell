@@ -4,24 +4,30 @@ LIBFT_INCLUDE = ./libft
 INCLUDE = ./includes
 CFLAGS = -Werror -Wextra -Wall -I$(LIBFT_INCLUDE) -I$(INCLUDE) 
 
-PARAM_EXPANSION_SRC = expansion/parameter_expansion/parameter_expansion.c       \
-					  expansion/parameter_expansion/parameter_expansion_utils.c
+PARAM_EXPANSION_SRC = parameter_expansion.c       \
+					  parameter_expansion_utils.c
 
-FIELD_SPLITTING_SRC = expansion/field_splitting/field.c       \
-					  expansion/field_splitting/field_peek.c  \
-					  expansion/field_splitting/field_utils.c
+FIELD_SPLITTING_SRC = field.c       \
+					  field_peek.c  \
+					  field_utils.c
 
-PATHNAME_EXPANSION_SRC = expansion/pathname_expansion/pattern_ops.c              \
-						 expansion/pathname_expansion/pathname_expansion.c       \
-						 expansion/pathname_expansion/pathname_expansion_utils.c \
+PATHNAME_EXPANSION_SRC = pattern_ops.c              \
+						 pathname_expansion.c       \
+						 pathname_expansion_utils.c \
 
-SRCS = minishell.c tokenizer.c tokenizer_input_validator.c lexer.c lexer_functions.c ast.c expansion.c execution.c builtins.c env.c utils.c prompt.c context.c signals.c \
-	   $(FIELD_SPLITTING_SRC)    \
-	   $(PARAM_EXPANSION_SRC)    \
-	   $(PATHNAME_EXPANSION_SRC) \
-	   here_document.c here_document_utils.c\
+EXPANSION_SRC = $(addprefix parameter_expansion/, $(PARAM_EXPANSION_SRC))   \
+				$(addprefix field_splitting/, $(FIELD_SPLITTING_SRC))       \
+			   	$(addprefix pathname_expansion/, $(PATHNAME_EXPANSION_SRC)) \
+				quote_removal.c           \
+				expansion_utils.c         \
+				expansion.c
+
+SRCS = minishell.c tokenizer.c tokenizer_input_validator.c lexer.c lexer_functions.c ast.c execution.c builtins.c env.c utils.c prompt.c context.c signals.c \
+	   here_document.c here_document_utils.c       \
+	   $(addprefix expansion/, $(EXPANSION_SRC)) \
 	   execution_pipeline_utils.c stream.c execution_redirection.c execution_simple_command.c execution_simple_command_utils.c execution_utils.c execution_pipeline.c  \
 	   debug.c
+
 OBJS_DIR = .objects/
 OBJS = $(SRCS:%.c=$(OBJS_DIR)%.o)
 HEADER_FILES = minishell.h            \
