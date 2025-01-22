@@ -35,21 +35,22 @@ int	should_not_fork(t_array *commands)
 	return (1);
 }
 
+#include <sys/ioctl.h>
 pid_t	fork_and_execute(t_array *commands, t_stream *streamline, size_t index)
 {
 	pid_t	pid;
 	int		status;
+	int		fd;
 
 	pid = fork();
 	if (pid == -1)
-	{
-		// should turn this into a function
-		perror("minishell");
-		error(NULL);
-	}
+		error(strerror(errno));
 	else if (pid > 0)
 		return (pid);
-
+	fd = open("/dev/tty", O_RDWR);
+	if (index == 0)
+		ioctl(fd, TIOCSCTTY, 0); // why 0?
+	close(fd);
 	ctx_is_child(CTX_SET, true);
 	setup_child_signals();
 	stream_dup2stdio(&streamline[index]);
