@@ -6,14 +6,14 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:11:53 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/29 20:08:03 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/22 10:25:04 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LEXER_H
 # define LEXER_H
 
-# include "libft/libft.h"
+# include "libft.h"
 
 typedef struct s_lexem
 {

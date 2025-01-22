@@ -1,31 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   context.h                                          :+:      :+:    :+:   */
+/*   tokenizer.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 15:37:48 by rrochd           ###   ########.fr       */
+/*   Created: 2024/12/29 16:29:33 by rrochd            #+#    #+#             */
+/*   Updated: 2025/01/22 11:44:50 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CONTEXT_H
-# define CONTEXT_H
+#ifndef TOKENIZER_H
+# define TOKENIZER_H
 
-# include "libft/libft.h"
-# include <termios.h>
+# include "libft.h"
+# include "token.h"
+# include "lexer.h"
+# include "field.h"
+# include "here_document.h"
 
-typedef struct s_context
-{
-	bool	foreground;
-	int 	exit_status;
-	struct termios old_termios;
-}			t_context;
+# define WHITE_SPACE " \t"
 
-t_context	*get_context_instance(void);
-void		set_exit_status(int status);
-char *get_exit_status(void);
-struct termios *get_old_termios(void);
+
+t_array	*tokenize(t_string *input);
+t_token	*token_init(int type, char *value);
+int	is_quoted(t_string *input);
 
 #endif

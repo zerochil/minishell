@@ -6,14 +6,14 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 08:48:37 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 08:48:41 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/22 10:35:28 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "libft/libft.h"
+#include "libft.h"
 #include <sys/stat.h>
 #include <readline/readline.h>
 #include <readline/history.h>

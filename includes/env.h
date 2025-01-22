@@ -1,7 +1,7 @@
 #ifndef ENV_H
 #define ENV_H
 
-#include "libft/libft.h"
+#include "libft.h"
 #include "utils.h"
 #include "context.h"
 

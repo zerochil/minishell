@@ -1,25 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   tokenizer.h                                        :+:      :+:    :+:   */
+/*   token.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
+/*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/29 16:29:33 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/19 13:11:59 by inajah           ###   ########.fr       */
+/*   Created: 2025/01/22 11:43:07 by inajah            #+#    #+#             */
+/*   Updated: 2025/01/22 11:44:33 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef TOKENIZER_H
-# define TOKENIZER_H
+#ifndef TOKEN_H
+# define TOKEN_H
 
-# include "lexer.h"
-# include "field.h"
-# include "here_document.h"
-# include "libft/libft.h"
-
-# define META_CHARACTERS "|&()<>\n \t"
-# define WHITE_SPACE " \t"
+# include "libft.h"
 
 typedef struct s_token
 {
@@ -28,9 +22,5 @@ typedef struct s_token
 	bool		should_field_split;
 	t_array		*fields; 
 }				t_token;
-
-t_array	*tokenize(t_string *input);
-t_token	*token_init(int type, char *value);
-int	is_quoted(t_string *input);
 
 #endif

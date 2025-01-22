@@ -1,13 +1,44 @@
 NAME = minishell
-CFLAGS = -Werror -Wextra -Wall
 CC = cc
-SRCS = minishell.c tokenizer.c tokenizer_input_validator.c lexer.c lexer_functions.c ast.c expansion.c here_document.c execution.c builtins.c env.c utils.c prompt.c context.c signals.c \
+LIBFT_INCLUDE = ./libft
+INCLUDE = ./includes
+CFLAGS = -Werror -Wextra -Wall -I$(LIBFT_INCLUDE) -I$(INCLUDE)
+
+FIELD_SRC = expansion/field/field.c \
+			expansion/field/field_peek.c \
+			expansion/field/field_utils.c
+
+PARAM_EXPANSION_SRC = expansion/parameter_expansion/parameter_expansion.c \
+					  expansion/parameter_expansion/parameter_expansion_utils.c
+					  
+
+SRCS = minishell.c tokenizer.c tokenizer_input_validator.c lexer.c lexer_functions.c ast.c expansion.c execution.c builtins.c env.c utils.c prompt.c context.c signals.c \
+	   $(FIELD_SRC)\
+	   $(PARAM_EXPANSION_SRC)\
+	   here_document.c here_document_utils.c\
 	   execution_pipeline_utils.c stream.c execution_redirection.c execution_simple_command.c execution_simple_command_utils.c execution_utils.c execution_pipeline.c  \
 	   debug.c
 OBJS_DIR = .objects/
 OBJS = $(SRCS:%.c=$(OBJS_DIR)%.o)
-HEADERS = minishell.h tokenizer.h lexer.h ast.h expansion.h here_document.h execution.h builtins.h env.h utils.h context.h signals.h execution_pipeline.h stream.h \
-		  debug.h
+HEADER_FILES = minishell.h            \
+			   token.h                \
+			   lexer.h                \
+			   tokenizer.h            \
+			   here_document.h        \
+			   ast.h                  \
+			   expansion.h            \
+			   field.h                \
+			   execution.h            \
+			   execution_pipeline.h   \
+			   env.h                  \
+			   context.h              \
+			   builtins.h             \
+			   signals.h              \
+			   stream.h               \
+			   debug.h                \
+			   utils.h
+
+HEADERS = $(HEADER_FILES:%=$(INCLUDE)/%)
 LIBFT = libft/libft.a
 
 
@@ -20,7 +51,8 @@ $(OBJS_DIR):
 	mkdir -p $(OBJS_DIR)
 
 $(OBJS_DIR)%.o: %.c $(HEADERS)
-	$(CC) $(CFLAGS) -c $< -o $@
+	@mkdir -p $(dir $@)
+	$(CC)  $(CFLAGS) -c $< -o $@ 
 
 $(LIBFT): FORCE
 	@make -C libft --no-print-directory

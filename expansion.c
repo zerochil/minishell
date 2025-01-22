@@ -6,319 +6,23 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/20 14:14:34 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/22 11:35:23 by inajah           ###   ########.fr       */
 /*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "expansion.h"
-#include "env.h"
 
-char	*parameter_get(char *parameter_name)
-{
-	char	*parameter_value;
-
-	if (ft_strcmp(parameter_name, "?") == 0)
-		return get_exit_status();
-	parameter_value = env_get(parameter_name);
-	if (parameter_value == NULL)
-		return ("");
-	return (parameter_value);
-}
 
 
 //////////////////////////////// field helper functions //////////////////////////////////////
-
-void	field_peek(t_field *field, char *c, char *m)
-{
-	if (field == NULL || c == NULL || m == NULL)
-	{
-		report_error("Error: field_peek");
-		return ;
-	}
-	*c = string_peek(field->value);
-	if (field->mask)
-		*m = string_peek(field->mask);
-}
-
-
-void	field_peek_set(t_field *field, size_t peek)
-{
-	if (field == NULL || peek > field->value->size)
-	{
-		report_error("Error: field_peek_set");
-		return ;
-	}
-	field->value->peek = peek;
-	if (field->mask)
-		field->mask->peek = peek;
-}
-
-void	field_peek_advance(t_field *field)
-{
-	if (field == NULL)
-	{
-		report_error("Error: field_peek_advance");
-		return ;
-	}
-	string_peek_advance(field->value);
-	if (field->mask)
-		string_peek_advance(field->mask);
-}
-
-void	field_peek_reset(t_field *field)
-{
-	if (field == NULL)
-	{
-		report_error("Error: field_peek");
-		return ;
-	}
-	string_peek_reset(field->value);
-	if (field->mask)
-		string_peek_reset(field->mask);
-}
-
-void	field_set(t_field *field, char *value, unsigned char mask)
-{
-	if (field == NULL)
-	{
-		report_error("Error: field_set");
-		return ;
-	}
-	string_set(field->value, value);
-	string_set(field->mask, value);
-	field_peek_reset(field);
-	ft_memset(field->mask->data, mask, field->mask->size);
-}
-
-char	field_shift_at_peek(t_field *field)
-{
-	char	c;
-
-	if (field == NULL)
-	{
-		report_error("Error: field_shift_at_peek");
-		return (-1);
-	}
-	c = string_peek(field->value);
-	string_segment_remove(field->value, field->value->peek, 1);
-	if (field->mask)
-		string_segment_remove(field->mask, field->mask->peek, 1);
-	return (c);
-}
-
-void	field_shift(t_field *field)
-{
-	if (field == NULL)
-	{
-		report_error("Error: field_shift");
-		return ;
-	}
-	string_shift(field->value);
-	string_shift(field->mask);
-}
-
-
-t_string *get_token_value_mask(char *token_value)
-{
-	t_string	*mask;
-	size_t	token_value_length;
-	char	in_quote;
-	size_t	i;
-
-	token_value_length = ft_strlen(token_value);
-	mask = track_malloc(sizeof(t_string));
-	string_init(mask);
-	string_ensure_capacity(mask, token_value_length);
-	mask->size = token_value_length;
-	in_quote = '\0';
-	i = 0;
-	while (token_value[i])
-	{
-		if (in_quote == '\0' && (token_value[i] == '\'' || token_value[i] == '"'))
-			in_quote = token_value[i];
-		else if (in_quote == token_value[i])
-			in_quote = '\0';
-		else if (in_quote == '\'')
-			mask->data[i] |= SINGLE_QUOTED;
-		else if (in_quote == '"')
-			mask->data[i] |= DOUBLE_QUOTED;
-		i++;
-	}
-	return (mask);
-}
-
-t_field	*field_init(char *token_value, char *mask)
-{
-	t_field	*field;
-
-	if (token_value == NULL)
-	{
-		report_error("field_init: error");
-		token_value = "";
-	}
-	field = track_malloc(sizeof(t_field));
-	field->value = track_malloc(sizeof(t_string));
-	string_init(field->value);
-	string_set(field->value, token_value);
-	field->mask = get_token_value_mask(token_value);
-	if (mask != NULL)
-		ft_memcpy(field->mask->data, mask, field->value->size);
-	return (field);
-}
 ///////////////////////////////// expansion utility functions ///////////////////////////////////////////////
-bool	remove_quotes_from_field(t_field *field)
-{
-	size_t	old_size;
-	char	c;
-	char	m;
-
-	old_size = field->value->size;
-	field_peek_reset(field);
-	while (true)
-	{
-		field_peek(field, &c, &m);
-		if (c == '\0')
-			break;
-		else if ((c == '\'' || c == '"' ) && m == ORIGINAL)
-			field_shift_at_peek(field);
-		else
-			field_peek_advance(field);
-	}
-	return (field->value->size != old_size);
-}
 
 static bool	is_ifs(char c)
 {
 	return (c == ' ' || c == '\t' || c == '\n');
 }
 
-static bool	is_valid_parameter_name_char(char c)
-{
-	return (ft_isalnum(c) || c == '_');
-}
-
-/////////////////////////////////// parameter expansion //////////////////////////
-void	field_replace(t_field *field, size_t start, size_t length,
-		char *value)
-{
-	size_t	value_length;
-
-	if (field->mask == NULL || value == NULL)
-	{
-		report_error("field_replace: error");
-		return ;
-	}
-	string_segment_replace(field->value, start, length, value);
-	string_segment_replace(field->mask, start, length, value);
-	value_length = ft_strlen(value);
-	ft_memset(field->mask->data + start, EXPANDED, value_length);
-}
-
-char *get_parameter_name(t_string *string, size_t dolar_position)
-{
-	char *str;
-	size_t i;
-
-	str = string->data;
-	i = dolar_position + 1;
-	if (!ft_isalpha(str[i]) && str[i] != '_' && str[i] != '?')
-	{
-		string_peek_advance(string);
-		return (NULL);
-	}
-	while (is_valid_parameter_name_char(str[i]))
-		i++;
-	if(dolar_position + 1 == i && str[i] == '?')
-		i++;
-	return (string_segment_extract(string, dolar_position,
-					i - dolar_position));
-}
-
-int	expand_parameter(t_string *string, char *parameter_name)
-{
-	char	*parameter_value;
-	size_t	value_length;
-	size_t	key_length;
-	size_t	dolar_position;
-
-	if (parameter_name == NULL)
-		return (-1);
-	dolar_position = string->peek;
-	parameter_value = parameter_get(parameter_name + 1);
-	key_length = ft_strlen(parameter_name);
-	value_length = ft_strlen(parameter_value);
-	string_segment_replace(string, dolar_position, key_length, parameter_value);
-	string->peek += value_length;
-	return (value_length);
-}
-
-void	expand_mask_at_peek(t_string *mask, int key_length, int value_length, int value_mask)
-{
-	char *tmp;
-
-	tmp = safe_malloc((value_length + 1) * sizeof(char));
-	ft_memset(tmp, value_mask, value_length);
-	string_segment_replace(mask, mask->peek, key_length, tmp);
-	free(tmp);
-}
-
-bool	expand_parameter_in_field(t_field *field)
-{
-	char 	*parameter_name;
-	size_t	dolar_position;
-	ssize_t	value_length;
-	int		mask;
-
-	dolar_position = field->value->peek;
-	parameter_name = get_parameter_name(field->value, dolar_position);
-	value_length = expand_parameter(field->value, parameter_name);
-	if (value_length < 0)
-		return (false);
-	mask = EXPANDED | (field->mask->data[dolar_position] & DOUBLE_QUOTED);
-	expand_mask_at_peek(field->mask, ft_strlen(parameter_name), value_length, mask);
-	//field_peek_set(field, dolar_position + value_length);
-	//print_field(field);
-	return (true);
-}
-
-bool	expand_field_parameter(t_field *field, int single_quoted_flag)
-{
-	char c;
-	char m;
-	bool	has_expanded;
-	bool	should_field_split;
-
-	should_field_split = false;
-	field_peek_reset(field);
-	while (true)
-	{
-		field_peek(field, &c, &m);
-		if (c == '\0')
-			break ;
-		if (c == '$' && (m & single_quoted_flag) == 0)
-		{
-			has_expanded = expand_parameter_in_field(field);
-			if ((m & DOUBLE_QUOTED) == 0)
-				should_field_split = has_expanded;
-			field->mask->peek = field->value->peek;
-		}
-		else
-			field_peek_advance(field);
-	}
-	return should_field_split;
-}
-//TODO: what if the variable name starts with a digit?
-void	parameter_expansion(void *token_ptr)
-{
-	t_token		*token;
-	t_field		*field;
-
-	token = token_ptr;
-	field = array_get(token->fields, 0);
-	//TODO:  handle this: $"HOME" -> HOME, $ gets consumed if it is not quoted and followed by a quote.
-	token->should_field_split = expand_field_parameter(field, SINGLE_QUOTED);
-}
 
 
 
@@ -551,7 +255,7 @@ t_array *list_files(t_field *pattern)
     char	*dir_path;
 	int		target_type;
 
-	remove_quotes_from_field(pattern);
+	field_remove_original_quotes(pattern);
 	target_type = DENTRY_VISIBLE;
 	target_type |= DENTRY_DIRECTORY * trim_trailing_slash(pattern);
     dir_path = pattern_extract_dir_path(pattern);
@@ -625,7 +329,7 @@ void single_field_quote_removal(void *field_ptr)
 	t_field	*field;
 	
 	field = field_ptr;
-	remove_quotes_from_field(field);
+	field_remove_original_quotes(field);
 }
 
 void	quote_removal(void *token_ptr)

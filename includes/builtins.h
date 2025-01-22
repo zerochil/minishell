@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-#include "libft/libft.h"
+#include "libft.h"
 #include "env.h"
 #include "utils.h"
 

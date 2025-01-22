@@ -6,14 +6,14 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 18:06:13 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 08:49:48 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/22 11:12:35 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HERE_DOCUMENT_H
 # define HERE_DOCUMENT_H
 
-# include "libft/libft.h"
+# include "libft.h"
 # include "field.h"
 # include "signals.h"
 # include "utils.h"
@@ -23,10 +23,16 @@
 # include <stdio.h>
 # include <sys/wait.h>
 # include <readline/readline.h>
+# include <termios.h>
 
-#define WARN_HEREDOC_DELIM "minishell: warning: here_document delimited by end-of-file"
+# define WARN_HEREDOC_DELIM \
+	"minishell: warning here_document delimited by end-of-file"
 
-bool	remove_quotes_from_field(t_field *field);
+char	*random_filename(void);
+size_t	get_second_line(char *input, size_t start);
+void	expand_parameter_here_doc(t_string *content);
+bool	is_delimiter(char *line, char *delimiter);
+
 char	*create_here_document(t_string *input, t_field *delimiter);
 
 #endif

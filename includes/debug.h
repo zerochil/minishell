@@ -1,23 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.h                                        :+:      :+:    :+:   */
+/*   debug.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
+/*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 15:37:49 by rrochd           ###   ########.fr       */
+/*   Created: 2025/01/20 09:28:59 by inajah            #+#    #+#             */
+/*   Updated: 2025/01/22 10:34:54 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MINISHELL_H
-# define MINISHELL_H
+#ifndef DEBUG_H
+# define DEBUG_H
 
-# include "libft/libft.h"
-# include "env.h"
-# include "context.h"
+#include "libft.h"
+#include "field.h"
+#include "tokenizer.h"
+#include "ast.h"
 
+void	print_field(void *field_ptr);
 void	print_token(void *token_ptr);
-char	*prompt(void);
+void	print(void *node_ptr);
 
 #endif
