@@ -148,7 +148,7 @@ t_array	*command_list(t_array *tokens)
 	// TODO: reset error messages
 	compound_list = track_malloc(sizeof(t_array));
 	array_init(compound_list);
-	while (true)
+	while (is_EOF(tokens) == false)
 	{
 		compound_node = compound_command(tokens);
 		if (check_compound_termination(compound_node, tokens) == false)
