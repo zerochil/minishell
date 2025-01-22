@@ -4,16 +4,17 @@ LIBFT_INCLUDE = ./libft
 INCLUDE = ./includes
 CFLAGS = -Werror -Wextra -Wall -I$(LIBFT_INCLUDE) -I$(INCLUDE)
 
-FIELD_SRC = expansion/field/field.c \
-			expansion/field/field_peek.c \
-			expansion/field/field_utils.c
+FIELD_SPLITTING_SRC = expansion/field_splitting/field.c       \
+					  expansion/field_splitting/field_peek.c  \
+					  expansion/field_splitting/field_utils.c \
+					  
 
-PARAM_EXPANSION_SRC = expansion/parameter_expansion/parameter_expansion.c \
+PARAM_EXPANSION_SRC = expansion/parameter_expansion/parameter_expansion.c       \
 					  expansion/parameter_expansion/parameter_expansion_utils.c
 					  
 
 SRCS = minishell.c tokenizer.c tokenizer_input_validator.c lexer.c lexer_functions.c ast.c expansion.c execution.c builtins.c env.c utils.c prompt.c context.c signals.c \
-	   $(FIELD_SRC)\
+	   $(FIELD_SPLITTING_SRC)\
 	   $(PARAM_EXPANSION_SRC)\
 	   here_document.c here_document_utils.c\
 	   execution_pipeline_utils.c stream.c execution_redirection.c execution_simple_command.c execution_simple_command_utils.c execution_utils.c execution_pipeline.c  \

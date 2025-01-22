@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 11:35:23 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/22 12:25:21 by inajah           ###   ########.fr       */
 /*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
@@ -18,90 +18,16 @@
 //////////////////////////////// field helper functions //////////////////////////////////////
 ///////////////////////////////// expansion utility functions ///////////////////////////////////////////////
 
-static bool	is_ifs(char c)
-{
-	return (c == ' ' || c == '\t' || c == '\n');
-}
-
-
-
-
-///////////////////////////////// field splitting ////////////////////////////////
-t_field	*field_slice_up_to_peek(t_field *field)
-{
-	t_field	*new_field;
-	char	*value;
-	char	*mask;
-
-	if (field->value->peek == 0)
-		return (NULL);
-
-	value = string_segment_slice(field->value, 0, field->value->peek);
-	mask = string_segment_slice(field->mask, 0, field->mask->peek);
-	new_field = field_init(value, mask);
-	field_peek_reset(field);
-	return (new_field);
-}
-
-void	skip_ifs(t_field *field)
-{
-	while (is_ifs(string_peek(field->value))
-		&& (string_peek(field->mask) == EXPANDED))
-		field_shift(field);
-}
-
-void single_field_split(t_array *fields)
-{
-	t_field	*field;
-	t_field	*new_field;
-	char	c;
-	char	m;
-
-	field = array_shift(fields);
-	field_peek_reset(field);
-	while (true)
-	{
-		field_peek(field, &c, &m);
-		if (c == '\0')
-			break;
-		if (is_ifs(c) && m == EXPANDED)
-		{
-			new_field = field_slice_up_to_peek(field);
-			if (new_field)
-				array_push(fields, new_field);
-			skip_ifs(field);
-		}
-		else
-			field_peek_advance(field);
-	}
-	if (field->value->size > 0)
-		array_push(fields, field);
-}
-
 void field_splitting(void *token_ptr)
 {
 	t_token *token;
 
 	token = token_ptr;
 	if (token->should_field_split)
-		single_field_split(token->fields);
+		field_split(token->fields);
 }
 
 /////////////////////////////// pathname expansion /////////////////////////////////
-
-t_field	*field_copy(t_field *field)
-{
-	t_field *copy;
-
-	if (!field)
-	{
-		report_error("field_copy: error");
-		return (NULL);
-	}
-	copy = field_init(field->value->data, field->mask->data);
-	return (copy);
-}
-
 char	*pattern_extract_dir_path(t_field *pattern)
 {
 	char *dir_path;

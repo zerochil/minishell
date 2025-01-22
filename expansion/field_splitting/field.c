@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 09:12:44 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 10:57:01 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/22 12:39:19 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,4 +71,47 @@ void	field_set(t_field *field, char *value, unsigned char mask)
 	string_set(field->mask, value);
 	field_peek_reset(field);
 	ft_memset(field->mask->data, mask, field->mask->size);
+}
+
+static t_field	*field_slice_up_to_peek(t_field *field)
+{
+	t_field	*new_field;
+	char	*value;
+	char	*mask;
+
+	if (field->value->peek == 0)
+		return (NULL);
+	value = string_segment_slice(field->value, 0, field->value->peek);
+	mask = string_segment_slice(field->mask, 0, field->mask->peek);
+	new_field = field_init(value, mask);
+	field_peek_reset(field);
+	return (new_field);
+}
+
+void	field_split(t_array *fields)
+{
+	t_field	*field;
+	t_field	*new_field;
+	char	c;
+	char	m;
+
+	field = array_shift(fields);
+	field_peek_reset(field);
+	while (true)
+	{
+		field_peek(field, &c, &m);
+		if (c == '\0')
+			break ;
+		if (is_ifs(c) && m == EXPANDED)
+		{
+			new_field = field_slice_up_to_peek(field);
+			if (new_field)
+				array_push(fields, new_field);
+			skip_ifs(field);
+		}
+		else
+			field_peek_advance(field);
+	}
+	if (field->value->size > 0)
+		array_push(fields, field);
 }

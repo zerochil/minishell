@@ -6,11 +6,36 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 10:49:01 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 10:55:03 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/22 12:36:43 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "field.h"
+
+bool	is_ifs(char c)
+{
+	return (c == ' ' || c == '\t' || c == '\n');
+}
+
+void	skip_ifs(t_field *field)
+{
+	while (is_ifs(string_peek(field->value))
+		&& (string_peek(field->mask) == EXPANDED))
+		field_shift(field);
+}
+
+t_field	*field_copy(t_field *field)
+{
+	t_field	*copy;
+
+	if (!field)
+	{
+		report_error("field_copy: error");
+		return (NULL);
+	}
+	copy = field_init(field->value->data, field->mask->data);
+	return (copy);
+}
 
 void	field_shift(t_field *field)
 {
