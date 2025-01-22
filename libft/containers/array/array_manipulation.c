@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 10:57:55 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/17 16:16:02 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/22 12:48:18 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,5 +111,23 @@ void	array_merge(t_array *dest, t_array *src)
 	{
 		array_push(dest, src->data[i]);
 		i++;
+	}
+}
+
+void	array_expand_at(t_array *array, size_t index, t_array *subarray)
+{
+	ssize_t	i;
+
+	if (!array || !subarray)
+	{
+		report_error("array_expand_at: error");
+		return ;
+	}
+	array_remove(array, index);
+	i = subarray->size - 1;
+	while (i >= 0)
+	{
+		array_insert(array, index, subarray->data[i]);
+		i--;
 	}
 }

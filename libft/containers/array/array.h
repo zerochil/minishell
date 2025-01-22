@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/21 20:00:43 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/17 16:16:25 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/22 12:48:44 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ void		*array_remove(t_array *arr, size_t index);
 void		*array_shift(t_array *arr);
 void *array_replace(t_array *array, size_t index, void *element);
 void	array_merge(t_array *dest, t_array *src);
+void	array_expand_at(t_array *array, size_t index, t_array *subarray);
 
 void		array_do(t_array *array, void (*func)(void *));
 void		*array_dup(t_array *arr);

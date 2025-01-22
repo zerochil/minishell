@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/14 20:53:34 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 12:32:26 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/22 12:40:59 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,6 @@ bool		field_remove_original_quotes(t_field *field);
 void		field_shift(t_field *field);
 bool		is_ifs(char c);
 void		skip_ifs(t_field *field);
-
 
 #endif
 
