@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 16:16:39 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/22 08:47:14 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include "stream.h"
 # include "execution_pipeline.h"
 # include "expansion.h"
+# include "utils.h"
 
 # define SHELL_NAME "minishell"
 # define ERR_COMMAND_NOT_FOUND "command not found"
@@ -48,8 +49,6 @@ int				open_redirection_files(t_array *redirection_list,
 					t_stream *stream);
 int				open_file(char *filename, int flags, int *fd);
 
-void			clean_exit(int status);
-bool			is_directory(char *path);
 void			display_error(char *program_name, char *command, char *error);
 
 #endif

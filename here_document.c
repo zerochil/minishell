@@ -6,13 +6,11 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 15:17:55 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/21 09:57:40 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/22 08:42:10 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "here_document.h"
-
-#define ERR_HEREDOC_DELIM "minishell: warning: here_document delimited by end-of-file"
 
 bool	is_delimiter(char *line, char *delimiter)
 {
@@ -65,7 +63,7 @@ void	start_here_doc_prompt(t_string *here_doc, char *delimiter)
 		line = readline("> ");
 		if (line == NULL)
 		{
-			printf(ERR_HEREDOC_DELIM" (wanted `%s')\n", delimiter);
+			printf(WARN_HEREDOC_DELIM" (wanted `%s')\n", delimiter);
 			break ;
 		}
 		if (is_delimiter(line, delimiter))
@@ -138,7 +136,7 @@ bool here_document_child_process(char *filename, t_string *here_doc, t_field *de
 		signal(SIGINT, handle_here_doc_signal);
 		start_here_doc_prompt(here_doc, delimiter->value->data);
 		create_here_doc_temp_file(filename, here_doc, should_expand);
-		exit (0);
+		clean_exit(0);
 	}
 	wait(&status);
 	tcsetattr(0, TCSANOW, get_old_termios());

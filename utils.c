@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/01/22 08:48:24 by inajah            #+#    #+#             */
+/*   Updated: 2025/01/22 08:48:30 by inajah           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "utils.h"
 
 void	destroy_context(void)
@@ -6,6 +18,20 @@ void	destroy_context(void)
 	rl_clear_history();
 }
 
+void	clean_exit(int status)
+{
+	destroy_context();
+	exit(status);
+}
+
+bool is_directory(char *path)
+{
+	struct stat path_stat;
+
+	if (stat(path, &path_stat) == -1)
+		return (false);
+	return (S_ISDIR(path_stat.st_mode));
+}
 
 bool is_valid_string(bool is_valid(char, int), char *str, size_t length)
 {
