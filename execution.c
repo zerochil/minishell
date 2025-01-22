@@ -67,8 +67,8 @@ int	execute_compound_command(t_ast_node *node)
 		if (command_node->type == AST_PIPELINE)
 		{
 			last_exit_status = execute_pipeline(command_node);
-			set_exit_status(last_exit_status);
-			if (last_exit_status == SIGINT_EXIT)
+			ctx_exit_status(CTX_SET, last_exit_status);
+			if (last_exit_status == EXIT_STATUS_SIGINT)
 				return (last_exit_status);
 			continue;
 		}
@@ -108,7 +108,7 @@ int	execute_subshell(t_ast_node *node)
 	while (index < node->children->size)
 	{
 		status = execute_compound_command(array_get(node->children, index));
-		if (status == SIGINT_EXIT)
+		if (status == EXIT_STATUS_SIGINT)
 			break;
 		index++;
 	}

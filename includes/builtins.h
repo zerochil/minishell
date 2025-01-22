@@ -7,6 +7,11 @@
 #include "env.h"
 #include "utils.h"
 
+# define BUILTIN_EXIT_SUCCESS 0
+# define BUILTIN_EXIT_ERROR 1
+# define BUILTIN_EXIT_MISUSE 2
+
+
 typedef struct s_builtin
 {
 	char *name;

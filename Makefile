@@ -55,7 +55,7 @@ LIBFT = libft/libft.a
 all: $(NAME)
 
 $(NAME): $(LIBFT) $(OBJS_DIR) $(OBJS)
-	$(CC) $(CFLAGS) $(LIBFT) $(OBJS) -o $(NAME) -Llibft -lft -lreadline
+	$(CC)  $(CFLAGS) $(LIBFT) $(OBJS) -o $(NAME) -Ilibft -Llibft -lft -lreadline
 
 $(OBJS_DIR):
 	mkdir -p $(OBJS_DIR)

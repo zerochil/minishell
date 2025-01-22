@@ -7,8 +7,6 @@ char *get_key(char *var)
 	key_len = ft_strcspn(var, "=");
 	if (key_len > 0 && var[key_len] == '=' && var[key_len - 1] == '+')
 		key_len--;
-	if (key_len <= 0)
-		key_len = ft_strlen(var);
 	if (is_valid_string(is_valid_identifier, var, key_len) == false)
 		return (NULL);
 	return (ft_strndup(var, key_len));
@@ -18,22 +16,14 @@ static char *get_value(char *var)
 {
 	char *equal_pos;
 
+	if (var == NULL)
+		return (NULL);
 	equal_pos = ft_strchr(var, '=');
 	if (equal_pos)
 		return (equal_pos + 1);
 	else
-		return ("");
+		return (NULL);
 }
-
-/*static char *get_value(char *var)*/
-/*{*/
-/*	char *equal_pos;*/
-/**/
-/*	equal_pos = ft_strchr(var, '=');*/
-/*	if (equal_pos)*/
-/*		return (equal_pos + 1);*/
-/*	return (NULL);*/
-/*}*/
 
 
 int compare_strings(void *a, void *b)
@@ -155,7 +145,7 @@ bool env_set(char *var)
 	key = get_key(var);
 	if (key == NULL)
 		return (manager_scope_end(), false);
-	if (ft_strchr(var, '=') == NULL && env_get(key) && *get_value(var) == '\0')
+	if (ft_strchr(var, '=') == NULL && env_get(key) && get_value(var) == NULL)
 		return (manager_scope_end(), true);
 	if(ft_strchr(var, '=') && ft_strchr(var, '=')[-1] == '+')
 		new_var = env_set_append(var, key);

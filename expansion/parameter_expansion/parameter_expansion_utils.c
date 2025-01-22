@@ -22,7 +22,7 @@ char	*parameter_get(char *parameter_name)
 	char	*parameter_value;
 
 	if (ft_strcmp(parameter_name, "?") == 0)
-		return (get_exit_status());
+		return (ctx_exit_status(CTX_GET, CTX_NO_VALUE));
 	parameter_value = env_get(parameter_name);
 	if (parameter_value == NULL)
 		return ("");

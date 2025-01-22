@@ -16,16 +16,28 @@
 # include "libft.h"
 # include <termios.h>
 
+# define CTX_NO_VALUE 0
+
+typedef enum e_ctx_ops
+{
+	CTX_SET,
+	CTX_GET,
+} ctx_operation;
+
 typedef struct s_context
 {
 	bool	foreground;
 	int 	exit_status;
 	struct termios old_termios;
+	bool	is_child;
 }			t_context;
 
-t_context	*get_context_instance(void);
-void		set_exit_status(int status);
-char *get_exit_status(void);
-struct termios *get_old_termios(void);
+t_context	*get_ctx_instance(void);
+
+
+char *ctx_exit_status(ctx_operation op, int status);
+struct termios *ctx_old_termios(ctx_operation op);
+bool ctx_is_child(ctx_operation op, bool is_child);
+bool ctx_is_foreground(ctx_operation op, bool is_foreground);
 
 #endif

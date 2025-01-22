@@ -18,8 +18,8 @@
 # include <readline/readline.h>
 # include <signal.h>
 
-# define SIGINT_EXIT 130
-# define SIGQUIT_EXIT 131
+# define EXIT_STATUS_SIGINT 130
+# define EXIT_STATUS_SIGQUIT 131
 
 void	setup_signals(void);
 void	setup_here_doc_signals(void);

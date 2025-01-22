@@ -54,23 +54,16 @@ void	handle_here_doc_signal(int signo)
 
 void	handle_signal(int signo)
 {
-	t_context	*context;
-
-	context = get_context_instance();
-	if (signo == SIGINT)
+	if (signo != SIGINT)
+		return ;
+	if (ctx_is_foreground(CTX_GET, CTX_NO_VALUE) == false)
+		ft_putchar_fd('\n', STDERR_FILENO);
+	else
 	{
-		if (!context->foreground)
-		{
-			ft_putchar_fd('\n', STDERR_FILENO);
-			/*rl_on_new_line();*/
-		}
-		else
-		{
-			set_exit_status(130);
-			ft_putchar_fd('\n', STDERR_FILENO);
-			rl_on_new_line();
-			rl_replace_line("", 0);
-			rl_redisplay();
-		}
+		ctx_exit_status(CTX_SET, EXIT_STATUS_SIGINT);
+		ft_putchar_fd('\n', STDERR_FILENO);
+		rl_on_new_line();
+		rl_replace_line("", 0);
+		rl_redisplay();
 	}
 }

@@ -49,6 +49,8 @@ pid_t	fork_and_execute(t_array *commands, t_stream *streamline, size_t index)
 	}
 	else if (pid > 0)
 		return (pid);
+
+	ctx_is_child(CTX_SET, true);
 	setup_child_signals();
 	stream_dup2stdio(&streamline[index]);
 	if (index != commands->size - 1)

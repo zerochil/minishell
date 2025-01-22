@@ -34,22 +34,20 @@ int	main(void)
 	t_string		input;
 	t_array			*tokens;
 	t_array			*list;
-	t_context		*context;
 
 	// TODO: reset STDI/O to default in case of: `./minishell < file`;
 	// TODO: init all instances in some function? or is there a better design than individual instances?
 	get_environment_instance();
-	context = get_context_instance();
-	tcgetattr(0, &context->old_termios);
+	tcgetattr(0, ctx_old_termios(CTX_GET));
 	string_init(&input);
 	setup_signals();
 
 
 	while (1)
 	{
-		context->foreground = true;
+		ctx_is_foreground(CTX_SET, true);
 		line = readline(prompt());
-		context->foreground = false;
+		ctx_is_foreground(CTX_SET, false);
 		if (line == NULL)
 		{
 			free(line);

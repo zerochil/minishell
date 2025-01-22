@@ -37,15 +37,18 @@ int	wait_for_pipeline(t_pipeline_state *state)
 			last_status = status;
 	}
 	if (pid == -1 && errno == EINTR)
-		return (SIGINT_EXIT);
+		return (EXIT_STATUS_SIGINT);
 	if (WIFSIGNALED(last_status))
 	{
 		sig = WTERMSIG(last_status);
 		if (sig == SIGQUIT)
-			return (ft_putendl_fd("Quit (core dumped)", STDERR_FILENO),
-				SIGQUIT_EXIT);
+			return
+			(
+				ft_putendl_fd("Quit (core dumped)", STDERR_FILENO),
+				EXIT_STATUS_SIGQUIT
+			);
 		else if (sig == SIGINT)
-			return (SIGINT_EXIT);
+			return (EXIT_STATUS_SIGINT);
 	}
 	return (WEXITSTATUS(last_status));
 }

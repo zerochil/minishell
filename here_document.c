@@ -72,10 +72,10 @@ bool	here_document_child_process(char *filename, t_string *here_doc,
 		clean_exit(0);
 	}
 	wait(&status);
-	tcsetattr(0, TCSANOW, get_old_termios());
+	tcsetattr(0, TCSANOW, ctx_old_termios(CTX_GET));
 	if (status != 0)
 	{
-		set_exit_status(WEXITSTATUS(status));
+		ctx_exit_status(CTX_SET, status);
 		return (false);
 	}
 	return (true);

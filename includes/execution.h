@@ -18,6 +18,7 @@
 # include "execution_pipeline.h"
 # include "expansion.h"
 # include "utils.h"
+# include "context.h"
 
 # define SHELL_NAME "minishell"
 # define ERR_COMMAND_NOT_FOUND "command not found"

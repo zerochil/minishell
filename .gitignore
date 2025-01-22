@@ -1,3 +1,6 @@
+# linter files
+compile_flags.txt
+
 # temp files
 .*.swp
 .*.swo
