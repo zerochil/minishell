@@ -6,17 +6,14 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/21 22:32:58 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/06 17:48:38 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/23 06:37:28 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "string.h"
 
-// this shit is dangerous this is no synchronisation between function manipulation and the peek position
-
 char	string_peek(t_string *string)
 {
-	// TODO: WHAT BOOMB is going to go off if we have string->size == 0 ??
 	if (string == NULL)
 	{
 		report_error("string_peek: error");

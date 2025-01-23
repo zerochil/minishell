@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:12:15 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/29 20:05:18 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 06:33:44 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ static void	lexems_init(t_array *lexems)
 	lexem_add(")", "CLOSE_PARENTHESIS");
 	lexem_add("\n", "NEWLINE");
 	lexem_add("|", "PIPE");
-	/*lexem_add("", "EOF");*/
 }
 
 t_array	*lexems_get_instance(void)
@@ -52,7 +51,6 @@ t_array	*lexems_get_instance(void)
 	if (lexems == NULL)
 	{
 		lexems = track_malloc(sizeof(t_array));
-		/*track_resource(lexems, lexems_destroyer);*/
 		lexems_init(lexems);
 	}
 	return (lexems);
