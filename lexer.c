@@ -67,3 +67,8 @@ int	lexem_get_type(char *identifier)
 		return (0);
 	return (lexem->type);
 }
+
+bool	lexem_is_cmd_word(int type)
+{
+	return (lexem_is_redirection(type) || lexem_is_word(type));
+}

@@ -66,7 +66,7 @@ static t_token	*tokenize_non_word(t_string *input)
 	return (token);
 }
 
-static t_token	*tokenize_next(t_string *input)
+t_token	*tokenize_next(t_string *input)
 {
 	t_token	*token;
 

@@ -20,12 +20,12 @@ int	builtin_exit(char **args, int out_fd)
 	if (ft_strarr_len(args) > 2)
 	{
 		ft_putendl_fd("exit: too many arguments", STDERR_FILENO);
-		return (BUILTIN_EXIT_MISUSE);
+		return (BUILTIN_EXIT_ERROR);
 	}
 	exit_status = BUILTIN_EXIT_SUCCESS;
 	if (args[1])
 	{
-		if (ft_isnumber(args[1]) == 0 || ft_numberlen(args[1]) > 20)
+		if (ft_isnumber(args[1]) == 0 || ft_strlen(args[1]) >= 20)
 		{
 			ft_putendl_fd("exit: numeric argument required", STDERR_FILENO);
 			exit_status = BUILTIN_EXIT_MISUSE;
@@ -124,7 +124,7 @@ int	builtin_cd(char **args, int out_fd)
 	if (ft_strarr_len(args) > 2)
 	{
 		return (ft_putendl_fd("cd: too many arguments", STDERR_FILENO),
-			BUILTIN_EXIT_MISUSE);
+			BUILTIN_EXIT_ERROR);
 	}
 	if (args[1])
 		dir_path = args[1];

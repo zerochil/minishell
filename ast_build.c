@@ -64,12 +64,17 @@ t_ast_node	*pipeline(t_array *tokens)
 t_ast_node	*command(t_array *tokens)
 {
 	t_token	*token;
+	t_ast_node	*subshell_node;
 
 	token = array_peek(tokens);
 	if (token->type == lexem_get_type("OPEN_PARENTHESIS"))
 	{
 		array_shift(tokens);
-		return (subshell(tokens));
+		subshell_node = subshell(tokens);
+		if (subshell_node == NULL || subshell_node->redirect_list == NULL || subshell_node->children == NULL)
+		{
+			return (NULL);
+		}
 	}
 	return (simple_command(tokens));
 }
@@ -97,8 +102,7 @@ t_ast_node	*subshell(t_array *tokens)
 		return (syntax_error(ERR_EMPTY_COMMAND), NULL);
 	if (token->type == lexem_get_type("CLOSE_PARENTHESIS"))
 		array_shift(tokens);
-	subshell_node->redirect_list = consume_until(tokens, lexem_is_redirection,
-			NULL, is_filename_missing);
+	subshell_node->redirect_list = consume_until(tokens, lexem_is_cmd_word, NULL, is_not_valid_redirection);
 	return (subshell_node);
 }
 
@@ -108,14 +112,11 @@ t_ast_node	*simple_command(t_array *tokens)
 	t_array		*argument_list;
 	t_array		*redirections;
 
-	argument_list = consume_until(tokens, lexem_is_word, lexem_is_redirection,
-			NULL);
-	redirections = consume_until(tokens, lexem_is_redirection, lexem_is_word,
-			is_filename_missing);
+	argument_list = consume_until(tokens, lexem_is_word, lexem_is_redirection, NULL);
+	redirections = consume_until(tokens, lexem_is_redirection, lexem_is_word, is_filename_missing);
 	if (redirections == NULL || argument_list == NULL)
 		return (NULL);
-	if (check_syntax_error(argument_list->size == 0 && redirections->size == 0,
-			ERR_WORD_OR_REDIR))
+	if (check_syntax_error(argument_list->size == 0 && redirections->size == 0, ERR_WORD_OR_REDIR))
 		return (NULL);
 	simple_command_node = create_ast_node(argument_list, AST_SIMPLE_COMMAND);
 	simple_command_node->redirect_list = redirections;

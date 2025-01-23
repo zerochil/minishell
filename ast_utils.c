@@ -81,13 +81,3 @@ t_array	*consume_until(t_array *tokens, bool is_target(int), bool to_skip(int),
 	}
 	return (consumed);
 }
-
-bool	is_filename_missing(t_token *token)
-{
-	if (token->value == NULL)
-	{
-		syntax_error(ERR_MISSING_FILENAME);
-		return (true);
-	}
-	return (false);
-}

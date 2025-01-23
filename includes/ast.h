@@ -17,6 +17,7 @@
 # include <tokenizer.h>
 # include <lexer.h>
 
+# define ERR_UNEXPECTED "syntax error near unexpected token"
 # define ERR_WORD_OR_REDIR "syntax error near unexpected token: expected word or redirection"
 # define ERR_MISSING_FILENAME "syntax error near unexpected token: missing filename"
 # define ERR_EMPTY_COMMAND "syntax error near unexpected token: empty command"
@@ -60,6 +61,9 @@ bool	skip_linebreak(t_array *tokens);
 int	is_logical_and_or(t_array *tokens);
 t_ast_node	*create_ast_node(t_array *children, t_ast_type type);
 t_array *consume_until(t_array *tokens, bool is_target(int), bool to_skip(int), bool is_error(t_token *));
+
 bool is_filename_missing(t_token *token);
+bool is_not_valid_redirection(t_token *token);
+
 
 #endif

@@ -17,6 +17,7 @@
 # include <termios.h>
 # include <string.h>
 # include <errno.h>
+# include <token.h>
 
 # define CTX_NO_VALUE 0
 
@@ -33,6 +34,9 @@ typedef struct s_context
 	struct termios old_termios;
 	bool	is_child;
 	char 	*cwd;
+
+	t_token 	*token;
+	t_string 	*input;
 }			t_context;
 
 t_context	*get_ctx_instance(void);

@@ -26,7 +26,7 @@ SRCS = minishell.c execution.c utils.c prompt.c context.c signals.c context_inst
 	   builtins.c builtins_utils.c builtins_environment.c \
 	   env.c env_init.c env_utils.c \
 	   lexer.c lexer_functions.c \
-	   ast.c ast_utils.c ast_build.c ast_errors.c \
+	   ast.c ast_utils.c ast_build.c ast_errors.c ast_predicates.c \
 	   tokenizer.c tokenizer_utils.c \
 	   here_document.c here_document_utils.c       \
 	   $(addprefix expansion/, $(EXPANSION_SRC)) \

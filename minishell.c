@@ -27,6 +27,9 @@ int	main(void)
 	t_array			*list;
 	int 			status;
 
+	/*printf("%d", ft_numberlen("-9223372036854775809"));*/
+	/*exit(1);*/
+
 	// TODO: heredoc fails, exit status is wrong
 	//       ALSO: no newline is shown, after pressing ctrl+c.
 	//             In SIGINT handler we can print a newline to fix it.
@@ -38,17 +41,19 @@ int	main(void)
 	string_init(&input);
 	setup_signals();
 
+
 	while (1)
 	{
 		ctx_is_foreground(CTX_SET, true);
-		line = readline(prompt());
+		line = readline("=> ");
 		ctx_is_foreground(CTX_SET, false);
 		if (line == NULL)
 		{
 			free(line);
 			status = atoi(ctx_exit_status(CTX_GET, CTX_NO_VALUE));
 			destroy_context();
-			ft_putendl_fd("exit", STDERR_FILENO);
+			if (isatty(STDIN_FILENO) && isatty(STDOUT_FILENO))
+				ft_putendl_fd("exit", STDERR_FILENO);
 			exit(status);
 		}
 		if (*line == '\0')
