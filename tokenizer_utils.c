@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   tokenizer_input_validator.c                        :+:      :+:    :+:   */
+/*   tokenizer_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 17:54:38 by rrochd            #+#    #+#             */
-/*   Updated: 2024/12/29 18:00:30 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 09:18:40 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,4 +32,21 @@ int	is_quoted(t_string *input)
 	}
 	string_peek_reset(input);
 	return (in_quote == '\0');
+}
+
+t_token	*token_init(int type, char *value)
+{
+	t_token	*token;
+
+	token = track_malloc(sizeof(t_token));
+	token->type = type;
+	token->value = value;
+	token->fields = NULL;
+	if (value)
+	{
+		token->fields = track_malloc(sizeof(t_array));
+		array_init(token->fields);
+		array_push(token->fields, field_init(value, NULL));
+	}
+	return (token);
 }

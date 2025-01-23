@@ -6,28 +6,11 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:29:07 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 18:46:40 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/23 09:18:20 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "tokenizer.h"
-
-t_token	*token_init(int type, char *value)
-{
-	t_token	*token;
-
-	token = track_malloc(sizeof(t_token));
-	token->type = type;
-	token->value = value;
-	token->fields = NULL;
-	if (value)
-	{
-		token->fields = track_malloc(sizeof(t_array));
-		array_init(token->fields);
-		array_push(token->fields, field_init(value, NULL));
-	}
-	return (token);
-}
 
 static t_token	*tokenize_word(t_string *input)
 {
@@ -99,15 +82,15 @@ static t_token	*tokenize_next(t_string *input)
 
 static bool	tokenize_here_document(t_token *token, t_string *input)
 {
-	char *filename;
-	t_field *delimiter;
+	char	*filename;
+	t_field	*delimiter;
 
 	delimiter = array_get(token->fields, 0);
 	filename = create_here_document(input, delimiter);
 	if (filename == NULL)
-		return false;
+		return (false);
 	field_set(delimiter, filename, 0);
-	return true;
+	return (true);
 }
 
 t_array	*tokenize(t_string *input)
@@ -115,7 +98,6 @@ t_array	*tokenize(t_string *input)
 	t_array	*tokens;
 	t_token	*token;
 
-	// TODO: REMEMBER TO ADD SCOPE FOR ALLOCATED MEMORY AND FREE IT;
 	if (!is_quoted(input))
 	{
 		report_error("tokenizer: unbalanced quotes!");
@@ -126,9 +108,9 @@ t_array	*tokenize(t_string *input)
 	while (1)
 	{
 		token = tokenize_next(input);
-		if (token->type == lexem_get_type("HERE_DOCUMENT") 
-			&& token->value && !tokenize_here_document(token, input))
-				return (NULL);
+		if (token->type == lexem_get_type("HERE_DOCUMENT") && token->value
+			&& !tokenize_here_document(token, input))
+			return (NULL);
 		array_push(tokens, token);
 		if (token->type == -1)
 			break ;
