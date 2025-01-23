@@ -6,12 +6,11 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 16:18:30 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 04:41:38 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "execution.h"
-#include "env.h"
+#include <execution.h>
 
 char	**build_arg_list(t_array *fields)
 {
@@ -86,7 +85,6 @@ char	*get_command_path(char *command_name)
 		command_path = build_command_path(path, command_name);
 		if (access(command_path, F_OK) == 0)
 			return (command_path);
-		resource_free(command_path);
 		i++;
 	}
 	return (NULL);

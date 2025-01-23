@@ -1,34 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ctx.c                                          :+:      :+:    :+:   */
+/*   context.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 15:37:49 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 04:41:06 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "context.h"
+#include <context.h>
 
-t_context	*get_ctx_instance(void)
-{
-	static t_context	ctx;
-
-	return (&ctx);
-}
-
-char *ctx_exit_status(ctx_operation op, int status)
+char	*ctx_exit_status(ctx_operation op, int status)
 {
 	t_context	*ctx;
-	static int last_exit;
-	static char* last_exit_str;
+	static int	last_exit;
+	static char	*last_exit_str;
 
 	ctx = get_ctx_instance();
 	if (op == CTX_GET)
 	{
-		if ( last_exit_str == NULL || last_exit != ctx->exit_status)
+		if (last_exit_str == NULL || last_exit != ctx->exit_status)
 		{
 			last_exit = ctx->exit_status;
 			if (last_exit_str)
@@ -43,7 +36,7 @@ char *ctx_exit_status(ctx_operation op, int status)
 	return (NULL);
 }
 
-struct termios *ctx_old_termios(ctx_operation op)
+struct termios	*ctx_old_termios(ctx_operation op)
 {
 	t_context	*ctx;
 
@@ -53,7 +46,7 @@ struct termios *ctx_old_termios(ctx_operation op)
 	return (NULL);
 }
 
-bool ctx_is_child(ctx_operation op, bool is_child)
+bool	ctx_is_child(ctx_operation op, bool is_child)
 {
 	t_context	*ctx;
 
@@ -67,7 +60,7 @@ bool ctx_is_child(ctx_operation op, bool is_child)
 	return (is_child);
 }
 
-bool ctx_is_foreground(ctx_operation op, bool is_foreground)
+bool	ctx_is_foreground(ctx_operation op, bool is_foreground)
 {
 	t_context	*ctx;
 
@@ -79,7 +72,7 @@ bool ctx_is_foreground(ctx_operation op, bool is_foreground)
 	return (is_foreground);
 }
 
-char *ctx_cwd(ctx_operation op, char *cwd)
+char	*ctx_cwd(ctx_operation op, char *cwd)
 {
 	t_context	*ctx;
 
@@ -88,8 +81,14 @@ char *ctx_cwd(ctx_operation op, char *cwd)
 		return (ctx->cwd);
 	if (op == CTX_SET)
 	{
-		resource_free(ctx->cwd);
-		resource_track(cwd, free);
+		printf("[%s]\n ", ctx->cwd);
+		if (ctx->cwd)
+		{
+			printf("[%s]\n ", ctx->cwd);
+			resource_free(ctx->cwd);
+		}
+		if (cwd)
+			resource_track(cwd, free);
 		ctx->cwd = cwd;
 	}
 	return (cwd);

@@ -22,7 +22,8 @@ EXPANSION_SRC = $(addprefix parameter_expansion/, $(PARAM_EXPANSION_SRC))   \
 				expansion_utils.c         \
 				expansion.c
 
-SRCS = minishell.c tokenizer.c tokenizer_input_validator.c lexer.c lexer_functions.c ast.c execution.c builtins.c env.c utils.c prompt.c context.c signals.c \
+SRCS = minishell.c tokenizer.c tokenizer_input_validator.c lexer.c lexer_functions.c ast.c execution.c env.c utils.c prompt.c context.c signals.c context_instance.c \
+	   builtins.c builtins_utils.c builtins_export.c \
 	   here_document.c here_document_utils.c       \
 	   $(addprefix expansion/, $(EXPANSION_SRC)) \
 	   execution_pipeline_utils.c stream.c execution_redirection.c execution_simple_command.c execution_simple_command_utils.c execution_utils.c execution_pipeline.c  \

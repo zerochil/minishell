@@ -4,6 +4,8 @@ char *get_key(char *var)
 {
 	int key_len;
 
+	if (var == NULL)
+		return (NULL);
 	key_len = ft_strcspn(var, "=");
 	if (key_len > 0 && var[key_len] == '=' && var[key_len - 1] == '+')
 		key_len--;
@@ -157,6 +159,25 @@ bool env_set(char *var)
 	array_push(environment, new_var);
 	array_sort(environment, compare_strings);
 	return (manager_scope_end(), true);
+}
+
+bool env_set_key_value(char *key, char *value)
+{
+	t_string string;
+	char *new_var;
+	bool is_set;
+
+	is_set = false;
+	string_init(&string);
+	string_append(&string, key);
+	string_append(&string, "=");
+	string_append(&string, value);
+	new_var = ft_strdup(string.data);
+	string_destroy(&string);
+	if (env_set(new_var))
+		is_set = true;
+	free(new_var);
+	return (is_set);
 }
 
 void env_unset(char *key)

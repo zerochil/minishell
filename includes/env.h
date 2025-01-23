@@ -10,6 +10,7 @@ t_array *get_environment_instance();
 bool env_set(char *var);
 void env_unset(char *var);
 char *env_get(char *key);
+bool env_set_key_value(char *key, char *value);
 
 char **env_get_array(char *program_name);
 
