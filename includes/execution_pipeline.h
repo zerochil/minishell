@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 16:20:32 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 06:59:02 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 
 # include <errno.h>
 # include <sys/wait.h>
-# include "signals.h"
-# include "stream.h"
+# include <signals.h>
+# include <stream.h>
 
 typedef struct s_pipeline_state
 {

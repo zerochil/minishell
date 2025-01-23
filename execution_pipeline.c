@@ -6,12 +6,12 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 16:19:26 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 06:50:07 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "execution.h"
 #include "builtins.h"
+#include "execution.h"
 
 int	should_not_fork(t_array *commands)
 {
@@ -35,7 +35,6 @@ int	should_not_fork(t_array *commands)
 	return (1);
 }
 
-#include <sys/ioctl.h>
 pid_t	fork_and_execute(t_array *commands, t_stream *streamline, size_t index)
 {
 	pid_t	pid;
@@ -62,7 +61,6 @@ int	execute_pipeline(t_ast_node *node)
 	int					exit_status;
 
 	pipeline_init(&state, node->children);
-	// TODO: get this out of here
 	if (should_not_fork(state.commands))
 		return (execute_command(array_get(state.commands, 0)));
 	while (state.index < state.commands->size)

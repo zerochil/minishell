@@ -6,11 +6,13 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 15:37:48 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 06:58:49 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "execution_pipeline.h"
+#include <execution_pipeline.h>
+
+#define DUMP_MSG "Quit (core dumped)"
 
 void	pipeline_init(t_pipeline_state *state, t_array *commands)
 {
@@ -42,11 +44,7 @@ int	wait_for_pipeline(t_pipeline_state *state)
 	{
 		sig = WTERMSIG(last_status);
 		if (sig == SIGQUIT)
-			return
-			(
-				ft_putendl_fd("Quit (core dumped)", STDERR_FILENO),
-				EXIT_STATUS_SIGQUIT
-			);
+			return (ft_putendl_fd(DUMP_MSG, 2), EXIT_STATUS_SIGQUIT);
 		else if (sig == SIGINT)
 			return (EXIT_STATUS_SIGINT);
 	}

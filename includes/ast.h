@@ -6,16 +6,16 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:36:18 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/22 10:23:49 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/23 06:48:39 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef AST_H
 # define AST_H
 
-# include "libft.h"
-# include "tokenizer.h"
-# include "lexer.h"
+# include <libft.h>
+# include <tokenizer.h>
+# include <lexer.h>
 
 # define ERR_WORD_OR_REDIR "syntax error near unexpected token: expected word or redirection"
 # define ERR_MISSING_FILENAME "syntax error near unexpected token: missing filename"

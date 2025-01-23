@@ -6,14 +6,14 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/22 10:35:13 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/23 06:48:16 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CONTEXT_H
 # define CONTEXT_H
 
-# include "libft.h"
+# include <libft.h>
 # include <termios.h>
 
 # define CTX_NO_VALUE 0

@@ -6,19 +6,19 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/22 08:47:14 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/23 06:49:02 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef EXECUTION_H
 # define EXECUTION_H
 
-# include "ast.h"
-# include "stream.h"
-# include "execution_pipeline.h"
-# include "expansion.h"
-# include "utils.h"
-# include "context.h"
+# include <ast.h>
+# include <stream.h>
+# include <execution_pipeline.h>
+# include <expansion.h>
+# include <utils.h>
+# include <context.h>
 
 # define SHELL_NAME "minishell"
 # define ERR_COMMAND_NOT_FOUND "command not found"
