@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "signals.h"
+#include <signals.h>
 
 void	setup_signals(void)
 {

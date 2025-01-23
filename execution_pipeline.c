@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "builtins.h"
-#include "execution.h"
+#include <builtins.h>
+#include <execution.h>
 
 int	should_not_fork(t_array *commands)
 {

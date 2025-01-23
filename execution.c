@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "execution.h"
+#include <execution.h>
 
 int	execution(t_array *ast_root_list)
 {
@@ -33,26 +33,6 @@ int	execution(t_array *ast_root_list)
 	return (status);
 }
 
-/*int	execute_complete_command(t_ast_node *node)*/
-/*{*/
-/*	t_ast_node	*compound_command_node;*/
-/**/
-/*	compound_command_node = array_shift(node->children);*/
-/*	if (compound_command_node == NULL)*/
-/*		return (-1);*/
-/*	return (execute_compound_command(compound_command_node));*/
-/*}*/
-
-/*int execute_command_list(t_ast_node *node)*/
-/*{*/
-/*	t_ast_node *compound_command_node;*/
-/**/
-/*	compound_command_node = array_shift(node->children);*/
-/*	if (compound_command_node == NULL)*/
-/*		return (-1);*/
-/*	return(execute_compound_command(compound_command_node));*/
-/*}*/
-
 int	execute_compound_command(t_ast_node *node)
 {
 	int			last_exit_status;
@@ -63,20 +43,20 @@ int	execute_compound_command(t_ast_node *node)
 	{
 		command_node = array_shift(node->children);
 		if (command_node == NULL)
-			break;
+			break ;
 		if (command_node->type == AST_PIPELINE)
 		{
 			last_exit_status = execute_pipeline(command_node);
 			ctx_exit_status(CTX_SET, last_exit_status);
 			if (last_exit_status == EXIT_STATUS_SIGINT)
 				return (last_exit_status);
-			continue;
+			continue ;
 		}
-		if ((command_node->type == AST_BINARY_AND && last_exit_status != 0) ||
-			(command_node->type == AST_BINARY_OR && last_exit_status == 0))
-			break;
-		if (command_node->type != AST_BINARY_AND && 
-			command_node->type != AST_BINARY_OR)
+		if ((command_node->type == AST_BINARY_AND && last_exit_status != 0)
+			|| (command_node->type == AST_BINARY_OR && last_exit_status == 0))
+			break ;
+		if (command_node->type != AST_BINARY_AND
+			&& command_node->type != AST_BINARY_OR)
 			error("execute_compound_command: error");
 	}
 	return (last_exit_status);
@@ -109,7 +89,7 @@ int	execute_subshell(t_ast_node *node)
 	{
 		status = execute_compound_command(array_get(node->children, index));
 		if (status == EXIT_STATUS_SIGINT)
-			break;
+			break ;
 		index++;
 	}
 	destroy_context();

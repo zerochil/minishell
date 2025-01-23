@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:36:18 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 06:48:39 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 08:45:55 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,18 +45,21 @@ typedef struct 				s_ast_node
 
 /*t_array *generate_ast(t_array *tokens);*/
 /*t_ast_node *complete_command(t_array *tokens);*/
-t_array	*complete_command(t_array *tokens);
-t_array	*command_list(t_array *tokens);
+t_array	*generate_ast(t_array *tokens);
 t_ast_node *compound_command(t_array *tokens);
 t_ast_node *pipeline(t_array *tokens);
 t_ast_node *command(t_array *tokens);
 t_ast_node *subshell(t_array *tokens);
 t_ast_node *simple_command(t_array *tokens);
 
-t_array *redirect_list(t_array *tokens);
-t_token *io_redirect(t_array *tokens);
-bool	skip_linebreak(t_array *tokens);
+char	*syntax_error(char *message);
+bool	check_syntax_error(bool condition, char *message);
 
-bool check_error();
+
+bool	skip_linebreak(t_array *tokens);
+int	is_logical_and_or(t_array *tokens);
+t_ast_node	*create_ast_node(t_array *children, t_ast_type type);
+t_array *consume_until(t_array *tokens, bool is_target(int), bool to_skip(int), bool is_error(t_token *));
+bool is_filename_missing(t_token *token);
 
 #endif
