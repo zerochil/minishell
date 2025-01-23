@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 06:18:44 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 06:22:00 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 17:02:20 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,15 +60,18 @@ static void	default_pwd(t_array *environment)
 
 static void	default_oldpwd(t_array *environment)
 {
-	char	*tmp;
+	char	*oldpwd;
 	char	*env_var;
 
 	env_var = array_find(environment, "OLDPWD", match_key);
 	if (!env_var)
 	{
-		tmp = getcwd(NULL, 0);
-		env_set_key_value("OLDPWD", tmp);
-		free(tmp);
+		oldpwd = ctx_cwd(CTX_SET, getcwd(NULL, 0));
+		if (oldpwd != NULL)
+			env_set_key_value("OLDPWD", oldpwd);
+		else
+			display_error("minishell_init",
+					"error retrieving current directory: getcwd: cannot access parent directories", strerror(errno));
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/16 09:16:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/21 09:36:20 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/23 08:47:04 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,20 +25,6 @@ static char	*prompt_user_name(void)
 		return "I have no name";
 	return (user_name);
 }
-/*
-static void	shrink_home_path_to_tilde(t_string *prompt)
-{
-	char	*home_path;
-	size_t	len;
-
-	home_path = env_get("HOME");
-	if (home_path == NULL)
-		return ;
-	len = ft_strlen(home_path);
-	if (ft_strncmp(prompt->data, home_path, len) == 0)
-		string_segment_replace(prompt, 0, len, "~");
-	prompt->data[prompt->size] = '\0';
-}*/
 
 static char	*prompt_cwd(void)
 {
@@ -48,7 +34,7 @@ static char	*prompt_cwd(void)
 	cwd = getcwd(NULL, 0);
 	path[0] = '\0';
 	if (cwd == NULL)
-		ft_strlcpy(path, "did you cd to the MOON??", sizeof(path));
+		ft_strlcpy(path, ".", sizeof(path));
 	else
 		ft_strlcpy(path, cwd, sizeof(path));
 	free(cwd);
@@ -62,19 +48,7 @@ static char	*prompt_exit_code(void)
 	exit_code = parameter_get("?");
 	return (exit_code);
 }
-/*
-static char *prompt_exit_color(char *exit_code)
-{
-	if (ft_strcmp(exit_code, "0") != 0)
-		return (" ["COLOR_RED);
-	return (" ["COLOR_GREEN);
-}
 
-static char *prompt_reset_color(void)
-{
-	return (COLOR_RESET"]");
-}
-*/
 char	*prompt(void)
 {
 	static t_string string;

@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 04:44:23 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 04:56:14 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 17:49:41 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,8 +63,8 @@ int	builtin_echo(char **args, int out_fd)
 		ft_putchar_fd('\n', out_fd);
 	return (BUILTIN_EXIT_SUCCESS);
 }
-
-int	builtin_cd(char **args, int out_fd)
+//TODO: cd "" should not error.
+/*int	_builtin_cd(char **args, int out_fd)
 {
 	char	*dir_path;
 	char	*oldpwd;
@@ -85,14 +85,59 @@ int	builtin_cd(char **args, int out_fd)
 			return (BUILTIN_EXIT_SUCCESS);
 	}
 	oldpwd = pwd("cd");
-	ctx_cwd(CTX_SET, dir_path);
-	env_set_key_value("OLDPWD", oldpwd);
-	env_set_key_value("PWD", dir_path);
 	if (!oldpwd)
 		return (BUILTIN_EXIT_ERROR);
+	env_set_key_value("OLDPWD", oldpwd);
 	if (chdir(dir_path) != 0)
 		return (perror("cd"), BUILTIN_EXIT_ERROR);
+	env_set_key_value("PWD", pwd("cd"));
 	return (BUILTIN_EXIT_SUCCESS);
+}*/
+
+int change_directory(char *dir_path)
+{
+	char *oldpwd;
+	char *pwd;
+
+	if (chdir(dir_path) != 0)
+	{
+		display_error("cd", dir_path, strerror(errno));
+		return (BUILTIN_EXIT_ERROR);
+	}
+	oldpwd = ctx_cwd(CTX_GET, CTX_NO_VALUE);
+	if (oldpwd != NULL)
+		env_set_key_value("OLDPWD", oldpwd);
+	pwd = ctx_cwd(CTX_SET, getcwd(NULL, 0));
+	if (pwd != NULL)
+		env_set_key_value("PWD", pwd);
+	else
+		display_error("cd",
+				"error retrieving current directory: getcwd: cannot access parent directories", strerror(errno));
+	return (BUILTIN_EXIT_SUCCESS);
+}
+
+int	builtin_cd(char **args, int out_fd)
+{
+	char *dir_path;
+
+	(void)out_fd;
+	if (ft_strarr_len(args) > 2)
+	{
+		return (ft_putendl_fd("cd: too many arguments", STDERR_FILENO),
+			BUILTIN_EXIT_MISUSE);
+	}
+	if (args[1])
+		dir_path = args[1];
+	else
+	{
+		dir_path = env_get("HOME");
+		if (!dir_path)
+			return (ft_putendl_fd("cd: HOME not set", STDERR_FILENO),
+				BUILTIN_EXIT_ERROR);
+		if (*dir_path == '\0')
+			return (BUILTIN_EXIT_SUCCESS);
+	}
+	return (change_directory(dir_path));
 }
 
 int	builtin_pwd(char **args, int out_fd)
@@ -100,10 +145,13 @@ int	builtin_pwd(char **args, int out_fd)
 	char	*cwd;
 
 	(void)args;
-	cwd = pwd("pwd");
-	// TODO: pwd remembers directory if dirpath isn't found;
+	cwd = ctx_cwd(CTX_GET, CTX_NO_VALUE);
 	if (!cwd)
+	{
+		display_error("pwd",
+				"error retrieving current directory: getcwd: cannot access parent directories", strerror(errno));
 		return (BUILTIN_EXIT_ERROR);
+	}
 	ft_putendl_fd(cwd, out_fd);
 	return (BUILTIN_EXIT_SUCCESS);
 }

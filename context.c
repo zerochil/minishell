@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 09:13:46 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 17:50:09 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,11 +81,14 @@ char	*ctx_cwd(ctx_operation op, char *cwd)
 		return (ctx->cwd);
 	if (op == CTX_SET)
 	{
+		if (cwd == NULL)
+			return (NULL);
 		if (ctx->cwd)
 		{
 			resource_free(ctx->cwd);
+			ctx->cwd = NULL;
 		}
-		if (cwd)
+		if (cwd && ctx->cwd != cwd)
 			resource_track(cwd, free);
 		ctx->cwd = cwd;
 	}

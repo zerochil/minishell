@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 06:26:44 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 06:26:45 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 17:42:24 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ char	**env_get_array(char *program_name)
 	char	*env_var;
 	size_t	i;
 
+	(void)program_name;
 	environment = get_environment_instance();
 	env_array = track_malloc((environment->size + 2) * sizeof(char *));
 	i = 0;
@@ -86,8 +87,6 @@ char	**env_get_array(char *program_name)
 			i++;
 		}
 	}
-	if (program_name)
-		env_array[i++] = ft_strjoin("_=", program_name);
 	env_array[i] = NULL;
 	return (env_array);
 }

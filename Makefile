@@ -2,7 +2,7 @@ NAME = minishell
 CC = cc
 LIBFT_INCLUDE = ./libft
 INCLUDE = ./includes
-CFLAGS = -Werror -Wextra -Wall -I$(LIBFT_INCLUDE) -I$(INCLUDE) 
+CFLAGS = -Werror -Wextra -Wall -I$(LIBFT_INCLUDE) -I$(INCLUDE) #-fsanitize=address
 
 PARAM_EXPANSION_SRC = parameter_expansion.c       \
 					  parameter_expansion_utils.c
@@ -18,8 +18,8 @@ PATHNAME_EXPANSION_SRC = pattern_ops.c              \
 EXPANSION_SRC = $(addprefix parameter_expansion/, $(PARAM_EXPANSION_SRC))   \
 				$(addprefix field_splitting/, $(FIELD_SPLITTING_SRC))       \
 			   	$(addprefix pathname_expansion/, $(PATHNAME_EXPANSION_SRC)) \
-				quote_removal.c           \
-				expansion_utils.c         \
+				quote_removal.c                                             \
+				expansion_utils.c                                           \
 				expansion.c
 
 SRCS = minishell.c execution.c utils.c prompt.c context.c signals.c context_instance.c \

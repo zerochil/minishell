@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 06:48:16 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 17:02:41 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 # include <libft.h>
 # include <termios.h>
+# include <string.h>
+# include <errno.h>
 
 # define CTX_NO_VALUE 0
 
@@ -41,5 +43,6 @@ struct termios *ctx_old_termios(ctx_operation op);
 bool ctx_is_child(ctx_operation op, bool is_child);
 bool ctx_is_foreground(ctx_operation op, bool is_foreground);
 char *ctx_cwd(ctx_operation op, char *cwd);
+
 
 #endif

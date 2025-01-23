@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 06:54:39 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 16:34:53 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,16 +20,12 @@ int	interpret_execve_error(void)
 	return (126);
 }
 
-int	execute_external(t_command_context *command_context)
+int	execute_external(char *command_name, t_command_context *command_context)
 {
 	stream_dup2stdio(&command_context->stream);
 	if (command_context->args[0] == NULL)
 	{
-		display_error(
-			SHELL_NAME,
-			command_context->args[0],
-			ERR_COMMAND_NOT_FOUND
-			);
+		display_error(SHELL_NAME, command_name, ERR_COMMAND_NOT_FOUND);
 		return (127);
 	}
 	if (is_directory(command_context->args[0]))
@@ -48,6 +44,7 @@ int	execute_builtin(char *command_name, char **args, int out_fd)
 	builtin_t	*builtins;
 	int			i;
 
+	args[0] = command_name;
 	builtins = get_builtins_instance();
 	i = 0;
 	while (builtins[i].name)
@@ -81,7 +78,7 @@ int	execute_simple_command(t_ast_node *node)
 		else
 		{
 			cmd_ctx.envp = env_get_array(cmd_ctx.args[0]);
-			status = execute_external(&cmd_ctx);
+			status = execute_external(command_name, &cmd_ctx);
 		}
 	}
 	stream_close(&cmd_ctx.stream);

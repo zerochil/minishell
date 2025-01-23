@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 08:48:24 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/23 10:16:45 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 17:08:22 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,14 @@ void	clean_exit(int status)
 	exit(status);
 }
 
-bool	is_directory(char *path)
+void display_error(char *program_name, char *command, char *error)
 {
-	struct stat	path_stat;
-
-	if (stat(path, &path_stat) == -1)
-		return (false);
-	return (S_ISDIR(path_stat.st_mode));
+	ft_putstr_fd(program_name, STDERR_FILENO);
+	ft_putstr_fd(": ", STDERR_FILENO);
+	ft_putstr_fd(command, STDERR_FILENO);
+	ft_putstr_fd(": ", STDERR_FILENO);
+	ft_putstr_fd(error, STDERR_FILENO);
+	ft_putstr_fd("\n", STDERR_FILENO);
 }
 
 bool	is_valid_string(bool is_valid(char, int), char *str, size_t length)
