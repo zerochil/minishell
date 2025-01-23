@@ -6,11 +6,11 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 08:48:24 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 08:48:30 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/23 10:16:45 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "utils.h"
+#include <utils.h>
 
 void	destroy_context(void)
 {
@@ -24,18 +24,18 @@ void	clean_exit(int status)
 	exit(status);
 }
 
-bool is_directory(char *path)
+bool	is_directory(char *path)
 {
-	struct stat path_stat;
+	struct stat	path_stat;
 
 	if (stat(path, &path_stat) == -1)
 		return (false);
 	return (S_ISDIR(path_stat.st_mode));
 }
 
-bool is_valid_string(bool is_valid(char, int), char *str, size_t length)
+bool	is_valid_string(bool is_valid(char, int), char *str, size_t length)
 {
-	size_t i;
+	size_t	i;
 
 	if (str == NULL || is_valid == NULL || length == 0)
 		return (false);
@@ -51,7 +51,7 @@ bool is_valid_string(bool is_valid(char, int), char *str, size_t length)
 	return (true);
 }
 
-bool is_valid_identifier(char c, int i)
+bool	is_valid_identifier(char c, int i)
 {
 	if (i == 0)
 		return (ft_isalpha(c) || c == '_');

@@ -6,11 +6,11 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/20 15:37:48 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 10:16:36 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "execution.h"
+#include <execution.h>
 
 t_stream	*streamline_init(int pipeline_size)
 {
