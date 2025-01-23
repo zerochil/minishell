@@ -6,15 +6,15 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/21 09:42:25 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/23 06:32:44 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SIGNALS_H
 # define SIGNALS_H
 
-# include "context.h"
-# include "utils.h"
+# include <context.h>
+# include <utils.h>
 # include <readline/readline.h>
 # include <signal.h>
 

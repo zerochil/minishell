@@ -6,11 +6,11 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 06:26:33 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 06:26:35 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 06:31:07 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "env.h"
+#include <env.h>
 
 char	*env_set_append(char *var, char *key)
 {
