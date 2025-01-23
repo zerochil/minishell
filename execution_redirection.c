@@ -6,11 +6,36 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 09:12:45 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 09:15:13 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "execution.h"
+
+static int	handle_append(t_token *token, t_stream *stream, t_field *field)
+{
+	if (token->type == lexem_get_type("REDIRECTION_APPEND"))
+		return (open_file(field->value->data, O_WRONLY | O_CREAT | O_APPEND,
+				&stream->write));
+	error("handle_redirection: error");
+	return (-1);
+}
+
+static int	handle_truncate(t_token *token, t_stream *stream, t_field *field)
+{
+	if (token->type == lexem_get_type("REDIRECTION_TRUNC"))
+		return (open_file(field->value->data, O_WRONLY | O_CREAT | O_TRUNC,
+				&stream->write));
+	return (handle_append(token, stream, field));
+}
+
+static int	handle_redirect_in(t_token *token, t_stream *stream, t_field *field)
+{
+	if (token->type == lexem_get_type("REDIRECTION_IN")
+		|| token->type == lexem_get_type("HERE_DOCUMENT"))
+		return (open_file(field->value->data, O_RDONLY, &stream->read));
+	return (handle_truncate(token, stream, field));
+}
 
 int	open_redirection_files(t_array *redirection_list, t_stream *stream)
 {
@@ -26,17 +51,7 @@ int	open_redirection_files(t_array *redirection_list, t_stream *stream)
 		if (token->fields->size != 1)
 			return (report_error("minishell: ambiguous redirect"), -1);
 		field = array_shift(token->fields);
-		if (token->type == lexem_get_type("REDIRECTION_IN")
-			|| token->type == lexem_get_type("HERE_DOCUMENT"))
-			open_error = open_file(field->value->data, O_RDONLY, &stream->read);
-		else if (token->type == lexem_get_type("REDIRECTION_TRUNC"))
-			open_error = open_file(field->value->data,
-					O_WRONLY | O_CREAT | O_TRUNC, &stream->write);
-		else if (token->type == lexem_get_type("REDIRECTION_APPEND"))
-			open_error = open_file(field->value->data,
-					O_WRONLY | O_CREAT | O_APPEND, &stream->write);
-		else
-			error("handle_redirection: error");
+		open_error = handle_redirect_in(token, stream, field);
 		if (open_error == -1)
 			return (stream_close(stream), -1);
 	}
