@@ -42,13 +42,12 @@ void	*array_remove(t_array *array, size_t index)
 {
 	void	*item;
 
+	if (!array)
+		return (ft_putendl_fd("Error: array_remove: array is NULL", STDERR_FILENO), NULL);
 	if (array->size == 0)
 		return (NULL);
-	if (!array || index >= array->size)
-	{
-		ft_putendl_fd("Error: array_remove", 2);
-		return (NULL);
-	}
+	if (index >= array->size)
+		return (ft_putendl_fd("Error: array_remove: index too great", STDERR_FILENO), NULL);
 	item = array->data[index];
 	ft_memmove(
 		array->data + index,

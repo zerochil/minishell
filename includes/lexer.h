@@ -15,6 +15,8 @@
 
 # include <libft.h>
 
+# define LEXEM_EOF -1
+
 typedef struct s_lexem
 {
 	int		type;
@@ -31,6 +33,7 @@ int			lexem_match_symbol(void *lexem_ptr, void *input_ptr);
 int			lexem_match_identifier(void *lexem_ptr, void *identifier);
 int			lexem_match_word_break(void *lexem_ptr, void *input_ptr);
 
-int			lexem_is_redirection(int type);
+bool	lexem_is_redirection(int type);
+bool lexem_is_word(int type);
 
 #endif

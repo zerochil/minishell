@@ -27,6 +27,7 @@ typedef struct s_array
 void		array_init(t_array *arr);
 void		array_destroy(t_array *arr);
 void	array_ensure_capacity(t_array *array, size_t needed_capacity);
+t_array	*array_create(void);
 
 
 void	*array_next(t_array *array);

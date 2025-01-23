@@ -25,8 +25,6 @@
 
 typedef enum e_ast_type
 {
-	AST_COMPLETE_COMMAND,
-	AST_COMMAND_LIST,
 	AST_COMPOUND_COMMAND,
 	AST_COMMAND,
 	AST_PIPELINE,
@@ -57,7 +55,7 @@ t_ast_node *simple_command(t_array *tokens);
 
 t_array *redirect_list(t_array *tokens);
 t_token *io_redirect(t_array *tokens);
-bool linebreak(t_array *tokens);
+bool	skip_linebreak(t_array *tokens);
 
 bool check_error();
 

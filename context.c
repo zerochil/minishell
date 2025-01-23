@@ -28,7 +28,7 @@ char *ctx_exit_status(ctx_operation op, int status)
 	ctx = get_ctx_instance();
 	if (op == CTX_GET)
 	{
-		if (last_exit != ctx->exit_status || last_exit_str == NULL)
+		if ( last_exit_str == NULL || last_exit != ctx->exit_status)
 		{
 			last_exit = ctx->exit_status;
 			if (last_exit_str)
@@ -77,4 +77,20 @@ bool ctx_is_foreground(ctx_operation op, bool is_foreground)
 	if (op == CTX_SET)
 		ctx->foreground = is_foreground;
 	return (is_foreground);
+}
+
+char *ctx_cwd(ctx_operation op, char *cwd)
+{
+	t_context	*ctx;
+
+	ctx = get_ctx_instance();
+	if (op == CTX_GET)
+		return (ctx->cwd);
+	if (op == CTX_SET)
+	{
+		resource_free(ctx->cwd);
+		resource_track(cwd, free);
+		ctx->cwd = cwd;
+	}
+	return (cwd);
 }

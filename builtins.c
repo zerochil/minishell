@@ -21,6 +21,23 @@ builtin_t *get_builtins_instance()
 	return (builtins);
 }
 
+#include <execution.h>
+char *pwd(char *command_name)
+{
+	char *cwd;
+
+	cwd = getcwd(NULL, 0);
+	if (cwd == NULL)
+		cwd = ctx_cwd(CTX_GET, CTX_NO_VALUE);
+	if (cwd == NULL)
+	{
+		display_error(command_name, ": error retrieving current directory: getcwd: cannot access parent directories: ", strerror(errno));
+		return (NULL);
+	}
+	ctx_cwd(CTX_SET, cwd);
+	return (cwd);
+}
+
 bool is_builtin(char *name)
 {
 	builtin_t *builtins;
@@ -157,6 +174,7 @@ int	builtin_cd(char **args, int out_fd)
 	char *dir_path;
 	char *env_pwd;
 
+	// TODO: check builtins leaks
 	(void)out_fd;
 	if (ft_strarr_len(args) > 2)
 		return (ft_putendl_fd("cd: too many arguments", STDERR_FILENO), BUILTIN_EXIT_MISUSE);
@@ -172,6 +190,12 @@ int	builtin_cd(char **args, int out_fd)
 	}
 	if (chdir(dir_path) != 0)
 		return (perror("cd"), BUILTIN_EXIT_ERROR); // Again, when will this ever happen?
+	char *oldpwd = pwd("cd");
+	if (!oldpwd)
+		return (BUILTIN_EXIT_ERROR);
+	env_pwd = ft_strjoin("OLDPWD=", oldpwd);
+	env_set(env_pwd);
+	free(env_pwd);
 	env_pwd = ft_strjoin("PWD=", dir_path);
 	env_set(env_pwd);
 	free(env_pwd);
@@ -198,11 +222,11 @@ int	builtin_pwd(char **args, int out_fd)
 	char *cwd;
 
 	(void)args;
-	cwd = getcwd(NULL, 0);
+	cwd = pwd(NULL);
+	// TODO: pwd remembers directory if dirpath isn't found;
 	if (!cwd)
-		return (perror("pwd"), BUILTIN_EXIT_ERROR); // when will this ever happen?
+		return (BUILTIN_EXIT_ERROR); // when will this ever happen?
 	ft_putendl_fd(cwd, out_fd);
-	free(cwd);
 	return (BUILTIN_EXIT_SUCCESS);
 }
 
@@ -211,13 +235,15 @@ int	builtin_env(char **args, int out_fd)
 	char **env_array;
 
 	(void)args;
-	env_array = env_get_array();
+	env_array = env_get_array(NULL);
 	while (*env_array)
 	{
 		ft_putendl_fd(*env_array, out_fd);
 		env_array++;
-
 	}
+	ft_putstr_fd("_=", out_fd);
+	ft_putendl_fd(args[0], out_fd);
+
 	resource_free(env_array);
 	return (BUILTIN_EXIT_SUCCESS);
 }

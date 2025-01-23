@@ -18,6 +18,8 @@
 # include <unistd.h>
 # include <limits.h>
 
+# include "../memory_management/memory_management.h"
+
 typedef struct s_list
 {
 	void			*content;

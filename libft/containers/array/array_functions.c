@@ -31,6 +31,15 @@ void	array_destroy(t_array *array)
 	array->capacity = 0;
 }
 
+t_array	*array_create(void)
+{
+	t_array	*array;
+
+	array = track_malloc(sizeof(t_array));
+	array_init(array);
+	return (array);
+}
+
 void	array_ensure_capacity(t_array *array, size_t needed_capacity)
 {
 	size_t	new_cap;

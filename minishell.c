@@ -17,6 +17,7 @@
 #include "execution.h"
 #include <readline/history.h>
 #include <readline/readline.h>
+#include <builtins.h>
 
 void handler(int sig)
 {
@@ -28,12 +29,30 @@ void handler(int sig)
 	return;
 }
 
+static char *_pwd(char *command_name)
+{
+	char *cwd;
+
+	cwd = getcwd(NULL, 0);
+	if (cwd == NULL)
+		cwd = ctx_cwd(CTX_GET, CTX_NO_VALUE);
+	if (cwd == NULL)
+	{
+		display_error(command_name, ": error retrieving current directory: getcwd: cannot access parent directories: ", strerror(errno));
+		return (NULL);
+	}
+	ctx_cwd(CTX_SET, cwd);
+	return (cwd);
+}
+
+
 int	main(void)
 {
 	char			*line;
 	t_string		input;
 	t_array			*tokens;
 	t_array			*list;
+	int 			status;
 
 	// TODO: reset STDI/O to default in case of: `./minishell < file`;
 	// TODO: init all instances in some function? or is there a better design than individual instances?
@@ -42,6 +61,7 @@ int	main(void)
 	string_init(&input);
 	setup_signals();
 
+	_pwd("minishell-init");
 
 	while (1)
 	{
@@ -51,8 +71,10 @@ int	main(void)
 		if (line == NULL)
 		{
 			free(line);
+			status = atoi(ctx_exit_status(CTX_GET, CTX_NO_VALUE));
 			destroy_context();
-			exit(0);
+			ft_putendl_fd("exit", STDERR_FILENO);
+			exit(status);
 		}
 		if (*line == '\0')
 		{

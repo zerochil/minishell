@@ -89,13 +89,6 @@ void	print(void *node_ptr)
 	node = node_ptr;
 	if(node == NULL)
 		return;
-	if (node->type == AST_COMPLETE_COMMAND)
-	{
-		print_children(node->children, "Complete: ");
-		printf("%s\n", node->error_message);
-	}
-	else if (node->type == AST_COMMAND_LIST)
-		print_children(node->children, "List: ");
 	else if (node->type == AST_COMPOUND_COMMAND)
 		print_children(node->children, "Compound: ");
 	else if (node->type == AST_BINARY_AND)

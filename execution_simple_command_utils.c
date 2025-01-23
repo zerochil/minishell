@@ -70,6 +70,8 @@ char	*get_command_path(char *command_name)
 	size_t	i;
 	char	*command_path;
 
+	if (command_name == NULL)
+		return (NULL);
 	if (ft_strchr(command_name, '/') != NULL)
 		return (command_name);
 	path_env = env_get("PATH");

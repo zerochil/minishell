@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lexer.h"
+#include <lexer.h>
 
 static void	lexem_add(char *symbol, char *identifier)
 {

@@ -189,7 +189,7 @@ char *env_get(char *key)
 	return (NULL);
 }
 
-char **env_get_array()
+char **env_get_array(char *program_name)
 {
 	t_array *environment;
 	char **env_array;
@@ -197,7 +197,7 @@ char **env_get_array()
 	size_t i;
 
 	environment = get_environment_instance();
-	env_array = track_malloc((environment->size + 1) * sizeof(char *));
+	env_array = track_malloc((environment->size + 2) * sizeof(char *));
 	i = 0;
 	array_reset(environment);
 	while (true)
@@ -211,6 +211,8 @@ char **env_get_array()
 			i++;
 		}
 	}
+	if (program_name)
+		env_array[i++] = ft_strjoin("_=", program_name);
 	env_array[i] = NULL;
 	return (env_array);
 }

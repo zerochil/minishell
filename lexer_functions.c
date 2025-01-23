@@ -46,10 +46,15 @@ int	lexem_match_word_break(void *lexem_ptr, void *input_ptr)
 	return (string_match(input, lexem->symbol, cmp, input->peek));
 }
 
-int	lexem_is_redirection(int type)
+bool	lexem_is_redirection(int type)
 {
 	return (type == lexem_get_type("REDIRECTION_IN")
 		|| type == lexem_get_type("REDIRECTION_APPEND")
 		|| type == lexem_get_type("REDIRECTION_TRUNC")
 		|| type == lexem_get_type("HERE_DOCUMENT"));
+}
+
+bool lexem_is_word(int type)
+{
+	return (type == lexem_get_type("WORD"));
 }
