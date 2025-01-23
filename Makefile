@@ -30,7 +30,7 @@ SRCS = minishell.c execution.c utils.c prompt.c context.c signals.c context_inst
 	   tokenizer.c tokenizer_utils.c \
 	   here_document.c here_document_utils.c       \
 	   $(addprefix expansion/, $(EXPANSION_SRC)) \
-	   execution_pipeline_utils.c stream.c execution_redirection.c execution_simple_command.c execution_simple_command_utils.c execution_utils.c execution_pipeline.c  \
+	   execution_pipeline_utils.c stream.c execution_redirection.c execution_simple_command.c execution_simple_command_utils.c execution_utils.c execution_pipeline.c execution_predicates.c \
 	   debug.c
 
 OBJS_DIR = .objects/

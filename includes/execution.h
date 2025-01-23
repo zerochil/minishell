@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 06:49:02 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 15:23:20 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,9 @@ char			*get_command_path(char *command_name);
 int				open_redirection_files(t_array *redirection_list,
 					t_stream *stream);
 int				open_file(char *filename, int flags, int *fd);
+
+bool	is_binary_or(void *node);
+bool	is_binary_and(void *node);
 
 void			display_error(char *program_name, char *command, char *error);
 

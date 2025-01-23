@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 08:46:49 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/23 10:34:11 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,33 +19,6 @@
 #include <readline/readline.h>
 #include <builtins.h>
 
-void handler(int sig)
-{
-	(void)sig;
-	wait(NULL);
-	write(1, "\n", 1);
-    rl_on_new_line(); 
-    //rl_replace_line("", 0);
-	return;
-}
-
-static char *_pwd(char *command_name)
-{
-	char *cwd;
-
-	cwd = getcwd(NULL, 0);
-	if (cwd == NULL)
-		cwd = ctx_cwd(CTX_GET, CTX_NO_VALUE);
-	if (cwd == NULL)
-	{
-		display_error(command_name, ": error retrieving current directory: getcwd: cannot access parent directories: ", strerror(errno));
-		return (NULL);
-	}
-	ctx_cwd(CTX_SET, cwd);
-	return (cwd);
-}
-
-
 int	main(void)
 {
 	char			*line;
@@ -54,14 +27,16 @@ int	main(void)
 	t_array			*list;
 	int 			status;
 
-	// TODO: reset STDI/O to default in case of: `./minishell < file`;
+	// TODO: heredoc fails, exit status is wrong
+	//       ALSO: no newline is shown, after pressing ctrl+c.
+	//             In SIGINT handler we can print a newline to fix it.
+	//       BUT: if we spawn a new minishell, the newline in parent's signal handler mess it up, there is a conflict there;
+	//       PERHAPS: it's the heredoc's signal handler that should print the newline
 	// TODO: init all instances in some function? or is there a better design than individual instances?
 	get_environment_instance();
 	tcgetattr(0, ctx_old_termios(CTX_GET));
 	string_init(&input);
 	setup_signals();
-
-	_pwd("minishell-init");
 
 	while (1)
 	{

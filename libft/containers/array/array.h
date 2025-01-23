@@ -30,8 +30,6 @@ void	array_ensure_capacity(t_array *array, size_t needed_capacity);
 t_array	*array_create(void);
 
 
-void	*array_next(t_array *array);
-void	*array_reset(t_array *array);
 void		array_push(t_array *arr, void *item);
 void		array_insert(t_array *array, size_t index, void *element);
 void		*array_pop(t_array *array);
@@ -52,5 +50,9 @@ void	*array_find(t_array *array, void *target, int (*cmp)(void *, void *));
 int		array_index_of(t_array *array, void *target, int (*cmp)(void *, void *));
 
 void    array_sort(t_array *array, int (*cmp)(void *, void *));
+
+void	*array_next(t_array *array);
+void	*array_reset(t_array *array);
+void	array_next_till(t_array *array, bool (*is_breakpoint)(void *));
 
 #endif
