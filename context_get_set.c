@@ -83,6 +83,7 @@ char	*ctx_cwd(ctx_operation op, char *cwd)
 		return (ctx->cwd);
 	if (op == CTX_SET)
 	{
+		manager_scope_begin("context");
 		if (cwd == NULL)
 			return (NULL);
 		if (ctx->cwd)
@@ -93,6 +94,7 @@ char	*ctx_cwd(ctx_operation op, char *cwd)
 		if (cwd && ctx->cwd != cwd)
 			resource_track(cwd, free);
 		ctx->cwd = cwd;
+		manager_scope_end();
 	}
 	return (cwd);
 }

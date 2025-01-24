@@ -49,6 +49,7 @@ void execute_input(char *input_str)
 	t_array		*list;
 
 	manager_add("execute_input");
+	track_malloc(1);
 	string_init(&input);
 	string_set(&input, input_str);
 	tokens = tokenize(&input);
@@ -65,6 +66,7 @@ int	main(void)
 
 	// TODO: init all instances in some function? or is there a better design than individual instances?
 	get_environment_instance();
+	lexems_get_instance();
 	tcgetattr(0, ctx_old_termios(CTX_GET));
 	setup_signals();
 
@@ -81,6 +83,7 @@ int	main(void)
 		add_history(input);
 		execute_input(input);
 		free(input);
+		// TODO: input is leaking if we exit 
 	}
 	rl_clear_history();
 	manager_free_everything();

@@ -62,5 +62,6 @@ t_rm_node	*rm_node_new_manager(char *name)
 
 	node = safe_malloc(sizeof(t_rm_node));
 	node->manager.name = name;
+	node->next = NULL;
 	return (node);
 }
