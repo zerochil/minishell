@@ -6,17 +6,19 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/09 18:06:13 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 11:12:35 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/24 09:22:58 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HERE_DOCUMENT_H
 # define HERE_DOCUMENT_H
 
-# include "libft.h"
-# include "field.h"
-# include "signals.h"
-# include "utils.h"
+# include <libft.h>
+# include <field.h>
+# include <token.h>
+# include <parameter_expansion.h>
+# include <signals.h>
+# include <utils.h>
 
 # include <stdlib.h>
 # include <errno.h>

@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 17:53:35 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/24 16:09:35 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,5 @@ int				open_file(char *filename, int flags, int *fd);
 
 bool			is_binary_or(void *node);
 bool			is_binary_and(void *node);
-
-bool			is_directory(char *path);
 
 #endif

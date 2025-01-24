@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   builtins_export.c                                  :+:      :+:    :+:   */
+/*   builtins_environment.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 04:55:10 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 04:55:11 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/24 16:17:56 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,8 +90,6 @@ int	builtin_env(char **args, int out_fd)
 		ft_putendl_fd(*env_array, out_fd);
 		env_array++;
 	}
-	ft_putstr_fd("_=", out_fd);
-	ft_putendl_fd(args[0], out_fd);
 	resource_free(env_array);
 	return (BUILTIN_EXIT_SUCCESS);
 }

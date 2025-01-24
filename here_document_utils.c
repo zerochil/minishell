@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 08:59:37 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 11:13:53 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/24 09:21:32 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,9 +79,6 @@ size_t	get_second_line(char *input, size_t start)
 	}
 	return (i);
 }
-
-int		expand_parameter(t_string *string, char *parameter_name);
-char	*get_parameter_name(t_string *string, size_t dolar_position);
 
 void	expand_parameter_here_doc(t_string *content)
 {
