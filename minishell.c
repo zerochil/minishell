@@ -49,7 +49,6 @@ void execute_input(char *input_str)
 	t_array		*list;
 
 	manager_add("execute_input");
-	track_malloc(1);
 	string_init(&input);
 	string_set(&input, input_str);
 	tokens = tokenize(&input);
@@ -58,6 +57,32 @@ void execute_input(char *input_str)
 	list = generate_ast(tokens);
 	execution(list);
 	manager_free();
+}
+
+void history_read(int fd)
+{
+	char	*line;
+
+	while (true)
+	{
+		line = get_next_line(fd);
+		if (line == NULL)
+			break ;
+		if(ft_strlen(line) > 0 && line[ft_strlen(line) - 1] == '\n')
+			line[ft_strlen(line) - 1] = '\0';
+		add_history(line);
+	}
+}
+
+int open_history(void)
+{
+	char	*path;
+	int		fd;
+
+	path = ".minishell_history";
+	fd = track_open(path, O_RDWR | O_CREAT, 0644, "history file open failed");
+	history_read(fd);
+	return (fd);
 }
 
 int	main(void)
@@ -70,6 +95,8 @@ int	main(void)
 	tcgetattr(0, ctx_old_termios(CTX_GET));
 	setup_signals();
 
+	int hist_fd;
+	hist_fd = open_history();
 	while (1)
 	{
 		input = get_input();
@@ -81,6 +108,8 @@ int	main(void)
 			continue ;
 		}
 		add_history(input);
+		write(hist_fd, input, ft_strlen(input));
+		write(hist_fd, "\n", 1);
 		execute_input(input);
 		free(input);
 		// TODO: input is leaking if we exit 

@@ -12,7 +12,7 @@
 
 #include "memory_management.h"
 
-void	close_fd(void *fd_ptr)
+static void	track_close_fd(void *fd_ptr)
 {
 	int	fd;
 
@@ -28,6 +28,6 @@ int	track_open(char *pathname, int flags, mode_t mode, char *error_message)
 	fd = open(pathname, flags, mode);
 	if (fd < 0)
 		error(error_message);
-	resource_track((void *)(intptr_t)fd, close_fd);
+	resource_track((void *)(intptr_t)fd, track_close_fd);
 	return (fd);
 }

@@ -47,17 +47,17 @@ static void	default_shlvl(t_array *environment)
 static void	default_pwd(t_array *environment)
 {
 	char	*pwd;
-	char	*env_var;
+	/*char	*env_var;*/
 
+	(void)environment;
 	pwd = ctx_cwd(CTX_SET, getcwd(NULL, 0));
 	if (pwd == NULL)
 	{
 		display_error("minishell_init", ERR_GETCWD_NO_PARENT, strerror(errno));
 		return ;
 	}
-	env_var = array_find(environment, "PWD", match_key);
-	if (!env_var)
-		env_set_key_value("PWD", pwd);
+	/*env_var = array_find(environment, "PWD", match_key);*/
+	env_set_key_value("PWD", pwd);
 }
 
 static void	default_oldpwd(t_array *environment)

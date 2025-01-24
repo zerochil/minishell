@@ -95,6 +95,7 @@ void						resource_transfer(void *resource_pointer,
 
 int							manager_is_in_scope(t_rm_node *manager);
 
+int							track_open(char *pathname, int flags, mode_t mode, char *error_message);
 
 void						free_strings(void *ptr);
 
