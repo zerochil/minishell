@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/24 16:09:35 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/24 20:44:47 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@
 # include <context.h>
 # include <sys/stat.h>
 
-# define SHELL_NAME "minishell"
 # define ERR_COMMAND_NOT_FOUND "command not found"
 # define ERR_IS_DIRECTORY "Is a directory"
 # define EXIT_STATUS_SYNTAX_ERROR 2
