@@ -45,6 +45,8 @@ int	main(void)
 	while (1)
 	{
 		ctx_is_foreground(CTX_SET, true);
+		if (atoi(ctx_exit_status(CTX_GET, CTX_NO_VALUE)) == EXIT_STATUS_SIGINT)
+			ft_putchar_fd('\n', STDERR_FILENO);
 		line = readline("=> ");
 		ctx_is_foreground(CTX_SET, false);
 		if (line == NULL)

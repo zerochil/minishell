@@ -75,7 +75,7 @@ bool	here_document_child_process(char *filename, t_string *here_doc,
 	tcsetattr(0, TCSANOW, ctx_old_termios(CTX_GET));
 	if (status != 0)
 	{
-		ctx_exit_status(CTX_SET, status);
+		ctx_exit_status(CTX_SET, WEXITSTATUS(status));
 		return (false);
 	}
 	return (true);

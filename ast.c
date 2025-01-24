@@ -58,7 +58,7 @@ t_array	*generate_ast(t_array *tokens)
 	t_ast_node	*compound_node;
 
 	compound_list = array_create();
-	skip_linebreak(tokens); // might be problematic, removed from complete command
+	skip_linebreak(tokens);
 	while (is_eof(tokens) == false)
 	{
 		syntax_error(NULL);

@@ -56,9 +56,7 @@ void	handle_signal(int signo)
 {
 	if (signo != SIGINT)
 		return ;
-	if (ctx_is_foreground(CTX_GET, CTX_NO_VALUE) == false)
-		return ;
-	else
+	if (ctx_is_foreground(CTX_GET, CTX_NO_VALUE))
 	{
 		ctx_exit_status(CTX_SET, EXIT_STATUS_SIGINT);
 		ft_putchar_fd('\n', STDERR_FILENO);

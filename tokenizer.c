@@ -99,10 +99,7 @@ t_array	*tokenize(t_string *input)
 	t_token	*token;
 
 	if (!is_quoted(input))
-	{
-		report_error("tokenizer: unbalanced quotes!");
-		return (NULL);
-	}
+		return (report_error("tokenizer: unbalanced quotes!"), NULL);
 	tokens = track_malloc(sizeof(t_array));
 	array_init(tokens);
 	while (1)

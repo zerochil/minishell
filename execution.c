@@ -25,11 +25,12 @@ int	execution(t_array *ast_root_list)
 		if (ast_root->type == AST_INVALID_COMMAND)
 		{
 			report_error(ast_root->error_message);
-			status = 2;
-			continue ;
+			status = EXIT_STATUS_SYNTAX_ERROR;
 		}
-		status = execute_compound_command(ast_root);
+		else
+			status = execute_compound_command(ast_root);
 	}
+	ctx_exit_status(CTX_SET, status);
 	return (status);
 }
 
@@ -48,7 +49,7 @@ int	execute_compound_command(t_ast_node *node)
 		if (command_node->type == AST_PIPELINE)
 		{
 			exit_status = execute_pipeline(command_node);
-			ctx_exit_status(CTX_SET, exit_status);
+			/*ctx_exit_status(CTX_SET, exit_status);*/
 			if (exit_status == EXIT_STATUS_SIGINT)
 				return (EXIT_STATUS_SIGINT);
 		}

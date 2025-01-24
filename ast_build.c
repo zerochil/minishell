@@ -72,9 +72,8 @@ t_ast_node	*command(t_array *tokens)
 		array_shift(tokens);
 		subshell_node = subshell(tokens);
 		if (subshell_node == NULL || subshell_node->redirect_list == NULL || subshell_node->children == NULL)
-		{
 			return (NULL);
-		}
+		return (subshell_node);
 	}
 	return (simple_command(tokens));
 }

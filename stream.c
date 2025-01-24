@@ -35,10 +35,7 @@ void	create_pipe(t_stream *streamline, int index)
 	t_stream	p;
 
 	if (pipe((int *)&p) == -1)
-	{
-		perror("minishell");
-		error(NULL);
-	}
+		error(strerror(errno));
 	streamline[index].write = p.write;
 	streamline[index + 1].read = p.read;
 }
@@ -61,9 +58,9 @@ void	stream_dup2stdio(t_stream *stream)
 {
 	if (stream->read != STDIN_FILENO)
 		if (dup2(stream->read, STDIN_FILENO) == -1)
-			error("dup2: error");
+			error(strerror(errno));
 	if (stream->write != STDOUT_FILENO)
 		if (dup2(stream->write, STDOUT_FILENO) == -1)
-			error("dup2: error");
+			error(strerror(errno));
 	stream_close(stream);
 }
