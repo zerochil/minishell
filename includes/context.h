@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 17:02:41 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/24 20:47:01 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <errno.h>
 # include <token.h>
 
+# define SHELL_NAME "Segmentation fault"
 # define CTX_NO_VALUE 0
 
 typedef enum e_ctx_ops
@@ -47,6 +48,5 @@ struct termios *ctx_old_termios(ctx_operation op);
 bool ctx_is_child(ctx_operation op, bool is_child);
 bool ctx_is_foreground(ctx_operation op, bool is_foreground);
 char *ctx_cwd(ctx_operation op, char *cwd);
-
 
 #endif

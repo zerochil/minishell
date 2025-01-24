@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 09:15:13 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/24 20:10:44 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,15 @@ static int	handle_truncate(t_token *token, t_stream *stream, t_field *field)
 
 static int	handle_redirect_in(t_token *token, t_stream *stream, t_field *field)
 {
+	int	fd;
+	
+	if (token->type == lexem_get_type("HERE_DOCUMENT"))
+	{
+		fd = open_file(field->value->data, O_RDONLY, &stream->read);
+		if (fd >= 0)
+			unlink(field->value->data);
+		return (fd);
+	}
 	if (token->type == lexem_get_type("REDIRECTION_IN")
 		|| token->type == lexem_get_type("HERE_DOCUMENT"))
 		return (open_file(field->value->data, O_RDONLY, &stream->read));

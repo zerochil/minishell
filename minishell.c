@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/24 18:20:27 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/24 20:47:32 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,14 @@
 #include <readline/readline.h>
 #include <builtins.h>
 
-char *get_input(void)
+char *get_line(void)
 {
 	char *line;
 
 	ctx_is_foreground(CTX_SET, true);
 	if (atoi(ctx_exit_status(CTX_GET, CTX_NO_VALUE)) == EXIT_STATUS_SIGINT)
 		ft_putchar_fd('\n', STDERR_FILENO);
-	line = readline("$> ");
+	line = readline(SHELL_NAME" ");
 	ctx_is_foreground(CTX_SET, false);
 	return (line);
 }
@@ -42,17 +42,13 @@ void handle_eof(void)
 	exit(status);
 }
 
-void execute_input(char *input_str)
+void execute_input(t_string *input)
 {
-	t_string	input;
 	t_array		*tokens;
 	t_array		*list;
 
-	manager_add("execute_input");
-	track_malloc(1);
-	string_init(&input);
-	string_set(&input, input_str);
-	tokens = tokenize(&input);
+	manager_add("execute_line");
+	tokens = tokenize(input);
 	if (tokens == NULL)
 		return ;
 	list = generate_ast(tokens);
@@ -62,28 +58,30 @@ void execute_input(char *input_str)
 
 int	main(void)
 {
-	char			*input;
+	char		*line;
+	t_string	input;
 
 	// TODO: init all instances in some function? or is there a better design than individual instances?
 	get_environment_instance();
 	lexems_get_instance();
 	tcgetattr(0, ctx_old_termios(CTX_GET));
 	setup_signals();
-
 	while (1)
 	{
-		input = get_input();
-		if (input == NULL)
+		line = get_line();
+		string_init(&input);
+		string_set(&input, line);
+		if (line == NULL)
 			handle_eof();
-		if (*input == '\0')
+		if (*line == '\0')
 		{
-			free(input);
+			free(line);
 			continue ;
 		}
-		add_history(input);
-		execute_input(input);
-		free(input);
-		// TODO: input is leaking if we exit 
+		add_history(line);
+		free(line);
+		execute_input(&input);
+		string_destroy(&input);
 	}
 	rl_clear_history();
 	manager_free_everything();
