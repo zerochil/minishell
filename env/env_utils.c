@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 06:26:44 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 17:42:24 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/24 18:13:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,26 +44,6 @@ int	compare_strings(void *a, void *b)
 	return (ft_strcmp(a, b));
 }
 
-int	match_key(void *element_ptr, void *target_ptr)
-{
-	char	*element;
-	char	*target;
-	size_t	element_length;
-	size_t	target_length;
-
-	element = (char *)element_ptr;
-	target = (char *)target_ptr;
-	if (ft_strchr(element, '='))
-	{
-		element_length = ft_strcspn(element, "=");
-		target_length = ft_strlen(target);
-		if (element_length < target_length)
-			element_length = target_length;
-		return (ft_strncmp(element, target, element_length) == 0);
-	}
-	return (ft_strcmp(element, target) == 0);
-}
-
 char	**env_get_array(char *program_name)
 {
 	t_array	*environment;
@@ -89,4 +69,18 @@ char	**env_get_array(char *program_name)
 	}
 	env_array[i] = NULL;
 	return (env_array);
+}
+
+void	print_key_value(char *env_var, int out_fd)
+{
+	if (ft_strchr(env_var, '='))
+	{
+		while (*env_var != '=')
+			ft_putchar_fd(*env_var++, out_fd);
+		ft_putstr_fd("=\"", out_fd);
+		ft_putstr_fd(env_var + 1, out_fd);
+		ft_putchar_fd('"', out_fd);
+	}
+	else
+		ft_putstr_fd(env_var, out_fd);
 }

@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 04:55:10 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/24 17:01:07 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/24 17:10:13 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,21 +28,6 @@ int	builtin_export_add(char **args)
 		args++;
 	}
 	return (exit_status);
-}
-
-void	print_key_value(char *env_var, int out_fd)
-{
-
-	if (ft_strchr(env_var, '='))
-	{
-		while (*env_var != '=')
-			ft_putchar_fd(*env_var++, out_fd);
-		ft_putstr_fd("=\"", out_fd);
-		ft_putstr_fd(env_var + 1, out_fd);
-		ft_putchar_fd('"', out_fd);
-	}
-	else
-		ft_putstr_fd(env_var, out_fd);
 }
 
 int	builtin_export_print(int out_fd)

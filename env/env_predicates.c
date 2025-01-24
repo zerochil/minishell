@@ -6,11 +6,31 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/24 16:08:16 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/24 16:09:14 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/24 17:05:20 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <env.h>
+
+int	match_key(void *element_ptr, void *target_ptr)
+{
+	char	*element;
+	char	*target;
+	size_t	element_length;
+	size_t	target_length;
+
+	element = (char *)element_ptr;
+	target = (char *)target_ptr;
+	if (ft_strchr(element, '='))
+	{
+		element_length = ft_strcspn(element, "=");
+		target_length = ft_strlen(target);
+		if (element_length < target_length)
+			element_length = target_length;
+		return (ft_strncmp(element, target, element_length) == 0);
+	}
+	return (ft_strcmp(element, target) == 0);
+}
 
 bool	is_directory(char *path)
 {
