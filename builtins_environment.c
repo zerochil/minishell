@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 04:55:10 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/24 16:17:56 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/24 17:01:07 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,21 @@ int	builtin_export_add(char **args)
 	return (exit_status);
 }
 
+void	print_key_value(char *env_var, int out_fd)
+{
+
+	if (ft_strchr(env_var, '='))
+	{
+		while (*env_var != '=')
+			ft_putchar_fd(*env_var++, out_fd);
+		ft_putstr_fd("=\"", out_fd);
+		ft_putstr_fd(env_var + 1, out_fd);
+		ft_putchar_fd('"', out_fd);
+	}
+	else
+		ft_putstr_fd(env_var, out_fd);
+}
+
 int	builtin_export_print(int out_fd)
 {
 	t_array	*environment;
@@ -42,17 +57,10 @@ int	builtin_export_print(int out_fd)
 		env_var = array_next(environment);
 		if (!env_var)
 			break ;
+		if (ft_strncmp(env_var, "_=", 2) == 0)
+			continue ;
 		ft_putstr_fd("declare -x ", out_fd);
-		if (ft_strchr(env_var, '='))
-		{
-			while (*env_var != '=')
-				ft_putchar_fd(*env_var++, out_fd);
-			ft_putstr_fd("=\"", out_fd);
-			ft_putstr_fd(env_var + 1, out_fd);
-			ft_putchar_fd('\"', out_fd);
-		}
-		else
-			ft_putstr_fd(env_var, out_fd);
+		print_key_value(env_var, out_fd);
 		ft_putchar_fd('\n', out_fd);
 	}
 	return (BUILTIN_EXIT_SUCCESS);
@@ -87,7 +95,10 @@ int	builtin_env(char **args, int out_fd)
 	env_array = env_get_array(NULL);
 	while (*env_array)
 	{
-		ft_putendl_fd(*env_array, out_fd);
+		if (ft_strncmp(*env_array, "_=", 2) == 0)
+			ft_putendl_fd("_=env", out_fd);
+		else
+			ft_putendl_fd(*env_array, out_fd);
 		env_array++;
 	}
 	resource_free(env_array);

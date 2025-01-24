@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 16:34:53 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/24 16:38:40 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,7 @@ int	execute_simple_command(t_ast_node *node)
 					cmd_ctx.stream.write);
 		else
 		{
+			env_set_key_value("_", cmd_ctx.args[0]);
 			cmd_ctx.envp = env_get_array(cmd_ctx.args[0]);
 			status = execute_external(command_name, &cmd_ctx);
 		}
