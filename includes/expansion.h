@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/04 17:13:33 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 14:37:31 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/25 09:59:24 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,13 +29,13 @@ enum
 	ALL_EXPANSIONS = 15,
 };
 
-bool	is_export_command(t_token *token);
+bool	is_export_command(t_array *token);
 bool	is_assingment_word(t_token *token);
 
 void	single_field_quote_removal(void *field_ptr);
 void	quote_removal(void *token_ptr);
 
-void	handle_expansions(t_ast_node *command);
+void	handle_expansions(void *command_ptr);
 void	expansion(t_array *tokens);
 
 #endif

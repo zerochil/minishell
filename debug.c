@@ -6,11 +6,21 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 09:28:43 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/20 09:30:47 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/25 09:18:29 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "debug.h"
+
+void	print_vars(void *str_ptr)
+{
+	char *str;
+
+	str = str_ptr;
+	if (str)
+		printf("%s\n", str);
+}
+
 
 void	print_field(void *field_ptr)
 {

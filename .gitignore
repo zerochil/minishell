@@ -4,6 +4,7 @@ compile_flags.txt
 # temp files
 .*.swp
 .*.swo
+.minishell_history
 vgcore.*
 
 # executable

@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/24 20:47:01 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/25 08:40:51 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 # include <errno.h>
 # include <token.h>
 
-# define SHELL_NAME "Segmentation fault"
+# define SHELL_NAME "Total"
 # define CTX_NO_VALUE 0
 
 typedef enum e_ctx_ops

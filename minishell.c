@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/24 20:47:32 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/25 09:05:07 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ char *get_line(void)
 	ctx_is_foreground(CTX_SET, true);
 	if (atoi(ctx_exit_status(CTX_GET, CTX_NO_VALUE)) == EXIT_STATUS_SIGINT)
 		ft_putchar_fd('\n', STDERR_FILENO);
-	line = readline(SHELL_NAME" ");
+	line = readline(SHELL_NAME"$ ");
 	ctx_is_foreground(CTX_SET, false);
 	return (line);
 }

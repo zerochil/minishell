@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 15:35:13 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/25 09:57:47 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,6 @@ int	execute_compound_command(t_ast_node *node)
 
 int	execute_command(t_ast_node *node)
 {
-	handle_expansions(node);
 	if (node->type == AST_SUBSHELL)
 		return (execute_subshell(node));
 	else if (node->type == AST_SIMPLE_COMMAND)

@@ -6,12 +6,12 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 15:50:25 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 15:01:08 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/25 10:03:49 by inajah           ###   ########.fr       */
 /*   Updated: 2025/01/10 09:57:42 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "expansion.h"
+#include <expansion.h>
 
 void	field_splitting(void *token_ptr)
 {
@@ -65,7 +65,7 @@ void	expansion(t_array *tokens)
 	i = 0;
 	if (tokens->size == 0)
 		return ;
-	is_export = false;
+	is_export = is_export_command(tokens);
 	while (i < tokens->size)
 	{
 		token = array_get(tokens, i);
@@ -76,13 +76,15 @@ void	expansion(t_array *tokens)
 			&& is_export && is_assingment_word(token))
 			flag = PARAMETER_EXPANSION | QUOTE_REMOVAL;
 		expand_token(token, flag);
-		is_export = is_export_command(token);
 		i++;
 	}
 }
 
-void	handle_expansions(t_ast_node *command)
+void	handle_expansions(void *command_ptr)
 {
+	t_ast_node	*command;
+
+	command = command_ptr;
 	if (command->type != AST_SIMPLE_COMMAND && command->type != AST_SUBSHELL)
 	{
 		error("Error: handle_expansions");

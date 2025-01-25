@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 06:58:49 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/25 10:00:56 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 
 void	pipeline_init(t_pipeline_state *state, t_array *commands)
 {
+	array_do(commands, handle_expansions);
 	state->commands = commands;
 	state->index = 0;
 	state->last_pid = -1;
