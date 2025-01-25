@@ -1,3 +1,11 @@
+# project related
+gramamr.txt
+
+# .supp
+readline.supp
+malloc.supp
+
+
 # linter files
 compile_flags.txt
 
