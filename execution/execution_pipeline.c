@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/25 10:10:55 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/26 08:48:24 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@ int	should_not_fork(t_array *commands)
 	if (token == NULL)
 		return (0);
 	field = array_get(token->fields, 0);
+	if (field == NULL)
+		return (1);
 	command_name = field->value->data;
 	if (is_builtin(command_name) == 0)
 		return (0);
