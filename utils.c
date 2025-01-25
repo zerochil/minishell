@@ -24,7 +24,7 @@ void	clean_exit(int status)
 	exit(status);
 }
 
-void display_error(char *program_name, char *command, char *error)
+void	display_error(char *program_name, char *command, char *error)
 {
 	ft_putstr_fd(program_name, STDERR_FILENO);
 	ft_putstr_fd(": ", STDERR_FILENO);

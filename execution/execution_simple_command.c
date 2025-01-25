@@ -82,6 +82,5 @@ int	execute_simple_command(t_ast_node *node)
 			status = execute_external(command_name, &cmd_ctx);
 		}
 	}
-	stream_close(&cmd_ctx.stream);
-	return (status);
+	return (stream_close(&cmd_ctx.stream), status);
 }

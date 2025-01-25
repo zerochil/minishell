@@ -14,9 +14,9 @@
 # define SIGNALS_H
 
 # include <context.h>
-# include <utils.h>
 # include <readline/readline.h>
 # include <signal.h>
+# include <utils.h>
 
 # define EXIT_STATUS_SIGINT 130
 # define EXIT_STATUS_SIGQUIT 131

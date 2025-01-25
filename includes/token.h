@@ -17,10 +17,10 @@
 
 typedef struct s_token
 {
-	int			type;
-	char		*value;
-	bool		should_field_split;
-	t_array		*fields; 
-}				t_token;
+	int		type;
+	char	*value;
+	bool	should_field_split;
+	t_array	*fields;
+}			t_token;
 
 #endif

@@ -14,10 +14,10 @@
 # define EXPANSION_H
 
 # include "ast.h"
-# include "parameter_expansion.h"
-# include "field.h"
-# include "pathname_expansion.h"
 # include "context.h"
+# include "field.h"
+# include "parameter_expansion.h"
+# include "pathname_expansion.h"
 
 enum
 {

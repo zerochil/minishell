@@ -6,13 +6,13 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/29 16:38:30 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/24 18:27:09 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/25 11:47:51 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <context.h>
 
-char	*ctx_exit_status(ctx_operation op, int status)
+char	*ctx_exit_status(t_ctx_operation op, int status)
 {
 	t_context	*ctx;
 	static int	last_exit;
@@ -38,7 +38,7 @@ char	*ctx_exit_status(ctx_operation op, int status)
 	return (NULL);
 }
 
-struct termios	*ctx_old_termios(ctx_operation op)
+struct termios	*ctx_old_termios(t_ctx_operation op)
 {
 	t_context	*ctx;
 
@@ -48,7 +48,7 @@ struct termios	*ctx_old_termios(ctx_operation op)
 	return (NULL);
 }
 
-bool	ctx_is_child(ctx_operation op, bool is_child)
+bool	ctx_is_child(t_ctx_operation op, bool is_child)
 {
 	t_context	*ctx;
 
@@ -62,7 +62,7 @@ bool	ctx_is_child(ctx_operation op, bool is_child)
 	return (is_child);
 }
 
-bool	ctx_is_foreground(ctx_operation op, bool is_foreground)
+bool	ctx_is_foreground(t_ctx_operation op, bool is_foreground)
 {
 	t_context	*ctx;
 
@@ -74,7 +74,7 @@ bool	ctx_is_foreground(ctx_operation op, bool is_foreground)
 	return (is_foreground);
 }
 
-char	*ctx_cwd(ctx_operation op, char *cwd)
+char	*ctx_cwd(t_ctx_operation op, char *cwd)
 {
 	t_context	*ctx;
 

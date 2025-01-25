@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 06:27:18 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/24 18:08:17 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/25 11:49:58 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,11 @@
 
 # include <context.h>
 # include <libft.h>
-# include <utils.h>
 # include <sys/stat.h>
+# include <utils.h>
 
 # define ERR_GETCWD_NO_PARENT \
-	"error retrieving current directory: getcwd: cannot access parent directories"
+"error retrieving current directory: getcwd: cannot access parent directories"
 
 void	set_default_env_vars(t_array *environment);
 t_array	*get_environment_instance(void);

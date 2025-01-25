@@ -6,15 +6,15 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 04:51:42 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 04:51:44 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/01/25 11:51:18 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <builtins.h>
 
-builtin_t	*get_builtins_instance(void)
+t_builtin	*get_builtins_instance(void)
 {
-	static builtin_t	builtins[] = {
+	static t_builtin	builtins[] = {
 	{"echo", &builtin_echo},
 	{"cd", &builtin_cd},
 	{"pwd", &builtin_pwd},
@@ -48,7 +48,7 @@ char	*pwd(char *command_name)
 
 bool	is_builtin(char *name)
 {
-	builtin_t	*builtins;
+	t_builtin	*builtins;
 	int			i;
 
 	builtins = get_builtins_instance();

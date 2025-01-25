@@ -13,40 +13,39 @@
 #ifndef FIELD_H
 # define FIELD_H
 
-# include <stdlib.h>
+# include "libft.h"
 # include <stdbool.h>
-# include "libft.h" 
+# include <stdlib.h>
 
 typedef struct s_field
 {
 	t_string	*value;
 	t_string	*mask;
-}	t_field;
+}				t_field;
 
-enum e_field_mask_value
+enum			e_field_mask_value
 {
 	ORIGINAL = 0,
-	EXPANDED = 1,             
+	EXPANDED = 1,
 	SINGLE_QUOTED = 2,
 	DOUBLE_QUOTED = 4,
 };
 
-t_field		*field_init(char *token_value, char *mask);
-void		field_set(t_field *field, char *value, unsigned char mask);
-void		field_split(t_array *fields);
-void		field_set(t_field *field, char *value, unsigned char mask);
-char		field_shift_at_peek(t_field *field);
+t_field			*field_init(char *token_value, char *mask);
+void			field_set(t_field *field, char *value, unsigned char mask);
+void			field_split(t_array *fields);
+void			field_set(t_field *field, char *value, unsigned char mask);
+char			field_shift_at_peek(t_field *field);
 
-void		field_peek(t_field *field, char *c, char *m);
-void		field_peek_set(t_field *field, size_t peek);
-void		field_peek_advance(t_field *field);
-void		field_peek_reset(t_field *field);
+void			field_peek(t_field *field, char *c, char *m);
+void			field_peek_set(t_field *field, size_t peek);
+void			field_peek_advance(t_field *field);
+void			field_peek_reset(t_field *field);
 
-t_field		*field_copy(t_field *field);
-bool		field_remove_original_quotes(t_field *field);
-void		field_shift(t_field *field);
-bool		is_ifs(char c);
-void		skip_ifs(t_field *field);
+t_field			*field_copy(t_field *field);
+bool			field_remove_original_quotes(t_field *field);
+void			field_shift(t_field *field);
+bool			is_ifs(char c);
+void			skip_ifs(t_field *field);
 
 #endif
-

@@ -13,19 +13,17 @@
 #ifndef TOKENIZER_H
 # define TOKENIZER_H
 
-# include <libft.h>
-# include <token.h>
-# include <lexer.h>
 # include <field.h>
 # include <here_document.h>
+# include <lexer.h>
+# include <libft.h>
+# include <token.h>
 
 # define WHITE_SPACE " \t"
 
-
 t_array	*tokenize(t_string *input);
 t_token	*token_init(int type, char *value);
-int	is_quoted(t_string *input);
+int		is_quoted(t_string *input);
 t_token	*tokenize_next(t_string *input);
-
 
 #endif

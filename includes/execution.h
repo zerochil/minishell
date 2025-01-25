@@ -14,12 +14,12 @@
 # define EXECUTION_H
 
 # include <ast.h>
-# include <stream.h>
+# include <context.h>
 # include <execution_pipeline.h>
 # include <expansion.h>
-# include <utils.h>
-# include <context.h>
+# include <stream.h>
 # include <sys/stat.h>
+# include <utils.h>
 
 # define ERR_COMMAND_NOT_FOUND "command not found"
 # define ERR_IS_DIRECTORY "Is a directory"

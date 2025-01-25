@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/25 09:57:47 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/25 11:53:41 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,6 @@ int	execute_compound_command(t_ast_node *node)
 		if (command_node->type == AST_PIPELINE)
 		{
 			exit_status = execute_pipeline(command_node);
-			/*ctx_exit_status(CTX_SET, exit_status);*/
 			if (exit_status == EXIT_STATUS_SIGINT)
 				return (EXIT_STATUS_SIGINT);
 		}

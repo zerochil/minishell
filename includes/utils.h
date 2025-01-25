@@ -14,8 +14,8 @@
 # define UTILS_H
 
 # include <libft.h>
-# include <readline/readline.h>
 # include <readline/history.h>
+# include <readline/readline.h>
 
 void	destroy_context(void);
 void	clean_exit(int status);

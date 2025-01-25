@@ -6,18 +6,18 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/25 10:00:33 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/25 11:48:36 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PIPELINE_H
-# define PIPELINE_H
+#ifndef EXECUTION_PIPELINE_H 
+# define EXECUTION_PIPELINE_H 
 
 # include <errno.h>
-# include <sys/wait.h>
+# include <expansion.h>
 # include <signals.h>
 # include <stream.h>
-# include <expansion.h>
+# include <sys/wait.h>
 
 typedef struct s_pipeline_state
 {

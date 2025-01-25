@@ -32,7 +32,7 @@ static int	handle_truncate(t_token *token, t_stream *stream, t_field *field)
 static int	handle_redirect_in(t_token *token, t_stream *stream, t_field *field)
 {
 	int	fd;
-	
+
 	if (token->type == lexem_get_type("HERE_DOCUMENT"))
 	{
 		fd = open_file(field->value->data, O_RDONLY, &stream->read);

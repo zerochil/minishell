@@ -18,7 +18,8 @@ static bool	is_compound_terminated(t_array *tokens)
 	t_token	*token;
 
 	token = array_peek(tokens);
-	return (token->type == LEXEM_EOF || token->type == lexem_get_type("NEWLINE"));
+	return (token->type == LEXEM_EOF
+		|| token->type == lexem_get_type("NEWLINE"));
 }
 
 static bool	check_compound_termination(t_ast_node *compound_node,
