@@ -62,7 +62,7 @@ ENV_SRC = env.c            \
 		  env_predicates.c \
 
 SRCS = minishell.c context.c context_get_set.c   \
-	   utils.c debug.c signals.c                 \
+	   utils.c signals.c                 \
 	   $(addprefix parsing/, $(PARSING_SRC))     \
 	   $(addprefix expansion/, $(EXPANSION_SRC)) \
 	   $(addprefix execution/, $(EXECUTION_SRC)) \
@@ -86,7 +86,6 @@ HEADER_FILES = minishell.h            \
 			   builtins.h             \
 			   signals.h              \
 			   stream.h               \
-			   debug.h                \
 			   utils.h
 
 HEADERS = $(HEADER_FILES:%=$(INCLUDE)/%)

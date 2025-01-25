@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 04:44:23 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/24 18:05:40 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/25 12:17:28 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ int	builtin_exit(char **args, int out_fd)
 	exit_status = BUILTIN_EXIT_SUCCESS;
 	if (args[1])
 	{
-		if (ft_isnumber(args[1]) == 0 || ft_strlen(args[1]) >= 20)
+		if (ft_isnumber(args[1]) == 0 || ft_numberlen(args[1]) >= 20)
 		{
 			ft_putendl_fd("exit: numeric argument required", STDERR_FILENO);
 			exit_status = BUILTIN_EXIT_MISUSE;
@@ -69,6 +69,8 @@ int	change_directory(char *dir_path)
 	char	*oldpwd;
 	char	*pwd;
 
+	if (dir_path == NULL || *dir_path == '\0')
+		return (BUILTIN_EXIT_SUCCESS);
 	if (chdir(dir_path) != 0)
 	{
 		display_error("cd", dir_path, strerror(errno));

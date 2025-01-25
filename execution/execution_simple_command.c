@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/24 16:38:40 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/25 12:01:39 by rrochd           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ int	execute_external(char *command_name, t_command_context *command_context)
 
 int	execute_builtin(char *command_name, char **args, int out_fd)
 {
-	builtin_t	*builtins;
+	t_builtin	*builtins;
 	int			i;
 
 	args[0] = command_name;

@@ -6,7 +6,7 @@ BASE_SRCS = ft_atoi.c ft_bzero.c ft_calloc.c ft_isalnum.c ft_isalpha.c ft_isasci
 
 MEMORY_MANAGEMNT_SRCS = resource_operations.c file_operations.c error_operations.c manager_operations.c free_operations.c malloc_operations.c node_operations.c node_operations_predicates.c manager_scope_operations.c 
 
-CONTAINERS_SRCS = array/array_access.c array/array_helper_functions.c array/array_functions.c array/array_manipulation.c array/array_sort.c array/array_iterator.c array/array_search.c\
+CONTAINERS_SRCS = array/array_access.c array/array_helper_functions.c array/array_functions.c array/array_manipulation.c array/array_sort.c array/array_iterator.c array/array_search.c array/array_bulk.c\
 				  string/string_functions.c string/string_manipulation.c string/string_segment_manipulation.c string/string_access.c string/string_peek.c\
 				  containers_functions.c
 
