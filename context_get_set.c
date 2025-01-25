@@ -62,7 +62,7 @@ bool	ctx_is_child(t_ctx_operation op, bool is_child)
 	return (is_child);
 }
 
-bool	ctx_is_foreground(t_ctx_operation op, bool is_foreground)
+int	ctx_is_foreground(t_ctx_operation op, int is_foreground)
 {
 	t_context	*ctx;
 

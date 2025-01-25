@@ -30,7 +30,7 @@ typedef enum e_ctx_ops
 
 typedef struct s_context
 {
-	bool			foreground;
+	int				foreground;
 	int				exit_status;
 	struct termios	old_termios;
 	bool			is_child;
@@ -45,7 +45,7 @@ t_context			*get_ctx_instance(void);
 char				*ctx_exit_status(t_ctx_operation op, int status);
 struct termios		*ctx_old_termios(t_ctx_operation op);
 bool				ctx_is_child(t_ctx_operation op, bool is_child);
-bool				ctx_is_foreground(t_ctx_operation op, bool is_foreground);
+int					ctx_is_foreground(t_ctx_operation op, int is_foreground);
 char				*ctx_cwd(t_ctx_operation op, char *cwd);
 
 #endif

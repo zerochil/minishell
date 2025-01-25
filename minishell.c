@@ -22,11 +22,13 @@ char	*get_line(void)
 {
 	char	*line;
 
-	ctx_is_foreground(CTX_SET, true);
-	if (atoi(ctx_exit_status(CTX_GET, CTX_NO_VALUE)) == EXIT_STATUS_SIGINT)
+	if (ctx_is_foreground(CTX_GET, CTX_NO_VALUE) == SIGINT)
+	{
 		ft_putchar_fd('\n', STDERR_FILENO);
+		rl_replace_line("", 0);
+	}
+	ctx_is_foreground(CTX_SET, true);
 	line = readline(SHELL_NAME "$ ");
-	ctx_is_foreground(CTX_SET, false);
 	return (line);
 }
 
@@ -46,6 +48,7 @@ void	execute_input(t_string *input)
 	t_array	*tokens;
 	t_array	*list;
 
+	ctx_is_foreground(CTX_SET, false);
 	manager_add("execute_line");
 	tokens = tokenize(input);
 	if (tokens == NULL)
