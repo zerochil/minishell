@@ -55,17 +55,21 @@ void	execute_input(t_string *input)
 	manager_free();
 }
 
-// TODO: init all instances in some function?
-// or is there a better design than individual instances?
+void	init_instances(void)
+{
+	get_environment_instance();
+	lexems_get_instance();
+	ctx_exit_status(CTX_SET, 0);
+	tcgetattr(0, ctx_old_termios(CTX_GET));
+	setup_signals();
+}
+
 int	main(void)
 {
 	char		*line;
 	t_string	input;
 
-	get_environment_instance();
-	lexems_get_instance();
-	tcgetattr(0, ctx_old_termios(CTX_GET));
-	setup_signals();
+	init_instances();
 	while (1)
 	{
 		line = get_line();

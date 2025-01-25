@@ -25,7 +25,7 @@ char	*ctx_exit_status(t_ctx_operation op, int status)
 		if (last_exit_str == NULL || last_exit != ctx->exit_status)
 		{
 			last_exit = ctx->exit_status;
-			if (last_exit_str)
+			if (last_exit_str != NULL)
 				resource_free(last_exit_str);
 			last_exit_str = ft_itoa(last_exit);
 			resource_track(last_exit_str, free);

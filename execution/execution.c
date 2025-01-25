@@ -17,6 +17,7 @@ int	execution(t_array *ast_root_list)
 	t_ast_node	*ast_root;
 	int			status;
 
+	status = 0;
 	while (true)
 	{
 		ast_root = array_shift(ast_root_list);
