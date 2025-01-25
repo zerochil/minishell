@@ -52,9 +52,9 @@ static int	read_buffer(int fd, t_string *stored)
 	return (bytes_read);
 }
 
+// TODO: rewrite get_next_line using the new string_op_segment functions
 char	*get_next_line(int fd)
 {
-	// TODO: rewrite get_next_line using the new string_op_segment functions
 	static t_string	stored[FOPEN_MAX];
 	int				bytes_read;
 	char			*newline;

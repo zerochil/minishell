@@ -14,7 +14,7 @@
 
 int	ft_isnumber(char *str)
 {
-	int is_number;
+	int	is_number;
 
 	is_number = 0;
 	while (ft_isspace(*str))

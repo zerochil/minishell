@@ -46,7 +46,6 @@ typedef struct s_scope_node
 	t_rm_node				*head;
 	struct s_scope_node		*next;
 }							t_scope_node;
-;
 
 typedef struct s_scope
 {
@@ -95,7 +94,8 @@ void						resource_transfer(void *resource_pointer,
 
 int							manager_is_in_scope(t_rm_node *manager);
 
-int							track_open(char *pathname, int flags, mode_t mode, char *error_message);
+int							track_open(char *pathname, int flags, mode_t mode,
+								char *error_message);
 
 void						free_strings(void *ptr);
 

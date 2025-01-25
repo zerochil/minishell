@@ -12,12 +12,15 @@
 
 #include "memory_management.h"
 
+// TODO: GUARD: what if we track the sam resource multiple times??
+// this can lead to multiple frees OR we when we call free_resoure
+// it should free all the instances of that
+
 void	resource_track(void *resource, void (*cleanup)(void *))
 {
 	t_rm_node	**manager_node;
 	t_rm_node	*new_resource;
 
-	// TODO: GUARD: what if we track the sam resource multiple times?? this can lead to multiple frees OR we when we call free_resoure it should free all the instances of that 
 	if (cleanup == NULL)
 		error("Failed to track resource, no cleanup function");
 	manager_node = managers_get_instance();
@@ -32,12 +35,12 @@ void	resource_track(void *resource, void (*cleanup)(void *))
 	rm_node_add_front(&(*manager_node)->manager.resources, new_resource);
 }
 
+// TODO: this could make use of the helper functions already defined
 void	resource_free(void *resource)
 {
-	t_rm_node   **manager_node;
+	t_rm_node	**manager_node;
 	t_rm_node	**indirect;
 	t_rm_node	*to_remove;
-	// TODO: this could make use of the helper functions already defined 
 
 	manager_node = managers_get_instance();
 	if (manager_node == NULL || *manager_node == NULL)

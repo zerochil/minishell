@@ -13,13 +13,12 @@
 #ifndef BASE_H
 # define BASE_H
 
+# include "../memory_management/memory_management.h"
+# include <limits.h>
+# include <stdbool.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
-# include <limits.h>
-# include <stdbool.h>
-
-# include "../memory_management/memory_management.h"
 
 typedef struct s_list
 {
@@ -72,7 +71,7 @@ char				*ft_strtrim(char const *s1, char const *set);
 char				*ft_strmapi(char const *s, char (*f)(unsigned int, char));
 char				*ft_strnstr(const char *haystack, const char *needle,
 						size_t len);
-char	*ft_strstr(const char *haystack, const char *needle);
+char				*ft_strstr(const char *haystack, const char *needle);
 char				**ft_split(char const *s, char c);
 size_t				ft_strlen(const char *s);
 size_t				ft_strnlen(const char *s, size_t maxlen);
@@ -98,8 +97,7 @@ int					starts_with(const char *str, const char *prefix);
 size_t				ft_strspn(const char *s, const char *accept);
 size_t				ft_strcspn(const char *s, const char *reject);
 
-size_t ft_strarr_len(char **arr);
-void	ft_strarr_del(char **arr, int index);
-
+size_t				ft_strarr_len(char **arr);
+void				ft_strarr_del(char **arr, int index);
 
 #endif

@@ -43,17 +43,16 @@ void	*array_remove(t_array *array, size_t index)
 	void	*item;
 
 	if (!array)
-		return (ft_putendl_fd("Error: array_remove: array is NULL", STDERR_FILENO), NULL);
+		return (ft_putendl_fd("Error: array_remove: array is NULL",
+				STDERR_FILENO), NULL);
 	if (array->size == 0)
 		return (NULL);
 	if (index >= array->size)
-		return (ft_putendl_fd("Error: array_remove: index too great", STDERR_FILENO), NULL);
+		return (ft_putendl_fd("Error: array_remove: index too great",
+				STDERR_FILENO), NULL);
 	item = array->data[index];
-	ft_memmove(
-		array->data + index,
-		array->data + index + 1,
-		(array->size - index - 1) * sizeof(void *)
-	);
+	ft_memmove(array->data + index, array->data + index + 1, (array->size
+			- index - 1) * sizeof(void *));
 	array->data[array->size - 1] = NULL;
 	array->size--;
 	return (item);
@@ -72,61 +71,8 @@ void	array_insert(t_array *array, size_t index, void *element)
 		return ;
 	}
 	array_ensure_capacity(array, array->size + 1);
-	ft_memmove(
-		array->data + index + 1,
-		array->data + index,
-		(array->size - index) * sizeof(void *)
-	);
+	ft_memmove(array->data + index + 1, array->data + index, (array->size
+			- index) * sizeof(void *));
 	array->data[index] = element;
 	array->size++;
-}
-
-
-void *array_replace(t_array *array, size_t index, void *element)
-{
-	void *old_element;
-
-	if (!array || index >= array->size)
-	{
-		ft_putendl_fd("Error: array_replace", 2);
-		return (NULL);
-	}
-	old_element = array->data[index];
-	array->data[index] = element;
-	return (old_element);
-}
-
-void	array_merge(t_array *dest, t_array *src)
-{
-	size_t  i;
-
-	if (!dest || !src)
-	{
-		ft_putendl_fd("Error: array_merge", 2);
-		return ;
-	}
-	i = 0;
-	while (i < src->size)
-	{
-		array_push(dest, src->data[i]);
-		i++;
-	}
-}
-
-void	array_expand_at(t_array *array, size_t index, t_array *subarray)
-{
-	ssize_t	i;
-
-	if (!array || !subarray)
-	{
-		report_error("array_expand_at: error");
-		return ;
-	}
-	array_remove(array, index);
-	i = subarray->size - 1;
-	while (i >= 0)
-	{
-		array_insert(array, index, subarray->data[i]);
-		i--;
-	}
 }

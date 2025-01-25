@@ -27,7 +27,7 @@ int	track_open(char *pathname, int flags, mode_t mode, char *error_message)
 
 	fd = open(pathname, flags, mode);
 	if (fd < 0)
-		error(error_message);
+		report_error(error_message);
 	resource_track((void *)(intptr_t)fd, track_close_fd);
 	return (fd);
 }

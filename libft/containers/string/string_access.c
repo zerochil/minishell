@@ -22,7 +22,8 @@ char	string_at(t_string *string, size_t index)
 	return (string->data[index]);
 }
 
-int	string_match(t_string *string, char *target, int (*cmp)(const char *, const char *, size_t), size_t start)
+int	string_match(t_string *string, char *target, int (*cmp)(const char *,
+			const char *, size_t), size_t start)
 {
 	if (string == NULL || start > string->size)
 	{

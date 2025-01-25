@@ -39,8 +39,8 @@ char	*ft_strstr(const char *haystack, const char *needle)
 	needle_length = ft_strlen(needle);
 	while (*haystack)
 	{
-		if (*haystack == *needle &&
-			!ft_strncmp(haystack, needle, needle_length))
+		if (*haystack == *needle && !ft_strncmp(haystack, needle,
+				needle_length))
 			return ((char *)haystack);
 		haystack++;
 	}

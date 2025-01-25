@@ -20,14 +20,11 @@ void	string_segment_remove(t_string *string, size_t start, size_t length)
 		return ;
 	}
 	if (length == 0)
-		return;
+		return ;
 	if (start + length > string->size)
 		length = string->size - start;
-	ft_memmove(
-		string->data + start,
-		string->data + start + length,
-		string->size - (start + length)
-		);
+	ft_memmove(string->data + start, string->data + start + length, string->size
+		- (start + length));
 	string->size -= length;
 	string->data[string->size] = '\0';
 }
@@ -53,7 +50,7 @@ void	string_segment_replace(t_string *string, size_t start, size_t length,
 		const char *new_text)
 {
 	if (length == 0)
-		return;
+		return ;
 	string_segment_remove(string, start, length);
 	string_insert(string, new_text, start);
 }

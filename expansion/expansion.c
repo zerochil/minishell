@@ -72,8 +72,7 @@ void	expansion(t_array *tokens)
 		flag = ALL_EXPANSIONS;
 		if (token->type == lexem_get_type("HERE_DOCUMENT"))
 			flag = NO_EXPANSIONS;
-		else if (token->type == lexem_get_type("WORD")
-			&& is_export && is_assingment_word(token))
+		else if (token->type == lexem_get_type("WORD") && is_export && is_assingment_word(token))
 			flag = PARAMETER_EXPANSION | QUOTE_REMOVAL;
 		expand_token(token, flag);
 		i++;

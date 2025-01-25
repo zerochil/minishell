@@ -33,5 +33,5 @@ int	ft_numberlen(char *str)
 		str++;
 	if (str[len] != '\0')
 		return (-1);
-	return len;
+	return (len);
 }

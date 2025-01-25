@@ -26,13 +26,15 @@ void	*array_peek_last(t_array *array)
 	return (array->data[array->size - 1]);
 }
 
-void *array_get(t_array *array, size_t index)
+void	*array_get(t_array *array, size_t index)
 {
 	if (array == NULL)
-		return (ft_putendl_fd("Error: array_get: array is NULL", STDERR_FILENO), NULL);
+		return (ft_putendl_fd("Error: array_get: array is NULL", STDERR_FILENO),
+			NULL);
 	if (array->size == 0)
 		return (NULL);
 	if (index >= array->size)
-		return (ft_putendl_fd("Error: array_get: Size too great", STDERR_FILENO), NULL);
+		return (ft_putendl_fd("Error: array_get: Size too great",
+				STDERR_FILENO), NULL);
 	return (array->data[index]);
 }

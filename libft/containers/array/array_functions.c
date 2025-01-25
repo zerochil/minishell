@@ -49,6 +49,7 @@ void	array_ensure_capacity(t_array *array, size_t needed_capacity)
 	new_cap = array->capacity;
 	while (new_cap < needed_capacity)
 		new_cap *= 2;
-	array->data = container_grow(array->data, array->capacity, new_cap, sizeof(void *));
+	array->data = container_grow(array->data, array->capacity, new_cap,
+			sizeof(void *));
 	array->capacity = new_cap;
 }

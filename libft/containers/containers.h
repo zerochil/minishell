@@ -13,9 +13,10 @@
 #ifndef CONTAINERS_H
 # define CONTAINERS_H
 
-#include "string/string.h"
-#include "array/array.h"
+# include "string/string.h"
+# include "array/array.h"
 
-// TODO: add negative peek like arr[-1] or str[-1]; do something liek string_peek(-1) or array_peek(-1)
+// TODO: add negative peek like arr[-1] or str[-1];
+// do something liek string_peek(-1) or array_peek(-1)
 
 #endif
