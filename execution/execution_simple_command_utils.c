@@ -74,7 +74,7 @@ char	*get_command_path(char *command_name)
 	if (ft_strchr(command_name, '/') != NULL)
 		return (command_name);
 	path_env = env_get("PATH");
-	if (path_env == NULL)
+	if (path_env == NULL || *path_env == '\0')
 		return (command_name);
 	path_list = ft_split(path_env, ':');
 	resource_track(path_list, free_strings);
