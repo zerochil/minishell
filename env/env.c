@@ -39,7 +39,7 @@ bool	env_set(char *var)
 	if (key == NULL)
 		return (manager_scope_end(), false);
 	if (ft_strchr(var, '=') == NULL && env_get(key) && get_value(var) == NULL)
-		return (manager_scope_end(), true);
+		return (manager_scope_end(), free(key), true);
 	if (ft_strchr(var, '=') && ft_strchr(var, '=')[-1] == '+')
 		new_var = env_set_append(var, key);
 	else
