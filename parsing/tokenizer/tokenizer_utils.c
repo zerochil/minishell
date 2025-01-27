@@ -20,17 +20,15 @@ int	is_quoted(t_string *input)
 	in_quote = '\0';
 	while (1)
 	{
-		c = string_peek_advance(input);
+		c = string_peek(input);
 		if (c == '\0')
 			break ;
-		if (in_quote != '\'' && c == '\\')
-			string_peek_advance(input);
-		else if (in_quote == '\0' && (c == '"' || c == '\''))
-			in_quote = c;
 		else if (in_quote == c)
 			in_quote = '\0';
+		else if (in_quote == '\0' && (c == '\'' || c == '"'))
+			in_quote = c;
+		string_peek_advance(input);
 	}
-	string_peek_reset(input);
 	return (in_quote == '\0');
 }
 
