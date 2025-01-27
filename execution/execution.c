@@ -72,12 +72,19 @@ int	execute_command(t_ast_node *node)
 	return (-1);
 }
 
+void sigint_handler(void)
+{
+	destroy_context();
+	exit(EXIT_STATUS_SIGINT);
+}
+
 int	execute_subshell(t_ast_node *node)
 {
 	int			status;
 	size_t		index;
 	t_stream	stream;
 
+	signal(SIGINT, handle_child_sigint);
 	stream = (t_stream){.read = STDIN_FILENO, .write = STDOUT_FILENO};
 	if (open_redirection_files(node->redirect_list, &stream) == -1)
 		return (-1);

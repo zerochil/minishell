@@ -24,7 +24,7 @@
 void	setup_signals(void);
 void	setup_here_doc_signals(void);
 void	handle_signal(int signo);
-void	handle_here_doc_signal(int signo);
 void	setup_child_signals(void);
+void	handle_child_sigint(int signo);
 
 #endif

@@ -66,7 +66,6 @@ bool	here_document_child_process(char *filename, t_string *here_doc,
 	else if (pid == 0)
 	{
 		setup_here_doc_signals();
-		signal(SIGINT, handle_here_doc_signal);
 		start_here_doc_prompt(here_doc, delimiter->value->data);
 		create_here_doc_temp_file(filename, here_doc, should_expand);
 		clean_exit(0);

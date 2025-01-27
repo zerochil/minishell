@@ -43,13 +43,14 @@ void	setup_here_doc_signals(void)
 			signal(signo, SIG_IGN);
 		signo++;
 	}
+	signal(SIGINT, handle_child_sigint);
 }
 
-void	handle_here_doc_signal(int signo)
+void	handle_child_sigint(int signo)
 {
 	(void)signo;
 	destroy_context();
-	exit(130);
+	exit(EXIT_STATUS_SIGINT);
 }
 
 void	handle_signal(int signo)
