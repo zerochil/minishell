@@ -41,13 +41,10 @@ int	wait_for_pipeline(t_pipeline_state *state)
 	}
 	if (pid == -1 && errno == EINTR)
 		return (EXIT_STATUS_SIGINT);
-	if (WIFSIGNALED(last_status))
-	{
-		sig = WTERMSIG(last_status);
-		if (sig == SIGQUIT)
-			return (ft_putendl_fd(DUMP_MSG, 2), EXIT_STATUS_SIGQUIT);
-		else if (sig == SIGINT)
-			return (EXIT_STATUS_SIGINT);
-	}
-	return (WEXITSTATUS(last_status));
+	if (WIFEXITED(last_status))
+		return (WEXITSTATUS(last_status));
+	sig = WTERMSIG(last_status);
+	if (sig == SIGQUIT)
+		ft_putendl_fd(DUMP_MSG, STDERR_FILENO);
+	return (128 + sig);
 }
