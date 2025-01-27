@@ -72,7 +72,7 @@ int	execute_command(t_ast_node *node)
 	return (-1);
 }
 
-void sigint_handler(void)
+void	sigint_handler(void)
 {
 	destroy_context();
 	exit(EXIT_STATUS_SIGINT);
