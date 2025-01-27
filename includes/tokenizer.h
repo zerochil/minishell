@@ -18,8 +18,11 @@
 # include <lexer.h>
 # include <libft.h>
 # include <token.h>
+# include <context.h>
 
 # define WHITE_SPACE " \t"
+# define TOKENIZER_ERROR_MSG "tokenizer: unbalanced quotes!"
+# define TOKENIZER_ERROR_EXIT_STATUS 2
 
 t_array	*tokenize(t_string *input);
 t_token	*token_init(int type, char *value);
