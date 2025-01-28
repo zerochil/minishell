@@ -22,7 +22,7 @@ int	builtin_exit(char **args, int out_fd)
 		ft_putendl_fd("exit: too many arguments", STDERR_FILENO);
 		return (BUILTIN_EXIT_ERROR);
 	}
-	exit_status = BUILTIN_EXIT_SUCCESS;
+	exit_status = atoi(ctx_exit_status(CTX_GET, CTX_NO_VALUE));
 	if (args[1])
 	{
 		if (ft_isnumber(args[1]) == 0 || ft_numberlen(args[1]) >= 20)
