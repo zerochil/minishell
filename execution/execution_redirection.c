@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/24 20:10:44 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/28 09:16:13 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ int	open_redirection_files(t_array *redirection_list, t_stream *stream)
 
 int	open_file(char *filename, int flags, int *fd)
 {
-	int new_fd;
+	int	new_fd;
 
 	new_fd = open(filename, flags, 0644);
 	if (new_fd == -1)

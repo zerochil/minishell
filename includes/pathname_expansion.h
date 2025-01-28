@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 12:51:06 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 14:06:06 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/28 09:15:11 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ enum	e_dentry_type
 
 char	*pattern_extract_dir_path(t_field *pattern);
 bool	pattern_matches(char *pattern_start, char *mask, char *str);
+int		field_compare_strings(void *a_ptr, void *b_ptr);
 
 bool	is_matching_pattern(t_field *pattern, char *str);
 void	recover_full_path(t_array *list, char *dir_path);

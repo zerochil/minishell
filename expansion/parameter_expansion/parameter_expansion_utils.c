@@ -6,11 +6,31 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 11:18:37 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 11:52:29 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/28 09:15:50 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "parameter_expansion.h"
+
+int	field_compare_strings(void *a_ptr, void *b_ptr)
+{
+	t_field	*a;
+	t_field	*b;
+	char	*str1;
+	char	*str2;
+	int		result;
+
+	if (!a_ptr || !b_ptr)
+		return (0);
+	a = a_ptr;
+	b = b_ptr;
+	str1 = ft_strlower(ft_strdup(a->value->data));
+	str2 = ft_strlower(ft_strdup(b->value->data));
+	result = ft_strcmp(str1, str2);
+	free(str1);
+	free(str2);
+	return (result);
+}
 
 static bool	is_valid_parameter_name_char(char c)
 {

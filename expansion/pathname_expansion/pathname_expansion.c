@@ -6,7 +6,7 @@
 /*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 12:41:58 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 14:19:47 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/28 09:12:16 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,5 +91,6 @@ t_array	*pathname_expansion_field(t_field *field)
 	filenames = list_files(field_copy(field));
 	if (filenames == NULL)
 		return (NULL);
+	array_sort(filenames, field_compare_strings);
 	return (filenames);
 }

@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 08:59:51 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/09 10:06:37 by inajah           ###   ########.fr       */
+/*   Updated: 2025/01/28 09:13:52 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ int					ft_strcmp(const char *s1, const char *s2);
 int					ft_toupper(int c);
 int					ft_tolower(int c);
 
+char				*ft_strlower(char *str);
 char				*ft_strchr(const char *s, int c);
 char				*ft_strrchr(const char *s, int c);
 char				*ft_strdup(const char *s1);
