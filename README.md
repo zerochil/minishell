@@ -176,7 +176,7 @@ This project isn’t just about making a functional shell—it’s about buildin
 6. **Signal handling**.
 7. **Error management.**
 
-## 1. Understanding Shell grammar
+## 1. Understanding shell grammar
 
 Source: **IEEE Std 1003.1**, [opengroup.org - Shell Command Language](https://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html)
 
@@ -187,10 +187,8 @@ Just like how LEGO instructions guide you in building something sturdy, grammar 
 A well-designed parser doesn’t just hardcode specific mistakes; instead, it understands the deeper rules of how commands should be formed. This way, it can detect errors naturally, rather than relying on checking for every possible mistake separately.
 
 Understanding grammar is essential for building the parser. Here is a simplified version of Shell grammar that aligns with the Minishell project requirements:
-
 ``` 
-complete_command ; linebreak command_list linebreak
-                 ;
+complete_command : linebreak command_list linebreak
 command_list     : compound_command linebreak command_list
 			    | compound_command
                  ;
@@ -225,44 +223,35 @@ Here’s a step-by-step breakdown of the above mentioned grammar, starting from 
 
 1. **complete_command**:  
    - This represents a full shell command.  
-   - It consists of a **command_list** surrounded by optional **linebreaks** (which handle newlines and formatting).  
-   - The second rule (`;`) allows for an empty command, meaning the shell can handle blank lines without errors.  
-
+   - It consists of a **command_list** surrounded by optional **linebreaks** (which handle newlines and formatting). 
 2. **command_list**:  
    - A list of commands that need to be executed.  
    - It consists of at least one **compound_command**, followed by an optional additional **command_list** (allowing for multiple commands to be chained together).  
-
 3. **compound_command**:  
    - This handles command execution logic, particularly logical operators:  
      - `&&`: Execute the next command only if the previous one succeeds.  
      - `||`: Execute the next command only if the previous one fails.  
    - A command can be a **pipeline** (explained next), optionally followed by `&&` or `||`, allowing for conditional execution chains.  
-
 4. **pipeline**:  
    - Defines how commands are linked using pipes (`|`).  
    - A **command** can be followed by `|` to pass its output to the next command in the pipeline.  
    - If no pipe is present, it’s just a single command.  
-
 5. **command**:  
    - A **command** can either be:  
      - A **subshell** (a group of commands inside parentheses that execute in a separate environment).  
      - A **simple_command** (a basic shell command with optional arguments or redirections).  
-
 6. **subshell**:  
    - A command group enclosed in parentheses `()`.  
    - This allows commands to be executed in a separate process.  
    - A **redirect_list** may optionally follow, meaning input/output redirection applies to the entire subshell.  
-
 7. **simple_command**:  
    - The most basic command structure.  
    - It consists of:  
      - An optional **io_redirect** (handling input/output redirection).  
      - One or more **WORD** tokens (representing the command name and arguments).  
-
 8. **redirect_list**:  
    - A sequence of **io_redirect** rules.  
    - Allows multiple redirections to be attached to a command (e.g., `command > file 2>&1`).  
-
 9. **io_redirect**:  
    - Specifies how input and output are handled.  
    - Examples:  
@@ -270,17 +259,87 @@ Here’s a step-by-step breakdown of the above mentioned grammar, starting from 
      - `> file` (write output to a file, overwriting).  
      - `>> file` (append output to a file).  
      - `<< WORD` (here-document, where input is provided inline).  
-
 10. **linebreak**:  
     - Handles newlines (`NEWLINE*`).  
     - Ensures that multiple blank lines don’t break the parsing process.  
-
 11. **WORD**:  
     - The most fundamental unit.  
     - Represents command names, arguments, filenames, or here-document delimiters.  
 
 ### **Why This Structure Matters**  
-
 - This grammar is **hierarchical**, meaning larger structures are built from smaller components.  
 - The use of recursion (e.g., `command_list → compound_command → pipeline → command`) allows the parser to handle complex commands without manually listing all edge cases.  
 - Instead of hardcoding syntax checks, this structured approach naturally enforces correct shell command syntax while allowing flexibility.
+
+## 2. Parsing user input and building the AST
+
+When a shell processes a command, it follows a structured process: first, it **breaks the input into lexemes**, then **converts them into tokens**, and finally **builds an Abstract Syntax Tree (AST)** to understand the command's structure. Let’s go step by step through these concepts.
+
+### **1. What is a Lexeme?**  
+A **lexeme** is the smallest unit of meaning in a command. It is a sequence of characters grouped together based on **syntactic rules**. Lexemes are not yet classified but are simply raw fragments of input.
+
+For example, in a shell command like:  
+```
+ls -l | grep txt > output.txt
+```
+The raw lexemes would be:  
+```
+"ls", "-l", "|", "grep", "txt", ">", "output.txt"
+```
+At this stage, they are just character sequences that need classification.
+
+---
+
+### **2. What is a Tokenizer?**  
+A **tokenizer (or lexer)** processes lexemes and classifies them into **tokens**. A **token** is a structured representation of a lexeme, attaching meaning to it.  
+
+For instance, after tokenization, we might classify lexemes as:  
+- `"ls"` → **WORD** (a command)  
+- `"-l"` → **WORD** (an argument)  
+- `"|"` → **PIPE** (an operator)  
+- `"grep"` → **WORD**  
+- `"txt"` → **WORD**  
+- `">"` → **REDIRECTION**
+- `"output.txt"` → **WORD (redirection target)**  
+
+The tokenizer ensures that the shell **understands what each piece of input represents**, so the parser can process it logically.
+
+---
+
+### **3. What is an Abstract Syntax Tree (AST)?**  
+An **Abstract Syntax Tree (AST)** is a structured tree representation of the command’s meaning. Each node represents an **operation or a component**, while the edges define **the relationships** between them.  
+
+The AST is crucial because:  
+- It establishes the correct **execution order** of commands.  
+- It **groups related components** logically (e.g., separating redirections from pipelines).  
+- It **avoids ambiguity** by following strict grammar rules.
+
+In building our AST, we took an **N-ary tree approach** rather than a binary one, allowing greater flexibility in representing complex shell commands. Instead of structuring the tree as a series of binary operations (where each operator has only two children), our AST nodes can have multiple children depending on their type. For example, a **pipeline node** doesn’t just link two commands at a time but holds a **list of command nodes** as children. This makes parsing more intuitive and execution more efficient. For instance, the command:  
+
+```bash
+ls | cat -e | wc -l
+```
+would be represented as a **pipeline node** with a **list of three command nodes**: `[ls, cat -e, wc -l]`. This structure ensures that parsing and execution remain **consistent and scalable**, as it allows us to naturally extend the tree for multiple piped commands, logical operators, and redirections without unnecessary nesting or complex tree traversal logic.
+
+another complex example:
+
+```bash
+(head -n1 && head -n2 | cat -e || ls) < infile | cat -n && echo hello > outfile
+```
+
+![AST example](images/complex_example.png)
+
+The given AST follows the structured grammar we discussed earlier, allowing us to parse and execute the command correctly. It starts with the entry point **complete_command**, which leads to a **command_list** and then a **compound_command**. This **compound_command** contains two **Pipelines** separated by an AND operator.
+
+The first **Pipeline** contains a single **command node**, which is a **subshell** `( ... )`. This subshell groups multiple commands together while applying an **input redirection (`< infile`)** to the entire group. Inside the **subshell**, we see recursion as the grammar returns to the **command_list** step to further break down the commands inside the parentheses. The **command_list** inside the subshell consists of a **compound_command** containing two **Pipelines** separated by an **AND operator (`&&`)**.
+
+The first **Pipeline** inside the subshell contains a single **simple command node** representing `head -n1`, which is a leaf node since it consists only of an argument list. The **AND operator (`&&`)** ensures that if `head -n1` succeeds, the second **Pipeline** executes. This second **Pipeline** consists of two **command nodes**:
+
+- The first **command node** is another **simple command** representing `head -n2`.
+- The second **command node** is `cat -e`, which receives input through the **Pipeline operator (`|`)**.
+
+Following the **AND and OR logic**, if the second **Pipeline** fails, the **OR node (`||`)** ensures that `ls` executes as an alternative command.
+
+Once the **subshell** is fully parsed, the AST moves back to the main **Pipeline**, where the output of the subshell is passed into `cat -n` via the **Pipeline operator (`|`)**. Finally, we encounter another **AND node (`&&`)**, which ensures that if `cat -n` succeeds, the last **Pipeline** executes. This last **Pipeline** contains a **simple command node** representing `echo hello`. This **simple command** is a leaf node since it contains only an argument list and an **output redirection (`> outfile`)**, ensuring that its output is written to a file.
+
+By following the structured grammar, the AST naturally enforces correct execution order, ensuring each command and operator is processed according to shell semantics.
