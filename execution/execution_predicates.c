@@ -28,13 +28,15 @@ bool	is_binary_and(void *node_ptr)
 	return (node->type == AST_BINARY_AND);
 }
 
-bool	is_same_tty(char *filename)
+bool	is_same_tty(char *filename, int fd)
 {
 	struct stat	tty_stat;
 	struct stat	file_stat;
 
-	if (fstat(STDIN_FILENO, &tty_stat) == -1)
-		return (report_error("minishell: fstat failed"), false);
+	if (fstat(fd, &tty_stat) == -1)
+		return (false);
+	if (lstat(filename, &file_stat) == -1 || S_ISLNK(file_stat.st_mode) == false)
+		return (false);
 	if (stat(filename, &file_stat) == -1)
 		return (false);
 	return (file_stat.st_dev == tty_stat.st_dev
