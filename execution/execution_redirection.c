@@ -31,8 +31,10 @@ static int	handle_truncate(t_token *token, t_stream *stream, t_field *field)
 
 static int	handle_redirect_in(t_token *token, t_stream *stream, t_field *field)
 {
-	int	fd;
+	int fd;
 
+	if (is_same_tty(field->value->data))
+		return (true);
 	if (token->type == lexem_get_type("HERE_DOCUMENT"))
 	{
 		fd = open_file(field->value->data, O_RDONLY, &stream->read);
@@ -69,21 +71,13 @@ int	open_redirection_files(t_array *redirection_list, t_stream *stream)
 
 int	open_file(char *filename, int flags, int *fd)
 {
-	int	new_fd;
-
-	new_fd = open(filename, flags, 0644);
-	if (new_fd == -1)
+	if (*fd != -1 && *fd != STDIN_FILENO && *fd != STDOUT_FILENO)
+		close(*fd);
+	*fd = open(filename, flags, 0644);
+	if (*fd == -1)
 	{
 		display_error(SHELL_NAME, filename, strerror(errno));
 		return (-1);
 	}
-	if (isatty(new_fd))
-	{
-		close(new_fd);
-		return (0);
-	}
-	if (*fd != -1 && *fd != STDIN_FILENO && *fd != STDOUT_FILENO)
-		close(*fd);
-	*fd = new_fd;
 	return (0);
 }

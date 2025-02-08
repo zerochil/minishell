@@ -54,4 +54,6 @@ int				open_file(char *filename, int flags, int *fd);
 bool			is_binary_or(void *node);
 bool			is_binary_and(void *node);
 
+bool			is_same_tty(char *filename);
+
 #endif
