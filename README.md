@@ -341,7 +341,7 @@ another complex example:
 (head -n1 && head -n2 | cat -e || ls) < infile | cat -n && echo hello > outfile
 ```
 
-![AST example](C:\Users\Nasus\Desktop\assets\complex_example.png)
+![AST example](images/complex_example.png)
 
 The given AST follows the structured grammar we discussed earlier, allowing us to parse and execute the command correctly. It starts with the entry point **complete_command**, which leads to a **command_list** and then a **compound_command**. This **compound_command** contains two **Pipelines** separated by an AND operator.
 
