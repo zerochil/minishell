@@ -164,7 +164,7 @@ As a developer working on Minishell, you are expected to:
   - `exit` with no options
 - Bonus part:
   - `&&` and `||` with parenthesis for priorities.
-  -   Wildcard `*` should work for the current working directory
+  - Wildcard `*` should work for the current working directory
 
 This project isn’t just about making a functional shell—it’s about building one that is well-structured, efficient, and easy to maintain. Knowing the goals from the start helps in designing a solid foundation before coding. In this blog, we’ll walk through the steps we took to complete the project, including the bonus part. Here are the steps:
 
@@ -187,6 +187,7 @@ Just like how LEGO instructions guide you in building something sturdy, grammar 
 A well-designed parser doesn’t just hardcode specific mistakes; instead, it understands the deeper rules of how commands should be formed. This way, it can detect errors naturally, rather than relying on checking for every possible mistake separately.
 
 Understanding grammar is essential for building the parser. Here is a simplified version of Shell grammar that aligns with the Minishell project requirements:
+
 ``` 
 complete_command : linebreak command_list linebreak
 command_list     : compound_command linebreak command_list
@@ -267,6 +268,7 @@ Here’s a step-by-step breakdown of the above mentioned grammar, starting from 
     - Represents command names, arguments, filenames, or here-document delimiters.  
 
 ### **Why This Structure Matters**  
+
 - This grammar is **hierarchical**, meaning larger structures are built from smaller components.  
 - The use of recursion (e.g., `command_list → compound_command → pipeline → command`) allows the parser to handle complex commands without manually listing all edge cases.  
 - Instead of hardcoding syntax checks, this structured approach naturally enforces correct shell command syntax while allowing flexibility.
@@ -275,25 +277,34 @@ Here’s a step-by-step breakdown of the above mentioned grammar, starting from 
 
 When a shell processes a command, it follows a structured process: first, it **breaks the input into lexemes**, then **converts them into tokens**, and finally **builds an Abstract Syntax Tree (AST)** to understand the command's structure. Let’s go step by step through these concepts.
 
+---
+
 ### **1. What is a Lexeme?**  
+
 A **lexeme** is the smallest unit of meaning in a command. It is a sequence of characters grouped together based on **syntactic rules**. Lexemes are not yet classified but are simply raw fragments of input.
 
 For example, in a shell command like:  
+
 ```
 ls -l | grep txt > output.txt
 ```
+
 The raw lexemes would be:  
+
 ```
 "ls", "-l", "|", "grep", "txt", ">", "output.txt"
 ```
+
 At this stage, they are just character sequences that need classification.
 
 ---
 
 ### **2. What is a Tokenizer?**  
+
 A **tokenizer (or lexer)** processes lexemes and classifies them into **tokens**. A **token** is a structured representation of a lexeme, attaching meaning to it.  
 
 For instance, after tokenization, we might classify lexemes as:  
+
 - `"ls"` → **WORD** (a command)  
 - `"-l"` → **WORD** (an argument)  
 - `"|"` → **PIPE** (an operator)  
@@ -307,9 +318,11 @@ The tokenizer ensures that the shell **understands what each piece of input repr
 ---
 
 ### **3. What is an Abstract Syntax Tree (AST)?**  
+
 An **Abstract Syntax Tree (AST)** is a structured tree representation of the command’s meaning. Each node represents an **operation or a component**, while the edges define **the relationships** between them.  
 
 The AST is crucial because:  
+
 - It establishes the correct **execution order** of commands.  
 - It **groups related components** logically (e.g., separating redirections from pipelines).  
 - It **avoids ambiguity** by following strict grammar rules.
@@ -319,6 +332,7 @@ In building our AST, we took an **N-ary tree approach** rather than a binary one
 ```bash
 ls | cat -e | wc -l
 ```
+
 would be represented as a **pipeline node** with a **list of three command nodes**: `[ls, cat -e, wc -l]`. This structure ensures that parsing and execution remain **consistent and scalable**, as it allows us to naturally extend the tree for multiple piped commands, logical operators, and redirections without unnecessary nesting or complex tree traversal logic.
 
 another complex example:
@@ -327,7 +341,7 @@ another complex example:
 (head -n1 && head -n2 | cat -e || ls) < infile | cat -n && echo hello > outfile
 ```
 
-![AST example](images/complex_example.png)
+![AST example](C:\Users\Nasus\Desktop\assets\complex_example.png)
 
 The given AST follows the structured grammar we discussed earlier, allowing us to parse and execute the command correctly. It starts with the entry point **complete_command**, which leads to a **command_list** and then a **compound_command**. This **compound_command** contains two **Pipelines** separated by an AND operator.
 
@@ -343,3 +357,148 @@ Following the **AND and OR logic**, if the second **Pipeline** fails, the **OR n
 Once the **subshell** is fully parsed, the AST moves back to the main **Pipeline**, where the output of the subshell is passed into `cat -n` via the **Pipeline operator (`|`)**. Finally, we encounter another **AND node (`&&`)**, which ensures that if `cat -n` succeeds, the last **Pipeline** executes. This last **Pipeline** contains a **simple command node** representing `echo hello`. This **simple command** is a leaf node since it contains only an argument list and an **output redirection (`> outfile`)**, ensuring that its output is written to a file.
 
 By following the structured grammar, the AST naturally enforces correct execution order, ensuring each command and operator is processed according to shell semantics.
+
+## 3. Execution: AST traversal and redirections handling
+
+### **Executing the Parsed AST: Key Concepts**  
+
+Once the shell command is parsed into an **Abstract Syntax Tree (AST)**, the next step is execution. This involves **traversing the AST**, handling operators (`&&`, `||`, `|`), managing processes, and ensuring correct data flow between commands. Below are the fundamental system calls and concepts required to execute a shell command properly.  
+
+---
+
+### **1. Traversing the AST for Execution**  
+
+- Execution starts from the root node (`complete_command`) and follows the grammar structure.  
+- **Logical operators (`&&`, `||`)** determine whether the next command executes based on exit status.  
+- **Pipelines (`|`)** ensure that the output of one command becomes the input of the next.  
+
+---
+
+### **2. Key System Calls for Execution**  
+
+#### **Process Creation (`fork`)**  
+
+- The shell **creates a child process** using `fork()`.  
+- The **child process** executes the command, while the **parent waits** for it to finish.  
+- If the command is part of a pipeline, multiple child processes are created and connected via pipes.  
+
+#### **Executing Commands (`execve`)**  
+
+- The child process replaces itself with the target program using `execve()`.  
+- `execve()` loads and runs the command (e.g., `/bin/ls`), replacing the child’s memory with the new program.  
+
+#### **Waiting for Child Processes (`wait`, `waitpid`)**  
+
+- The parent process waits for a child process to **finish executing** using `wait()` or `waitpid()`.  
+- Using `wait()` or `waitpid()` we can get the **exit status** of the child process, which determines whether subsequent commands (like in `&&` or `||`) will execute.  
+- The **exit status** is stored in an integer and extracted using `WEXITSTATUS(status)`, which gives the return code of the command (0 for success, non-zero for failure).
+
+#### **Exit Status & Logical Operators**  
+
+- **`&&` (AND):** The next command runs **only if** the previous command’s exit status is `0` (success).  
+- **`||` (OR):** The next command runs **only if** the previous command’s exit status is **non-zero** (failure).  
+
+---
+
+### **3. Handling Pipelines (`|`)**  
+
+- `pipe()` creates a unidirectional **data channel** between two processes.  
+- Before calling `execve()`, `dup2()` is used to **redirect stdout** of one process into the **stdin** of the next. 
+- The **exit status of a pipeline** is always the **exit status of the last command** in the pipeline.  
+
+Example:  
+
+```bash
+ls | grep txt | wc -l
+```
+
+- `ls` outputs to `grep`, `grep` outputs to `wc -l`.  
+- The shell only considers the **exit status of `wc -l`** for logical operators (`&&`, `||`).  
+
+---
+
+### **4. Handling Redirections (`<`, `>`, `>>`)**  
+
+- In a shell, redirections are processed from **left to right**, modifying the standard input (stdin) or standard output (stdout) of a command before execution. Input redirections (**<**, **<<**) affect stdin, meaning the command reads from the specified file or heredoc instead of the terminal. Output redirections (**>**, **>>**) affect stdout, sending command output to a file rather than displaying it. If multiple redirections appear in a command, they are applied sequentially in order. For example
+
+  ```bash
+  cat < infile > outfile
+  ```
+
+  infile is set as stdin, then stdout is redirected to outfile. However, in 
+
+  ```bash
+  cat > outfile < infile
+  ```
+
+  stdout is redirected first, followed by stdin. Understanding this left-to-right evaluation ensures correct command execution without unintended behavior.
+
+  ### **Complex Redirection Example**  
+
+  Let's construct a **more advanced** command that includes:  
+
+  - **Multiple input redirections** (`<`, `<<`)  
+  - **Multiple output redirections** (`>`, `>>`)  
+  - **Usage of `/dev/stdin` and `/dev/stdout`**  
+
+  #### **Example Command:**  
+
+  ```bash
+  command < input1 <<EOF1 < /dev/stdin >> output1 > output2 >> /dev/stdout <<EOF2
+  some text for heredoc 1
+  EOF1
+  some text for heredoc 2
+  EOF2
+  ```
+
+  ### **Step-by-Step Redirection Processing (Left to Right)**  
+
+  1. **`< input1`** → Redirects **stdin** to read from `input1`.  
+  2. **`<<EOF1`** → Starts a **heredoc**, overriding `stdin`, feeding multi-line input from `EOF1`.  
+  3. **`< /dev/stdin`** → Overrides previous input redirections, but since `/dev/stdin` represents the current standard input (which was already changed), **Bash ignores this** (it doesn't change anything).  
+  4. **`>> output1`** → Redirects **stdout**, appending output to `output1`.  
+  5. **`> output2`** → Redirects **stdout** again, but this time **overwrites `output1`**, since `>` truncates the file.  
+  6. **`>> /dev/stdout`** → Redirects output to `/dev/stdout`, but since this is already the standard output, **Bash skips this redirection** as it is redundant.  
+  7. **`<<EOF2`** → Another **heredoc**, overriding `stdin` again with multi-line input from `EOF2`.  
+
+  ---
+
+  ### **Final Effect:**  
+
+  - **`stdin` is ultimately set to `EOF2`'s heredoc**, because heredocs override previous input redirections.  
+  - **`stdout` is ultimately redirected to `output2`**, because `>` (truncation) overwrites any previous `>> output1` redirection.  
+  - **Redirections to `/dev/stdin` and `/dev/stdout` are ignored by Bash**, as they do not actually change anything.  
+
+  This example demonstrates **how redirections are applied sequentially**, and how Bash **optimizes** cases where redirections are redundant (e.g., `/dev/stdin` and `/dev/stdout`).
+
+  **Note:**
+
+  ​	Here-document redirection (**<<** delimiter) is processed immediately when encountered, before command execution. This behavior is demonstrated in the following example, where a syntax error occurs.
+
+  ``` bash
+  cat << EOF ()&&
+  ```
+
+  ```bash
+  inajah:~$ cat << EOF () &&
+  > this is the here-doc running
+  > but the command has a syntax error
+  > EOF
+  -bash: syntax error near unexpected token `('
+  ```
+
+---
+
+### **5. Subshell Execution**  
+
+- When encountering a **subshell (`command_list`)**, the shell **forks a new child process**.  
+- The **subshell executes independently**, and its **exit status** determines subsequent command execution. 
+
+## 4. Environment Variable and Wildcard expansions: 
+
+According to **IEEE Std 1003.1**, [opengroup.org - Shell Command Language](https://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html), expansion happens in four steps:
+
+- Parameter expansion
+- Field splitting
+- Pathname expansion
+- Quote removal
