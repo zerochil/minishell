@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/24 20:44:47 by inajah           ###   ########.fr       */
+/*   Updated: 2025/02/10 09:53:36 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <context.h>
 # include <execution_pipeline.h>
 # include <expansion.h>
+# include <env.h>
 # include <stream.h>
 # include <sys/stat.h>
 # include <utils.h>

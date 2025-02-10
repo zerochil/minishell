@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/20 15:35:53 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 04:41:38 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/02/10 09:52:26 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ char	*get_command_path(char *command_name)
 	{
 		path = path_list[i];
 		command_path = build_command_path(path, command_name);
-		if (access(command_path, F_OK) == 0)
+		if (access(command_path, F_OK) == 0 && !is_directory(command_path))
 			return (command_path);
 		i++;
 	}
