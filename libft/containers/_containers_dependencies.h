@@ -16,7 +16,7 @@
 # include "../base/base.h"
 # include "../memory_management/memory_management.h"
 
-# define INITIAL_CAPACITY 1
+# define INITIAL_CAPACITY 16
 
 void		*container_grow(void *old_data, size_t old_cap, size_t new_cap,
 				size_t elem_size);
