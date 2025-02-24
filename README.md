@@ -190,23 +190,24 @@ Understanding grammar is essential for building the parser. Here is a simplified
 
 ``` 
 complete_command : linebreak command_list linebreak
+                 ;
 command_list     : compound_command linebreak command_list
-			    | compound_command
+                 | compound_command
                  ;
 compound_command : pipeline '&&' linebreak compound_command
                  | pipeline '||' linebreak compound_command
-			    | pipeline
+                 | pipeline
                  ;
 pipeline         : command '|' linebreak pipeline
                  | command
                  ;
 command          : subshell
-			    | simple_command
+                 | simple_command
                  ;
 subshell         : '(' command_list ')' redirect_list*
                  ;
 simple_command   : io_redirect simple_command
-			    | io_redirect
+                 | io_redirect
                  | WORD        simple_command
                  | WORD
                  ;
@@ -215,8 +216,8 @@ redirect_list    : io_redirect redirect_list*
 io_redirect      : '<'     WORD(filename) 
                  | '>'     WORD(filename)
                  | '>>'    WORD(filename)
-                 | '<<'    WORD 		
-			    ;
+                 | '<<'    WORD
+                 ;
 linebreak        : NEWLINE* linebreak*
 ```
 
@@ -516,3 +517,83 @@ According to **IEEE Std 1003.1**, [opengroup.org - Shell Command Language](https
 - Field splitting
 - Pathname expansion
 - Quote removal
+
+To better explain these steps, let's use a straightforward example and analyze each step as it is applied:
+
+```sh
+export var='aa            "bb"             cc'
+echo "this" is '$var' val""ue $var
+```
+
+### Step-by-Step Expansion Process
+
+1. **Parameter Expansion:**
+   - identify expandable variables: any variable not inside **single quotes**.
+   - look for the `var` variable value in the **environment**:
+     - valid **variable name** does not start with a number and contains alphanumeric characters our underscore.<br>
+       example: `$var` valid, `$6var` invalid, `$%hello` invalid.
+   - the second `$var` is replaced by its value.
+   - this step always output a single field.<br>
+  result : 
+ ```bash
+ echo "this" is '$var' val""ue aa            "bb"             cc.
+ ```
+2. **Field Splitting:**
+
+   - The shell splits the expanded value based on the Internal Field Separator (IFS, which defaults `space`,`\t` or `\n`).
+   - The value of `var` becomes a list of three values: `aa` `"bb"` `cc` (extra spaces are collapsed).
+   - the result of this step is always a list of fields.(in case of no IFS presence the list contains a single field).
+ ```bash
+ echo "this" is '$var' val""ue aa "bb" cc.
+ ```
+3. **Pathname Expansion:**
+   - when the keyword `export` (not ex''port or "export") encounterd, any upcomming assingment word (expression of type key=value or key+=value) where the key is a valid variable name is not subject to pathname expansion.
+   - If any part of the result contains an **unquoted** wildcard characters (`*`), they are expanded to match filenames in the current directory.
+   - Since the input do not contain wildcards, this step does not change the result.
+   - the result of this step is a larger list of fields if the expansion happened.
+4. **Quote Removal:**
+
+   - Any remaining original quotes (quotes before expansion) are removed.
+  
+ ```bash
+ echo this is $var value aa "bb" cc.
+ ```
+#### Final Output:
+
+```sh
+this is $var value aa "bb" cc.
+```
+
+This demonstrates how shell expansions work in sequence to produce the final output.
+
+### Bash Behavior in Applying Expansions
+
+Bash follows a specific set of rules when determining whether to apply **field splitting** or not. The behavior depends on the result of parameter expansion step, the keyword used (command name), and whether the variable is enclosed in double quotes or not.
+
+#### When Field Splitting is Applied
+
+Field splitting occurs **only when the last unquoted variable expantion succeeded** This means:
+
+```sh
+export var="aa     bb     cc"
+echo hello$var%world
+$> helloaa bb cc%world
+```
+
+#### When Field Splitting is Not Applied
+
+```sh
+export var="aa     bb     cc"
+echo hello$var$%world
+$> helloaa      bb      cc%world
+```
+field splitting did not occur because `$%world` was not a valid variable name hence the last expansion failed outside double quotes.
+
+```sh
+export var="aa     bb     cc"
+export x=$var
+echo "$x"
+$> aa     bb     cc
+```
+in this example, two expansions occured without field splitting.<br> The first one happened with the `export` command. when the keyword export (not ex''port or "export") encounterd, any upcomming assingment word (expression of type key=value or key+=value) where the key is a valid variable name is not subject to field splitting, allowing the key variable to take the full value including the IFS characters.<br>
+The second expansion had no field splitting because it happend inside double quotes. double quotes preserve the IFS characters coming from parameter expasion.
