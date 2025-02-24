@@ -119,7 +119,7 @@ Understanding and applying these concepts can further enhance your ability to wr
 
 ---
 
-# Understanding the Minishell Project
+# 1. Understanding the Minishell Project
 
 Before diving into the implementation details, it is crucial to understand what the Minishell project entails. This section will outline the project’s requirements and what is expected from a developer tackling this challenge.
 
@@ -127,7 +127,7 @@ Before diving into the implementation details, it is crucial to understand what 
 
 Minishell is a simplified shell that mimics the behavior of Bash but with limited functionalities. The goal is to implement a command-line interpreter capable of executing basic shell commands while handling input, output, and built-in functions. It serves as an excellent introduction to system programming and process management.
 
-### What Is Expected?
+## What Is Expected?
 
 As a developer working on Minishell, you are expected to:
 
@@ -176,7 +176,7 @@ This project isn’t just about making a functional shell—it’s about buildin
 6. **Signal handling**.
 7. **Error management.**
 
-## 1. Understanding shell grammar
+# 2. Understanding shell grammar
 
 Source: **IEEE Std 1003.1**, [opengroup.org - Shell Command Language](https://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html)
 
@@ -267,19 +267,19 @@ Here’s a step-by-step breakdown of the above mentioned grammar, starting from 
     - The most fundamental unit.  
     - Represents command names, arguments, filenames, or here-document delimiters.  
 
-### **Why This Structure Matters**  
+## **Why This Structure Matters**  
 
 - This grammar is **hierarchical**, meaning larger structures are built from smaller components.  
 - The use of recursion (e.g., `command_list → compound_command → pipeline → command`) allows the parser to handle complex commands without manually listing all edge cases.  
 - Instead of hardcoding syntax checks, this structured approach naturally enforces correct shell command syntax while allowing flexibility.
 
-## 2. Parsing user input and building the AST
+# 3. Parsing user input and building the AST
 
 When a shell processes a command, it follows a structured process: first, it **breaks the input into lexemes**, then **converts them into tokens**, and finally **builds an Abstract Syntax Tree (AST)** to understand the command's structure. Let’s go step by step through these concepts.
 
 ---
 
-### **1. What is a Lexeme?**  
+## 1. What is a Lexeme?  
 
 A **lexeme** is the smallest unit of meaning in a command. It is a sequence of characters grouped together based on **syntactic rules**. Lexemes are not yet classified but are simply raw fragments of input.
 
@@ -299,7 +299,7 @@ At this stage, they are just character sequences that need classification.
 
 ---
 
-### **2. What is a Tokenizer?**  
+## 2. What is a Tokenizer? 
 
 A **tokenizer (or lexer)** processes lexemes and classifies them into **tokens**. A **token** is a structured representation of a lexeme, attaching meaning to it.  
 
@@ -317,7 +317,7 @@ The tokenizer ensures that the shell **understands what each piece of input repr
 
 ---
 
-### **3. What is an Abstract Syntax Tree (AST)?**  
+## 3. What is an Abstract Syntax Tree (AST)? 
 
 An **Abstract Syntax Tree (AST)** is a structured tree representation of the command’s meaning. Each node represents an **operation or a component**, while the edges define **the relationships** between them.  
 
@@ -358,15 +358,15 @@ Once the **subshell** is fully parsed, the AST moves back to the main **Pipeline
 
 By following the structured grammar, the AST naturally enforces correct execution order, ensuring each command and operator is processed according to shell semantics.
 
-## 3. Execution: AST traversal and redirections handling
+# 4. Execution: AST traversal and redirections handling
 
-### **Executing the Parsed AST: Key Concepts**  
+## Executing the Parsed AST: Key Concepts  
 
 Once the shell command is parsed into an **Abstract Syntax Tree (AST)**, the next step is execution. This involves **traversing the AST**, handling operators (`&&`, `||`, `|`), managing processes, and ensuring correct data flow between commands. Below are the fundamental system calls and concepts required to execute a shell command properly.  
 
 ---
 
-### **1. Traversing the AST for Execution**  
+### 1. Traversing the AST for Execution  
 
 - Execution starts from the root node (`complete_command`) and follows the grammar structure.  
 - **Logical operators (`&&`, `||`)** determine whether the next command executes based on exit status.  
@@ -374,33 +374,33 @@ Once the shell command is parsed into an **Abstract Syntax Tree (AST)**, the nex
 
 ---
 
-### **2. Key System Calls for Execution**  
+### 2. Key System Calls for Execution
 
-#### **Process Creation (`fork`)**  
+#### Process Creation (`fork`) 
 
 - The shell **creates a child process** using `fork()`.  
 - The **child process** executes the command, while the **parent waits** for it to finish.  
 - If the command is part of a pipeline, multiple child processes are created and connected via pipes.  
 
-#### **Executing Commands (`execve`)**  
+#### Executing Commands (`execve`)  
 
 - The child process replaces itself with the target program using `execve()`.  
 - `execve()` loads and runs the command (e.g., `/bin/ls`), replacing the child’s memory with the new program.  
 
-#### **Waiting for Child Processes (`wait`, `waitpid`)**  
+#### Waiting for Child Processes (`wait`, `waitpid`) 
 
 - The parent process waits for a child process to **finish executing** using `wait()` or `waitpid()`.  
 - Using `wait()` or `waitpid()` we can get the **exit status** of the child process, which determines whether subsequent commands (like in `&&` or `||`) will execute.  
 - The **exit status** is stored in an integer and extracted using `WEXITSTATUS(status)`, which gives the return code of the command (0 for success, non-zero for failure).
 
-#### **Exit Status & Logical Operators**  
+#### Exit Status & Logical Operators
 
 - **`&&` (AND):** The next command runs **only if** the previous command’s exit status is `0` (success).  
 - **`||` (OR):** The next command runs **only if** the previous command’s exit status is **non-zero** (failure).  
 
 ---
 
-### **3. Handling Pipelines (`|`)**  
+### 3. Handling Pipelines (`|`)  
 
 - `pipe()` creates a unidirectional **data channel** between two processes.  
 - Before calling `execve()`, `dup2()` is used to **redirect stdout** of one process into the **stdin** of the next. 
@@ -417,63 +417,64 @@ ls | grep txt | wc -l
 
 ---
 
-### **4. Handling Redirections (`<`, `>`, `>>`)**  
+### 4. Handling Redirections (<, >, >>)
+   In a shell, redirections are processed from left to right, modifying the standard input (stdin) or standard output (stdout) of a command before execution. Input redirections (<, <<) affect stdin, meaning the command reads from the specified file or heredoc instead of the terminal. Output redirections (>, >>) affect stdout, sending command output to a file rather than displaying it. If multiple redirections appear in a command, they are applied sequentially in order. For example:
 
-- In a shell, redirections are processed from **left to right**, modifying the standard input (stdin) or standard output (stdout) of a command before execution. Input redirections (**<**, **<<**) affect stdin, meaning the command reads from the specified file or heredoc instead of the terminal. Output redirections (**>**, **>>**) affect stdout, sending command output to a file rather than displaying it. If multiple redirections appear in a command, they are applied sequentially in order. For example
+```sh
+cat < infile > outfile
+```
 
-  ```bash
-  cat < infile > outfile
-  ```
+Here, `infile` is set as stdin, then stdout is redirected to `outfile`. However, in:
 
-  infile is set as stdin, then stdout is redirected to outfile. However, in 
+```sh
+cat > outfile < infile
+```
 
-  ```bash
-  cat > outfile < infile
-  ```
+stdout is redirected first, followed by stdin. Understanding this left-to-right evaluation ensures correct command execution without unintended behavior.
 
-  stdout is redirected first, followed by stdin. Understanding this left-to-right evaluation ensures correct command execution without unintended behavior.
+#### Complex Redirection Example
 
-  ### **Complex Redirection Example**  
+Let's construct a more advanced command that includes:
 
-  Let's construct a **more advanced** command that includes:  
+- Multiple input redirections (`<`, `<<`)
+- Multiple output redirections (`>`, `>>`)
+- Usage of `/dev/stdin` and `/dev/stdout`
 
-  - **Multiple input redirections** (`<`, `<<`)  
-  - **Multiple output redirections** (`>`, `>>`)  
-  - **Usage of `/dev/stdin` and `/dev/stdout`**  
+#### Example Command:
 
-  #### **Example Command:**  
+```sh
+command < input1 <<EOF1 < /dev/stdin >> output1 > output2 >> /dev/stdout <<EOF2
+some text for heredoc 1
+EOF1
+some text for heredoc 2
+EOF2
+```
 
-  ```bash
-  command < input1 <<EOF1 < /dev/stdin >> output1 > output2 >> /dev/stdout <<EOF2
-  some text for heredoc 1
-  EOF1
-  some text for heredoc 2
-  EOF2
-  ```
+#### Step-by-Step Redirection Processing (Left to Right)
 
-  ### **Step-by-Step Redirection Processing (Left to Right)**  
+1. `< input1` → Redirects stdin to read from `input1`.
+2. `<<EOF1` → Starts a heredoc with the delimiter `EOF1`, overriding stdin.
+3. `< /dev/stdin` → Redirects stdin to `/dev/stdin`. Since redirections are processed sequentially, `/dev/stdin` will be the last stdin file which is the heredoc.
+4. `>> output1` → Redirects stdout, appending output to `output1`.
+5. `> output2` → Redirects stdout with truncation, overriding the previous stdout.
+6. `>> /dev/stdout` → Redirects stdout to `output2` with append since `/dev/stdout` refers to the last stdout file which is `output2`.
+7. `<<EOF2` → Another heredoc with the delimiter `EOF2`, overriding stdin again.
 
-  1. **`< input1`** → Redirects **stdin** to read from `input1`.  
-  2. **`<<EOF1`** → Starts a **heredoc**, overriding `stdin`, feeding multi-line input from `EOF1`.  
-  3. **`< /dev/stdin`** → Overrides previous input redirections, but since `/dev/stdin` represents the current standard input (which was already changed), **Bash ignores this** (it doesn't change anything).  
-  4. **`>> output1`** → Redirects **stdout**, appending output to `output1`.  
-  5. **`> output2`** → Redirects **stdout** again, but this time **overwrites `output1`**, since `>` truncates the file.  
-  6. **`>> /dev/stdout`** → Redirects output to `/dev/stdout`, but since this is already the standard output, **Bash skips this redirection** as it is redundant.  
-  7. **`<<EOF2`** → Another **heredoc**, overriding `stdin` again with multi-line input from `EOF2`.  
+#### Final Effect:
 
-  ---
+- Stdin is ultimately set to the second heredoc, because heredocs override previous input redirections.
+- Stdout is ultimately redirected to `output2` with append, because when opening /dev/stdout with append mode  it was referring to the last duped stdout which was `output2`.
 
-  ### **Final Effect:**  
+This example demonstrates how redirections are applied sequentially and how the shell handles file descriptor operations in a structured manner to maintain consistency in input and output redirection. in general redirection handling follows these steps:
 
-  - **`stdin` is ultimately set to `EOF2`'s heredoc**, because heredocs override previous input redirections.  
-  - **`stdout` is ultimately redirected to `output2`**, because `>` (truncation) overwrites any previous `>> output1` redirection.  
-  - **Redirections to `/dev/stdin` and `/dev/stdout` are ignored by Bash**, as they do not actually change anything.  
+- Open the redirection path ( filename or create heredoc ).
+- Apply the redirection type (in, out or append) ( in C we can use dup or dup2 ).
+- Move to the next redirection. ( left-to-right ).
 
-  This example demonstrates **how redirections are applied sequentially**, and how Bash **optimizes** cases where redirections are redundant (e.g., `/dev/stdin` and `/dev/stdout`).
 
   **Note:**
 
-  ​	Here-document redirection (**<<** delimiter) is processed immediately when encountered, before command execution. This behavior is demonstrated in the following example, where a syntax error occurs.
+  ​	Here-document redirection (**<<** delimiter) is processed immediately when encountered, while building the AST and before command execution. This behavior is demonstrated in the following example, where a syntax error occurs.
 
   ``` bash
   cat << EOF ()&&
@@ -487,12 +488,25 @@ ls | grep txt | wc -l
   -bash: syntax error near unexpected token `('
   ```
 
+#### Subshell Redirection Handling
+
+When using a subshell, all commands inside the parentheses share the same redirection context. For example:
+```bash
+(head -n1 && head -n1) < infile < infile2 > outfile
+```
+Step-by-Step Execution:
+  1. < infile → Redirects stdin to infile.
+  2. < infile2 → Redirects stdin to infile2, overriding the previous redirection.
+  3. \> outfile → Redirects stdout to outfile, truncating the file.
+
+Since the entire command inside () runs in a subshell, all commands within the parentheses inherit the same redirections. This means both `head -n1` commands will read from infile2 (the final stdin redirection) and write to outfile. The shell applies the redirections before executing the subshell, ensuring a consistent input/output environment for all commands within it.
+
 ---
 
-### **5. Subshell Execution**  
+### 5. Subshell Execution  
 
 - When encountering a **subshell (`command_list`)**, the shell **forks a new child process**.  
-- The **subshell executes independently**, and its **exit status** determines subsequent command execution. 
+- The **subshell executes independently**, and its **exit status** determines subsequent command execution.
 
 ## 4. Environment Variable and Wildcard expansions: 
 
