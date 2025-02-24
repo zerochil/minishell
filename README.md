@@ -509,7 +509,7 @@ Since the entire command inside () runs in a subshell, all commands within the p
 - When encountering a **subshell (`command_list`)**, the shell **forks a new child process**.  
 - The **subshell executes independently**, and its **exit status** determines subsequent command execution.
 
-## 4. Environment Variable and Wildcard expansions: 
+# 5. Environment Variable and Wildcard expansions: 
 
 According to **IEEE Std 1003.1**, [opengroup.org - Shell Command Language](https://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html), expansion happens in four steps:
 
@@ -525,7 +525,7 @@ export var='aa            "bb"             cc'
 echo "this" is '$var' val""ue $var
 ```
 
-### Step-by-Step Expansion Process
+## Step-by-Step Expansion Process
 
 1. **Parameter Expansion:**
    - identify expandable variables: any variable not inside **single quotes**.
@@ -566,34 +566,111 @@ this is $var value aa "bb" cc.
 
 This demonstrates how shell expansions work in sequence to produce the final output.
 
-### Bash Behavior in Applying Expansions
+## Bash Behavior in Applying Expansions
 
 Bash follows a specific set of rules when determining whether to apply **field splitting** or not. The behavior depends on the result of parameter expansion step, the keyword used (command name), and whether the variable is enclosed in double quotes or not.
 
-#### When Field Splitting is Applied
+### When Field Splitting is Applied
 
 Field splitting occurs **only when the last unquoted variable expantion succeeded** This means:
 
 ```sh
-export var="aa     bb     cc"
-echo hello$var%world
-$> helloaa bb cc%world
+$> export var="aa     bb     cc"
+$> echo hello$var%world$does_not_exist
+helloaa bb cc%world
 ```
+This example illustrates the above-mentioned rule. The last expansion happened on the variable `$does_not_exist`. Even though it resulted in an empty string, it is still considered a valid expansion; hence field splitting applied.
 
-#### When Field Splitting is Not Applied
+### When Field Splitting is Not Applied
 
 ```sh
-export var="aa     bb     cc"
-echo hello$var$%world
-$> helloaa      bb      cc%world
+$> export var="aa     bb     cc"
+$> echo hello$var$%world
+helloaa      bb      cc%world
 ```
 field splitting did not occur because `$%world` was not a valid variable name hence the last expansion failed outside double quotes.
 
 ```sh
-export var="aa     bb     cc"
-export x=$var
-echo "$x"
-$> aa     bb     cc
+$> export var="aa     bb     cc"
+$> export x=$var
+$> echo "$x"
+aa     bb     cc
 ```
 in this example, two expansions occured without field splitting.<br> The first one happened with the `export` command. when the keyword export (not ex''port or "export") encounterd, any upcomming assingment word (expression of type key=value or key+=value) where the key is a valid variable name is not subject to field splitting, allowing the key variable to take the full value including the IFS characters.<br>
 The second expansion had no field splitting because it happend inside double quotes. double quotes preserve the IFS characters coming from parameter expasion.
+
+# 6. Builtin commands
+
+Built-in commands are essential for Minishell, as they run directly within the shell without calling external programs. They provide core functionality like navigating directories, managing environment variables, and controlling the shell process. This section covers the required built-in commands, their behavior in bash, and how they interact with the shell environment.
+
+## `echo` Command
+
+The echo command prints text to the standard output. It is commonly used to display messages, variables, or command results in the shell.
+
+Option:
+<br>
+    **-n** : Prevents a newline from being printed at the end of the output.
+
+Example:
+```bash
+$> echo "Hello, world!"
+Hello, world!
+$> echo -n "Hello, world!"
+Hello, world!$>
+```
+### behavior:
+- when given - followed by multiple n characters it does the same as -n.
+```bash
+$> echo -nnnnnnnnnnnnnnnnnnn message
+message$>
+```
+- if the option is invalid it is considered an argument.
+```bash
+$> echo -n-n-n-n message
+-n-n-n-n message
+$> echo -nnnnab message
+-nnnnab message
+```
+
+## `cd` Command
+
+The cd (change directory) command is used to navigate between directories in the shell. It updates the current working directory.
+Usage:
+    cd <path>: Moves to the specified directory.
+    cd: Without arguments, it changes to the user's home directory.
+
+Example:
+```bash
+cd /home/user/Documents
+```
+This command changes the working directory to /home/user/Documents and update the value of `PWD` and `OLDPWD` environment variables. `OLDPWD` set to the previous working directory, and `PWD` to the current working directory
+
+### behavior:
+- if the argument is not a directory path, `cd` will **return 1** displaying an error message.
+```bash
+$> touch file.c
+$> cd file.c
+bash: cd: file.c: Not a directory
+$> echo $?
+1
+```
+- if the HOME environment variable is not set, `cd` without argument will **return 1** displaying an error message.
+```bash
+$> unset HOME
+$> cd
+bash: cd: HOME not set
+$> echo $?
+1
+```
+- if the parent folder does not exist, `cd` will print an error message and **return 0**
+```bash
+$> mkdir -p x/y/z
+$> cd x/y/z
+$> rm -rf ../../../x
+$> cd .
+cd: error retrieving current directory: getcwd: cannot access parent directories: No such file or directory
+$> echo $?
+0
+$> pwd
+/home/current_user/x/y/z
+```
