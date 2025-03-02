@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 06:26:44 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/25 09:54:49 by inajah           ###   ########.fr       */
+/*   Updated: 2025/03/02 17:12:21 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,16 +71,18 @@ char	**env_get_array(char *program_name)
 	return (env_array);
 }
 
-void	print_key_value(char *env_var, int out_fd)
+bool	print_key_value(char *env_var, int out_fd)
 {
-	if (ft_strchr(env_var, '='))
+	if (ft_strchr(env_var, '=') == NULL)
+		return (ft_putstr_fd(env_var, out_fd));
+	while (*env_var != '=')
 	{
-		while (*env_var != '=')
-			ft_putchar_fd(*env_var++, out_fd);
-		ft_putstr_fd("=\"", out_fd);
-		ft_putstr_fd(env_var + 1, out_fd);
-		ft_putchar_fd('"', out_fd);
+		if (ft_putchar_fd(*env_var++, out_fd) == false)
+			return (false);
 	}
-	else
-		ft_putstr_fd(env_var, out_fd);
+	if (ft_putstr_fd("=\"", out_fd) == false
+		|| ft_putstr_fd(env_var + 1, out_fd) == false
+		|| ft_putchar_fd('"', out_fd) == false)
+		return (false);
+	return (true);
 }

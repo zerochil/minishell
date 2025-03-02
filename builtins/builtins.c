@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 04:44:23 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/25 12:17:28 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/03/02 17:08:31 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,13 +54,14 @@ int	builtin_echo(char **args, int out_fd)
 	}
 	while (args[i])
 	{
-		ft_putstr_fd(args[i], out_fd);
-		if (args[i + 1])
-			ft_putchar_fd(' ', out_fd);
+		if (ft_putstr_fd(args[i], out_fd) == false)
+			return (BUILTIN_EXIT_ERROR);
+		if (args[i + 1] && ft_putchar_fd(' ', out_fd) == false)
+			return (BUILTIN_EXIT_ERROR);
 		i++;
 	}
-	if (newline_flag == 0)
-		ft_putchar_fd('\n', out_fd);
+	if (newline_flag == 0 && ft_putchar_fd('\n', out_fd) == false)
+		return (BUILTIN_EXIT_ERROR);
 	return (BUILTIN_EXIT_SUCCESS);
 }
 

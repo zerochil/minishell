@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 15:20:39 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/23 15:24:05 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/03/02 17:10:34 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,8 @@ bool	is_same_tty(char *filename, int fd)
 
 	if (fstat(fd, &tty_stat) == -1)
 		return (false);
-	if (lstat(filename, &file_stat) == -1 || S_ISLNK(file_stat.st_mode) == false)
+	if (lstat(filename, &file_stat) == -1
+		|| S_ISLNK(file_stat.st_mode) == false)
 		return (false);
 	if (stat(filename, &file_stat) == -1)
 		return (false);

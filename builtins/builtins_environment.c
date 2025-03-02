@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/23 04:55:10 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/25 10:03:37 by inajah           ###   ########.fr       */
+/*   Updated: 2025/03/02 17:12:02 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,10 @@ int	builtin_export_print(int out_fd)
 			break ;
 		if (ft_strncmp(env_var, "_=", 2) == 0)
 			continue ;
-		ft_putstr_fd("declare -x ", out_fd);
-		print_key_value(env_var, out_fd);
-		ft_putchar_fd('\n', out_fd);
+		if (ft_putstr_fd("declare -x ", out_fd) == false
+			|| print_key_value(env_var, out_fd) == false
+			|| ft_putchar_fd('\n', out_fd) == false)
+			return (BUILTIN_EXIT_ERROR);
 	}
 	return (BUILTIN_EXIT_SUCCESS);
 }
@@ -80,10 +81,11 @@ int	builtin_env(char **args, int out_fd)
 	env_array = env_get_array(NULL);
 	while (*env_array)
 	{
-		if (ft_strncmp(*env_array, "_=", 2) == 0)
-			ft_putendl_fd("_=env", out_fd);
-		else
-			ft_putendl_fd(*env_array, out_fd);
+		if (ft_strncmp(*env_array, "_=", 2) == 0
+			&& ft_putendl_fd("_=env", out_fd) == false)
+			return (125);
+		else if (ft_putendl_fd(*env_array, out_fd) == false)
+			return (125);
 		env_array++;
 	}
 	resource_free(env_array);

@@ -6,13 +6,18 @@
 /*   By: rrochd <rrochd@student.1337.ma             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 00:16:41 by rrochd            #+#    #+#             */
-/*   Updated: 2024/09/10 09:59:41 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/03/02 16:49:13 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "base.h"
 
-void	ft_putchar_fd(char c, int fd)
+bool	ft_putchar_fd(char c, int fd)
 {
-	write(fd, &c, 1);
+	if (write(fd, &c, 1) < 0)
+	{
+		perror("write error");
+		return (false);
+	}
+	return (true);
 }

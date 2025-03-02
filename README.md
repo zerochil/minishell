@@ -599,6 +599,13 @@ aa     bb     cc
 in this example, two expansions occured without field splitting.<br> The first one happened with the `export` command. when the keyword export (not ex''port or "export") encounterd, any upcomming assingment word (expression of type key=value or key+=value) where the key is a valid variable name is not subject to field splitting, allowing the key variable to take the full value including the IFS characters.<br>
 The second expansion had no field splitting because it happend inside double quotes. double quotes preserve the IFS characters coming from parameter expasion.
 
+**Note**
+> expantion steps happen at the pipeline level. not before execution. meaning while traversing the AST to execute. when reaching the pipeline node expansion occures. this is demonstrated in the following example:
+```bash
+$> export x="this is a value" && echo $x
+this is a value
+```
+
 # 6. Builtin commands
 
 Built-in commands are essential for Minishell, as they run directly within the shell without calling external programs. They provide core functionality like navigating directories, managing environment variables, and controlling the shell process. This section covers the required built-in commands, their behavior in bash, and how they interact with the shell environment.

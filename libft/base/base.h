@@ -6,7 +6,7 @@
 /*   By: rrochd <rrochd@student.1337.ma             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 08:59:51 by rrochd            #+#    #+#             */
-/*   Updated: 2025/01/28 09:13:52 by inajah           ###   ########.fr       */
+/*   Updated: 2025/03/02 16:43:45 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,10 @@ typedef struct s_list
 	struct s_list	*next;
 }					t_list;
 
-void				ft_putstr_fd(char *s, int fd);
-void				ft_putendl_fd(char *s, int fd);
+bool				ft_putstr_fd(char *s, int fd);
+bool				ft_putendl_fd(char *s, int fd);
 void				ft_putnbr_fd(int n, int fd);
-void				ft_putchar_fd(char c, int fd);
+bool				ft_putchar_fd(char c, int fd);
 
 void				ft_bzero(void *s, size_t n);
 void				*ft_calloc(size_t count, size_t size);

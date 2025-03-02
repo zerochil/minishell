@@ -6,16 +6,16 @@
 /*   By: rrochd <rrochd@student.1337.ma             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/09 00:17:04 by rrochd            #+#    #+#             */
-/*   Updated: 2024/09/10 09:59:42 by rrochd           ###   ########.fr       */
+/*   Updated: 2025/03/02 16:44:12 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "base.h"
 
-void	ft_putendl_fd(char *s, int fd)
+bool	ft_putendl_fd(char *s, int fd)
 {
 	if (!s)
-		return ;
-	write(fd, s, ft_strlen(s));
-	write(fd, "\n", 1);
+		return (true);
+	return (ft_putstr_fd(s, fd)
+		&& ft_putchar_fd('\n', fd));
 }
