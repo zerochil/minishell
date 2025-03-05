@@ -92,8 +92,10 @@ t_ast_node	*subshell(t_array *tokens)
 		compound_node = compound_command(tokens);
 		if (compound_node == NULL)
 			return (NULL);
+		token = array_peek(tokens);
 		array_push(subshell_node->children, compound_node);
-		skip_linebreak(tokens);
+		if (skip_linebreak(tokens) == false && token->type != lexem_get_type("CLOSE_PARENTHESIS"))
+			return (NULL);
 		token = array_peek(tokens);
 		if (token->type == lexem_get_type("CLOSE_PARENTHESIS"))
 			break ;
