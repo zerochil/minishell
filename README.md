@@ -681,3 +681,40 @@ $> echo $?
 $> pwd
 /home/current_user/x/y/z
 ```
+## `pwd` - Print Working Directory
+
+### **Description**
+The `pwd` (print working directory) command is a shell builtin that prints the absolute path of the current working directory to standard output. It is useful for determining the current location within the filesystem.
+
+### **Usage**
+```sh
+pwd
+```
+### **Behavior**
+- When executed, `pwd` retrieves the full path of the current directory and prints it.
+- It typically uses the `getcwd()` function in C to obtain the absolute path.
+### **Implementation Details in Minishell**
+- `pwd` implementation usually calls `getcwd(NULL, 0)`, which dynamically allocates memory for the path string and returns the absolute directory path.
+- If `getcwd()` fails (which can happen if the current directory was deleted or permissions are restricted), an error message is printed.
+- The command does not take any arguments in most implementations.
+- The exit status of `pwd` is:
+  - `0` on success (if the directory is printed correctly).
+  - A nonzero value on failure (e.g., if `getcwd()` fails).
+
+### **Example**
+```sh
+$ pwd
+/home/user/projects/minishell
+```
+### **Edge Cases**
+- If the current directory has been deleted (`rmdir` or `rm -rf` was used), `getcwd()` might fail, and `pwd` should return an error.
+- Bash maintains the current working directory internally instead of always relying on `getcwd()`, allowing `pwd` to return a directory path even if it has been deleted.
+```sh
+$> cd /tmp && mkdir -p x/y/z
+$> cd x/y/z
+$> pwd
+/tmp/x/y/z
+$> rm -r ../../../x
+$> pwd
+/tmp/x/y/z
+```
