@@ -1,6 +1,6 @@
 # project related
 gramamr.txt
-
+.vscode
 # .supp
 readline.supp
 malloc.supp

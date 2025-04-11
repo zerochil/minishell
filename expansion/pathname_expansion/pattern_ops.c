@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pattern_ops.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: inajah <inajah@student.1337.ma>            +#+  +:+       +#+        */
+/*   By: inajah <inajah@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/22 13:51:44 by inajah            #+#    #+#             */
-/*   Updated: 2025/01/22 14:25:26 by inajah           ###   ########.fr       */
+/*   Updated: 2025/04/11 18:53:33 by inajah           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,11 @@ char	*pattern_extract_dir_path(t_field *pattern)
 	return (dir_path);
 }
 
+static bool	not_quoted(char mask)
+{
+	return (mask == EXPANDED || mask == ORIGINAL);
+}
+
 static void	double_assign(char **a, char **b, char *c, char *d)
 {
 	*a = c;
@@ -43,10 +48,11 @@ bool	pattern_matches(char *pattern_start, char *mask, char *str)
 	double_assign(&star, &ss, NULL, NULL);
 	while (*str)
 	{
-		if (*pattern == '*' && mask[pattern - pattern_start] == ORIGINAL)
+		if (*pattern == '*' 
+		&& not_quoted(mask[pattern - pattern_start]))
 		{
 			while (*(pattern + 1) == '*'
-				&& mask[(pattern + 1) - pattern_start] == ORIGINAL)
+				&& not_quoted(mask[(pattern + 1) - pattern_start]))
 				pattern++;
 			double_assign(&star, &ss, pattern++, str);
 		}
@@ -57,7 +63,8 @@ bool	pattern_matches(char *pattern_start, char *mask, char *str)
 		else
 			return (0);
 	}
-	while (*pattern == '*' && mask[pattern - pattern_start] == ORIGINAL)
+	while (*pattern == '*'
+		&& not_quoted(mask[pattern - pattern_start]))
 		pattern++;
 	return (!*pattern);
 }
