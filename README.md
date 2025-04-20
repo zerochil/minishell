@@ -206,9 +206,9 @@ command          : subshell
                  ;
 subshell         : '(' command_list ')' redirect_list*
                  ;
-simple_command   : io_redirect simple_command
-                 | io_redirect
-                 | WORD        simple_command
+simple_command   : redirect_list simple_command
+                 | redirect_list
+                 | WORD          simple_command
                  | WORD
                  ;
 redirect_list    : io_redirect redirect_list*
