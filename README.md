@@ -280,7 +280,7 @@ When a shell processes a command, it follows a structured process: first, it **b
 
 ---
 
-## 1. What is a Lexeme?  
+## 3. 1) What is a Lexeme?  
 
 A **lexeme** is the smallest unit of meaning in a command. It is a sequence of characters grouped together based on **syntactic rules**. Lexemes are not yet classified but are simply raw fragments of input.
 
@@ -300,7 +300,7 @@ At this stage, they are just character sequences that need classification.
 
 ---
 
-## 2. What is a Tokenizer? 
+## 3. 2) What is a Tokenizer? 
 
 A **tokenizer (or lexer)** processes lexemes and classifies them into **tokens**. A **token** is a structured representation of a lexeme, attaching meaning to it.  
 
@@ -318,7 +318,7 @@ The tokenizer ensures that the shell **understands what each piece of input repr
 
 ---
 
-## 3. What is an Abstract Syntax Tree (AST)? 
+## 3. 3) What is an Abstract Syntax Tree (AST)? 
 
 An **Abstract Syntax Tree (AST)** is a structured tree representation of the command’s meaning. Each node represents an **operation or a component**, while the edges define **the relationships** between them.  
 
@@ -358,6 +358,14 @@ Following the **AND and OR logic**, if the second **Pipeline** fails, the **OR n
 Once the **subshell** is fully parsed, the AST moves back to the main **Pipeline**, where the output of the subshell is passed into `cat -n` via the **Pipeline operator (`|`)**. Finally, we encounter another **AND node (`&&`)**, which ensures that if `cat -n` succeeds, the last **Pipeline** executes. This last **Pipeline** contains a **simple command node** representing `echo hello`. This **simple command** is a leaf node since it contains only an argument list and an **output redirection (`> outfile`)**, ensuring that its output is written to a file.
 
 By following the structured grammar, the AST naturally enforces correct execution order, ensuring each command and operator is processed according to shell semantics.
+
+## 3. 4) Our Minishell parser flowchart:
+
+  A **Flowchart** is a visual representation of a process, system, or algorithm, using
+standardized symbols to depict the sequence of steps and the flow of control.
+It helps in understanding how a particular logic unfolds by mapping decisions, inputs, and outputs clearly and logically. In the context of software development, flowcharts are especially useful for illustrating how a program processes input and transitions between different states. Below is the flowchart of the Minishell parser, which outlines how the shell interprets and breaks down user commands into executable components.
+
+![minishell parser flowchart](./images/shell_command_parser.svg)
 
 # 4. Execution: AST traversal and redirections handling
 
