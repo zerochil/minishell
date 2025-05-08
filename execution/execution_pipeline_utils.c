@@ -42,7 +42,10 @@ int	wait_for_pipeline(t_pipeline_state *state)
 	if (pid == -1 && errno == EINTR)
 		return (EXIT_STATUS_SIGINT);
 	if (WIFEXITED(last_status))
+	{
+		ctx_is_foreground(CTX_SET, true);
 		return (WEXITSTATUS(last_status));
+	}
 	sig = WTERMSIG(last_status);
 	if (sig == SIGQUIT)
 		ft_putendl_fd(DUMP_MSG, STDERR_FILENO);
