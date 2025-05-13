@@ -23,7 +23,7 @@
 # define BUILTIN_EXIT_SUCCESS 0
 # define BUILTIN_EXIT_ERROR 1
 # define BUILTIN_EXIT_MISUSE 2
-
+# define BUILTIN_WRITE_FAILED 125
 typedef struct s_builtin
 {
 	char	*name;

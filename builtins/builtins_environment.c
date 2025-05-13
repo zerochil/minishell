@@ -81,13 +81,12 @@ int	builtin_env(char **args, int out_fd)
 	env_array = env_get_array(NULL);
 	while (*env_array)
 	{
-		if (ft_strncmp(*env_array, "_=", 2) == 0
-			&& ft_putendl_fd("_=env", out_fd) == false)
-			return (125);
-		else if (ft_putendl_fd(*env_array, out_fd) == false)
-			return (125);
+		if (ft_putendl_fd(*env_array, out_fd) == false)
+			return (BUILTIN_WRITE_FAILED);
 		env_array++;
 	}
+	if (ft_putendl_fd("_=env", out_fd) == false)
+		return (BUILTIN_WRITE_FAILED);
 	resource_free(env_array);
 	return (BUILTIN_EXIT_SUCCESS);
 }

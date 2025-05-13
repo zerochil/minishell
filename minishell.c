@@ -48,6 +48,7 @@ void	execute_input(t_string *input)
 	t_array	*tokens;
 	t_array	*list;
 
+	env_unset("_");
 	ctx_is_foreground(CTX_SET, false);
 	manager_add("execute_line");
 	tokens = tokenize(input);
